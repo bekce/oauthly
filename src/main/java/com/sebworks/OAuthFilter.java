@@ -32,10 +32,11 @@ public class OAuthFilter implements Filter{
 	private Pattern pattern;
 	private boolean oauthFilterEnabled;
 	private OAuthAuthorizationController controller;
-	
+	private WebApplicationContext context;
+
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
+		context = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
 		if(context == null){
 			throw new ServletException("Spring context not found");
 		}
@@ -78,15 +79,23 @@ public class OAuthFilter implements Filter{
 		if(authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")){
 			String token = authorizationHeader.substring("Bearer ".length());
 			if(controller.getTokenStatus(token) == TokenStatus.VALID_ACCESS){
+				context.getBean(SessionData.class).authenticated = true;
 				chain.doFilter(request, response);
 				return;
 			}
 		} else { //check for access_token query param (/url?access_token=xyz)
 			String token = request.getParameter("access_token");
 			if(controller.getTokenStatus(token) == TokenStatus.VALID_ACCESS){
+				context.getBean(SessionData.class).authenticated = true;
 				chain.doFilter(request, response);
 				return;
 			}
+		}
+
+		// check if user was currently authenticated in the session
+		if(context.getBean(SessionData.class).authenticated){
+			chain.doFilter(request, response);
+			return;
 		}
 
 		response.sendError(401, "Invalid or missing bearer token");
