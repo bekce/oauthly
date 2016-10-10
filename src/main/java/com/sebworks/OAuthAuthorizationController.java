@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * This controller implements oauth2 authorization server semantics with password grant type.
- * Supports refresh tokens.
- * Works with request params in token post method for the requirement, it is best to modify it for generic usage.
- * It uses JWT to issue tokens, so tokens are self contained and there is no token store.
- * It works with {@link OAuthFilter} to protect resources.
- * Currently it works with a single user and client id, but it is easy to extend for multiple users.
+ * <p>This controller implements oauth2 authorization server semantics with password grant type.<br>
+ * Supports refresh tokens.<br>
+ * Works with request params in token post method for the requirement, it is best to modify it for generic usage.<br>
+ * It uses JWT to issue tokens, so tokens are self contained and there is no token store.<br>
+ * It works with {@link OAuthFilter} to protect resources.<br>
+ * Currently it works with a single user and client id, but it is easy to extend for multiple users.</p>
  *
  * Created by Selim Eren Bekçe on 2016-08-25.
  */
@@ -97,8 +97,8 @@ public class OAuthAuthorizationController implements InitializingBean {
     }
 
     /**
-     * This endpoint issues a new token to the client.
-     * Two grant_types are supported: 'password' and 'refresh_token'
+     * This endpoint issues a new token to the client.<br>
+     * Two grant_types are supported: 'password' and 'refresh_token'<br>
      * Its parameters can be customized to fit project needs. Currently it requires client_id and client_secret as Basic Authorization header.
      * @param username the resource owner username when grant_type is 'password'
      * @param password the resource owner password when grant_type is 'password'
@@ -144,11 +144,13 @@ public class OAuthAuthorizationController implements InitializingBean {
     /**
      * Prepares & issues a new token and returns it.
      * It puts the following information to the token:
-     * - version 'v'
-     * - expiry date 'exp'
-     * - combined hash value of client_id, client_secret, username and password.
+     * <li>
+     * <ul>version 'v'</ul>
+     * <ul>expiry date 'exp'</ul>
+     * <ul>combined hash 'h' value of client_id, client_secret, username and password.</ul><br>
      * This hash is important because if either one of the parameters change, the change in hash value will render the token invalid. Example: if password of user changes, the token will automatically get invalid. Note that this hash is not technically bulletproof, there exist very little (approx. 1 in 4*10^9) chance that it will compute the same hash value.
-     * - token type 't' -> 'a' (access) or 'r' (refresh)
+     * <ul>token type 't' -> 'a' (access) or 'r' (refresh)</ul>
+     * </li>
      * It prepares both access and refresh tokens, signs them using JWT and packs in a Token object.
      * Note that this single user implementation does not put username to the claims map.
      *
