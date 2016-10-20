@@ -56,6 +56,7 @@ public class OAuthAuthorizationController implements InitializingBean {
         // precompute the basic auth value for fast checks
         String s = clientId + ":" + clientSecret;
         basicAuthValue = "Basic " + Base64.encodeBase64String(s.getBytes("utf-8"));
+        log.info("basicAuthValue: " + basicAuthValue);
     }
 
     /**

@@ -1,22 +1,16 @@
 package com.sebworks;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * This filter is responsible for protecting resources. It sends 401 if no token found in the request.
@@ -76,24 +70,19 @@ public class OAuthFilter implements Filter{
 
 		// Check for Authorization header
 		String authorizationHeader = request.getHeader("Authorization");
-		if(authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")){
+		SessionData sessionData = context.getBean(SessionData.class);
+		if (authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")) {
 			String token = authorizationHeader.substring("Bearer ".length());
-			if(controller.getTokenStatus(token) == TokenStatus.VALID_ACCESS){
-				context.getBean(SessionData.class).authenticated = true;
-				chain.doFilter(request, response);
-				return;
-			}
+			sessionData.authenticated = controller.getTokenStatus(token) == TokenStatus.VALID_ACCESS;
 		} else { //check for access_token query param (/url?access_token=xyz)
 			String token = request.getParameter("access_token");
-			if(controller.getTokenStatus(token) == TokenStatus.VALID_ACCESS){
-				context.getBean(SessionData.class).authenticated = true;
-				chain.doFilter(request, response);
-				return;
+			if (token != null && !token.isEmpty()) {
+				sessionData.authenticated = controller.getTokenStatus(token) == TokenStatus.VALID_ACCESS;
 			}
 		}
 
-		// check if user was currently authenticated in the session
-		if(context.getBean(SessionData.class).authenticated){
+		// check if user is currently authenticated in the session
+		if(sessionData.authenticated){
 			chain.doFilter(request, response);
 			return;
 		}
