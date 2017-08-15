@@ -1,4 +1,4 @@
-package com.sebworks;
+package com.sebworks.oauthly;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

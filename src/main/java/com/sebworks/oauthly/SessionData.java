@@ -1,4 +1,4 @@
-package com.sebworks;
+package com.sebworks.oauthly;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

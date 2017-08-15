@@ -1,4 +1,4 @@
-package com.sebworks;
+package com.sebworks.oauthly;
 
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;

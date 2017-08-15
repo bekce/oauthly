@@ -1,4 +1,4 @@
-package com.sebworks;
+package com.sebworks.oauthly;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

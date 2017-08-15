@@ -1,4 +1,4 @@
-package com.sebworks;
+package com.sebworks.oauthly;
 
 /**
  * Created by Selim Eren Bekçe on 2016-10-10.

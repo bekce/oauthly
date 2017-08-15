@@ -1,18 +1,21 @@
-package com.sebworks;
+package com.sebworks.oauthly;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.Data;
 
 /**
  * Created by Selim Eren Bekçe on 2016-10-10.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
 public class Token {
-    public String access_token;
-    public String refresh_token;
-    public String token_type;
-    public Long expires_in;
-    public String scope;
-    public String error;
+    private String access_token;
+    private String refresh_token;
+    private String token_type;
+    private Long created_at;
+    private Long expires_in;
+    private String scope;
+    private String error;
 
     public Token(String error) {
         this.error = error;
