@@ -3,6 +3,7 @@ package com.sebworks.oauthly.entity;
 import com.sebworks.oauthly.Token;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 /**
  * Models a third party token, such as from facebook
@@ -15,6 +16,7 @@ public class ThirdPartyToken {
     /**
      * belonging user
      */
+    @Indexed
     private String userId;
     /**
      * e.g. 'facebook' or 'twitter'

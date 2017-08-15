@@ -2,6 +2,7 @@ package com.sebworks.oauthly.entity;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class Grant {
     /**
      * Used while getting the token, then removed
      */
+    @Indexed
     private String code;
     /**
      * Used while getting the token, then removed
