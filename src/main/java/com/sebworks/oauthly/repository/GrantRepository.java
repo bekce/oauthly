@@ -11,5 +11,6 @@ import java.util.List;
 public interface GrantRepository extends MongoRepository<Grant, String> {
     List<Grant> findByClientId(String clientId);
     List<Grant> findByUserId(String userId);
+    Grant findByClientIdAndUserId(String clientId, String userId);
     Grant findByCode(String code);
 }

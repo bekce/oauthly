@@ -6,19 +6,28 @@ import com.auth0.jwt.JWTVerifyException;
 import com.sebworks.oauthly.OAuthFilter;
 import com.sebworks.oauthly.Token;
 import com.sebworks.oauthly.TokenStatus;
-import org.apache.commons.codec.binary.Base64;
+import com.sebworks.oauthly.entity.Client;
+import com.sebworks.oauthly.entity.Grant;
+import com.sebworks.oauthly.entity.User;
+import com.sebworks.oauthly.repository.ClientRepository;
+import com.sebworks.oauthly.repository.GrantRepository;
+import com.sebworks.oauthly.repository.ScopeRepository;
+import com.sebworks.oauthly.repository.UserRepository;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>This controller implements oauth2 authorization server semantics with password grant type.<br>
@@ -35,14 +44,12 @@ import java.util.Objects;
 public class OAuthAuthorizationController implements InitializingBean {
     private static final Logger log = LoggerFactory.getLogger(OAuthAuthorizationController.class);
 
-    @Value("${oauth.server.client.id}")
-    private String clientId;
-    @Value("${oauth.server.client.secret}")
-    private String clientSecret;
-    @Value("${oauth.server.username}")
-    private String username;
-    @Value("${oauth.server.password}")
-    private String password;
+    @Autowired
+    private ClientRepository clientRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private GrantRepository grantRepository;
     @Value("${oauth.server.jwt.secret}")
     private String jwtSecret;
     /** In seconds */
@@ -52,92 +59,149 @@ public class OAuthAuthorizationController implements InitializingBean {
     @Value("${oauth.server.expire.refresh.token}")
     private long expireRefreshToken;
 
-    private String basicAuthValue;
-
     @Override
     public void afterPropertiesSet() throws Exception {
-        // precompute the basic auth value for fast checks
-        String s = clientId + ":" + clientSecret;
-        basicAuthValue = "Basic " + Base64.encodeBase64String(s.getBytes("utf-8"));
-        log.info("basicAuthValue: " + basicAuthValue);
     }
 
     /**
      * Validate given token and return its type
      * @see TokenStatus
      */
-    public TokenStatus getTokenStatus(String access_token){
+    public Pair<Grant, TokenStatus> getTokenStatus(String access_token){
         if(access_token == null)
-            return TokenStatus.INVALID;
+            return new Pair<>(null, TokenStatus.INVALID);
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
             final Map<String,Object> claims = verifier.verify(access_token);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 1 && type != 2){
+                return new Pair<>(null, TokenStatus.INVALID);
+            }
             // check expiry date
             int exp = (int) claims.get("exp");
             if(exp < (System.currentTimeMillis() / 1000L))
-                return TokenStatus.INVALID;
+                return new Pair<>(null, TokenStatus.INVALID);
+            // check grant
+            String grant_id = (String) claims.get("grant");
+            Grant grant = grantRepository.findOne(grant_id);
+            if(grant == null){
+                return new Pair<>(null, TokenStatus.INVALID);
+            }
+            Client client = clientRepository.findOne(grant.getClientId());
+            if(client == null){
+                return new Pair<>(null, TokenStatus.INVALID); // how can this be?
+            }
             // check hash value
             int receivedHash = (int) claims.get("h");
-            int correctHash = Objects.hash(clientId, clientSecret, username, password);
+            int correctHash = Objects.hash(client.getId(), client.getSecret());
             if(receivedHash != correctHash) {
-                return TokenStatus.INVALID;
+                return new Pair<>(null, TokenStatus.INVALID);
             }
-            // check token type
-			Object type = claims.get("t");
-			if("a".equals(type))
-                return TokenStatus.VALID_ACCESS;
-            else if("r".equals(type))
-                return TokenStatus.VALID_REFRESH;
-            else{
-                log.debug("Unknown token type: "+ type);
-                return TokenStatus.INVALID;
+            // check token type & version
+			if(type == 1){
+                return new Pair<>(grant, TokenStatus.VALID_ACCESS);
+            } else {
+                return new Pair<>(grant, TokenStatus.VALID_REFRESH);
             }
         } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
-            return TokenStatus.INVALID;
+            return new Pair<>(null, TokenStatus.INVALID);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return TokenStatus.INVALID;
+            return new Pair<>(null, TokenStatus.INVALID);
         }
     }
 
     /**
-     * This endpoint issues a new token to the client.<br>
-     * Two grant_types are supported: 'password' and 'refresh_token'<br>
-     * Its parameters can be customized to fit project needs. Currently it requires client_id and client_secret as Basic Authorization header.
+     * Issues new tokens.
+     *
+     * @param client_id id of the client (required)
+     * @param client_secret secret of the client (required)
+     * @param grant_type supported grant types: 'client_credentials', 'authorization_code', 'password' or 'refresh_token' (required)
      * @param username the resource owner username when grant_type is 'password'
      * @param password the resource owner password when grant_type is 'password'
-     * @param grant_type supported grant types: 'password' or 'refresh_token'
      * @param refresh_token the previously retrieved refresh_token when grant_type is 'refresh_token'
-     * @param authorization_header The client_id and client_secret as basic authorization header:
-     *                             'Basic '+base64encode(client_id+':'+client_secret)
+     * @param redirect_uri redirect_uri parameter while retrieving authorization code from /authorize, when grant_type is 'authorization_code'
+     * @param code retrieved code when grant_type is 'authorization_code'
+     * @param scope requested scope when grant_type is 'password'
      * @return token
      */
     @RequestMapping(value = "/token", method = RequestMethod.POST)
-    public ResponseEntity<Token> token(@RequestParam(value = "username", required = false) String username,
-                                       @RequestParam(value = "password", required = false) String password,
-                                       @RequestParam("grant_type") String grant_type,
-                                       @RequestParam(value = "refresh_token", required = false) String refresh_token,
-                                       @RequestHeader("Authorization") String authorization_header) {
+    public ResponseEntity<Token> token(
+            @RequestParam(value = "client_id") String client_id,
+            @RequestParam(value = "client_secret") String client_secret,
+            @RequestParam(value = "grant_type") String grant_type,
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "refresh_token", required = false) String refresh_token,
+            @RequestParam(value = "redirect_uri", required = false) String redirect_uri,
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "scope", required = false) String scope) {
 
-        // Here we expect the client to send client_id:client_secret as Basic auth.
-        // This behavior can easily be changed depending on the requirements.
-        if(!basicAuthValue.equals(authorization_header)){
+        Client client = clientRepository.findOne(client_id);
+        if(client == null || !Objects.equals(client.getSecret(), client_secret)){
             return ResponseEntity.badRequest().body(new Token("unauthorized"));
         }
 
         switch (grant_type) {
-            case "password": {
-                if (!this.username.equals(username) || !this.password.equals(password)) {
-                    return ResponseEntity.badRequest().body(new Token("invalid_grant"));
+            case "client_credentials": {
+                /* In this mode, we use client_id as user_id in Grant */
+                Grant grant = grantRepository.findByClientIdAndUserId(client_id, client_id);
+                if(grant == null){
+                    grant = new Grant();
+                    grant.setClientId(client_id);
+                    grant.setUserId(client_id);
+                    grant = grantRepository.save(grant);
                 }
-                Token token = prepareToken();
+                Token token = prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
+                return ResponseEntity.ok(token);
+            }
+            case "authorization_code": {
+                Grant grant = grantRepository.findByCode(code);
+                if(grant == null){
+                    return ResponseEntity.badRequest().body(new Token("invalid code"));
+                }
+                if(!Objects.equals(grant.getRedirectUri(), redirect_uri)){
+                    return ResponseEntity.badRequest().body(new Token("invalid redirect_uri"));
+                }
+                grant.setCode(null);
+                grant.setRedirectUri(null);
+                grant = grantRepository.save(grant);
+                Token token = prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
+                return ResponseEntity.ok(token);
+            }
+            case "password": {
+                if(!client.isTrusted()){
+                    return ResponseEntity.badRequest().body(new Token("client not trusted for password type grant"));
+                }
+                User user = userRepository.findByUsername(username);
+                if(user == null){
+                    user = userRepository.findByEmail(username);
+                }
+                if(user == null || user.checkPassword(password)){
+                    return ResponseEntity.badRequest().body(new Token("invalid login"));
+                }
+                Grant grant = grantRepository.findByClientIdAndUserId(client_id, user.getId());
+                if(grant == null){
+                    // create new grant automatically because this is a trusted app
+                    grant = new Grant();
+                    grant.setUserId(user.getId());
+                    grant.setClientId(client_id);
+                    if(scope != null){
+                        grant.setScopes(Arrays.asList(scope.split(" ")));
+                    }
+                    grant = grantRepository.save(grant);
+                }
+                Token token = prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
                 return ResponseEntity.ok(token);
             }
             case "refresh_token": {
-                if (getTokenStatus(refresh_token) == TokenStatus.VALID_REFRESH) {
+                Pair<Grant, TokenStatus> tokenStatus = getTokenStatus(refresh_token);
+                if (tokenStatus.getValue1() != TokenStatus.VALID_REFRESH) {
                     return ResponseEntity.badRequest().body(new Token("invalid_refresh_token"));
                 }
-                Token token = prepareToken();
+                Grant grant = tokenStatus.getValue0();
+                Token token = prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
                 return ResponseEntity.ok(token);
             }
             default:
@@ -160,27 +224,28 @@ public class OAuthAuthorizationController implements InitializingBean {
      *
      * @return generated token
      */
-    private Token prepareToken() {
-        int hash = Objects.hash(clientId, clientSecret, username, password);
+    private Token prepareToken(String client_id, String client_secret, String grant_id, List<String> scopes) {
+        int hash = Objects.hash(client_id, client_secret);
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
         final long exp = iat + expireAccessToken; // expires claim. In this case the token expires in 60 seconds
         final JWTSigner signer = new JWTSigner(jwtSecret);
+
         final HashMap<String, Object> claims = new HashMap<>();
-        claims.put("v", 1); //version
+        claims.put("vt", 1); //version=1 & type=access
         claims.put("exp", exp);
         claims.put("h", hash);
-        claims.put("t", "a");
+        claims.put("grant", grant_id);
         final String token_a = signer.sign(claims);
 
         final HashMap<String, Object> claims_r = new HashMap<>();
         final long exp_r = iat + expireRefreshToken; // refresh token expire time: 1 week
-        claims_r.put("v", 1); //version
+        claims_r.put("vt", 2); //version=1 & type=refresh
         claims_r.put("exp", exp_r);
         claims_r.put("h", hash);
-        claims_r.put("t", "r");
+        claims_r.put("grant", grant_id);
         final String token_r = signer.sign(claims_r);
 
         /* The last parameter (scope) is entirely optional. You can use it to implement scoping requirements. If you would like so, put it to claims map to verify it. */
-        return new Token(token_a, token_r, "bearer", expireAccessToken, "read write");
+        return new Token(token_a, token_r, "bearer", expireAccessToken, scopes == null ? "" : String.join(" ", scopes));
     }
 }

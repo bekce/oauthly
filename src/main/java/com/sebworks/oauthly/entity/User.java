@@ -1,6 +1,7 @@
 package com.sebworks.oauthly.entity;
 
 import lombok.Data;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
@@ -22,4 +23,15 @@ public class User {
      */
     @Indexed(unique = true)
     private String cookie;
+
+    public void encryptThenSetPassword(String password_plaintext){
+        String salt = BCrypt.gensalt(12);
+        this.password = BCrypt.hashpw(password_plaintext, salt);
+    }
+
+    public boolean checkPassword(String password_plaintext){
+        if(null == this.password || !this.password.startsWith("$2a$"))
+            throw new java.lang.IllegalArgumentException("Invalid hash provided for comparison");
+        return BCrypt.checkpw(password_plaintext, password);
+    }
 }
