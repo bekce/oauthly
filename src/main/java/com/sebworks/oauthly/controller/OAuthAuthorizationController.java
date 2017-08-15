@@ -1,8 +1,11 @@
-package com.sebworks.oauthly;
+package com.sebworks.oauthly.controller;
 
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
+import com.sebworks.oauthly.OAuthFilter;
+import com.sebworks.oauthly.Token;
+import com.sebworks.oauthly.TokenStatus;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
