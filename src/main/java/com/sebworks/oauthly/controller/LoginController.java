@@ -22,6 +22,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.HashMap;
@@ -51,7 +52,7 @@ public class LoginController {
     private String jwtSecret;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String login(HttpServletResponse response, HttpSession session, Model model,
+    public String login(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model,
                         @RequestParam(value = "csrf_token") String csrf_token,
                         @RequestParam(value = "username") String username,
                         @RequestParam(value = "password") String password) {
@@ -59,16 +60,16 @@ public class LoginController {
         String csrf_token1 = (String) session.getAttribute("csrf_token");
         session.removeAttribute("csrf_token");
         if(csrf_token1 == null || !csrf_token1.equals(csrf_token)){
-            model.addAttribute("error", "request failed");
-            return "login";
+            model.addAttribute("error", "Request failed");
+            return login(request, session, model);
         }
         User user = userRepository.findByUsername(username);
         if(user == null){
             user = userRepository.findByEmail(username);
         }
         if(user == null || !user.checkPassword(password)){
-            model.addAttribute("error", "invalid login");
-            return "login";
+            model.addAttribute("error", "Invalid login");
+            return login(request, session, model);
         }
         sessionDataAccessor.access().setUserId(user.getId());
 
@@ -87,26 +88,44 @@ public class LoginController {
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(HttpServletRequest request, HttpSession session, Model model) {
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
+        if(cookies != null) for (Cookie cookie : cookies) {
             if("ltat".equals(cookie.getName())){
                 User user = validateCookie(cookie.getValue());
                 if(user != null){
                     sessionDataAccessor.access().setUserId(user.getId());
-                    String redir = (String) session.getAttribute("redir");
-                    if(redir == null) redir = "/";
-                    return "redirect:"+redir;
                 }
             }
         }
 
+        if(sessionDataAccessor.access().getUserId() != null){
+            String redir = (String) session.getAttribute("redir");
+            if(redir == null) redir = "/";
+            return "redirect:"+redir;
+        }
+
         String csrf_token = UUID.randomUUID().toString().replace("-", "");
         session.setAttribute("csrf_token", csrf_token);
+
+        model.addAttribute("message", "");
+        if(!model.containsAttribute("error"))
+            model.addAttribute("error", "");
+        model.addAttribute("csrf_token", csrf_token);
+
         return "login";
     }
 
     @RequestMapping(value = "/logout", method = {RequestMethod.GET, RequestMethod.POST})
-    public String logout() {
+    public String logout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) for (Cookie cookie : cookies) {
+            if("ltat".equals(cookie.getName())){
+                cookie.setMaxAge(0);
+                response.addCookie(cookie);
+            }
+        }
+
         sessionDataAccessor.access().setUserId(null);
+        session.invalidate();
         return "redirect:/login";
     }
 
@@ -117,7 +136,7 @@ public class LoginController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public String register(@ModelAttribute("dto") RegistrationDto dto, BindingResult bindingResult,
+    public String register(@ModelAttribute("dto") @Valid RegistrationDto dto, BindingResult bindingResult,
                            Model model, HttpSession session) {
         registrationValidator.validate(dto, bindingResult);
 

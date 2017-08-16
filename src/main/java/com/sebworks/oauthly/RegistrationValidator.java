@@ -2,6 +2,7 @@ package com.sebworks.oauthly;
 
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.repository.UserRepository;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -31,6 +32,9 @@ public class RegistrationValidator implements Validator {
         }
         if (userRepository.findByEmail(dto.getEmail()) != null) {
             errors.rejectValue("email", "Duplicate.userForm.email");
+        }
+        if(!EmailValidator.getInstance().isValid(dto.getEmail())){
+            errors.rejectValue("email", "Invalid.userForm.email");
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "NotEmpty");

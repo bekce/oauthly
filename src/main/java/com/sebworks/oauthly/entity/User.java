@@ -18,11 +18,6 @@ public class User {
     @Indexed(unique = true)
     private String email;
     private String password;
-    /**
-     * Contains user's long-lived authenticator
-     */
-    @Indexed(unique = true)
-    private String cookie;
 
     public void encryptThenSetPassword(String password_plaintext){
         String salt = BCrypt.gensalt(12);
