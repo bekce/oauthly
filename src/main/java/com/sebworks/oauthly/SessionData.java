@@ -1,5 +1,9 @@
 package com.sebworks.oauthly;
 
+import com.sebworks.oauthly.entity.User;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +16,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("session")
+@Getter
+@Setter
 public class SessionData {
-    public boolean authenticated = false;
+    private String userId;
 }

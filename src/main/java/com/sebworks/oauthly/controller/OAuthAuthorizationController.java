@@ -11,7 +11,6 @@ import com.sebworks.oauthly.entity.Grant;
 import com.sebworks.oauthly.entity.User;
 import com.sebworks.oauthly.repository.ClientRepository;
 import com.sebworks.oauthly.repository.GrantRepository;
-import com.sebworks.oauthly.repository.ScopeRepository;
 import com.sebworks.oauthly.repository.UserRepository;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
@@ -20,10 +19,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
@@ -39,7 +40,7 @@ import java.util.*;
  *
  * Created by Selim Eren Bekçe on 2016-08-25.
  */
-@RestController
+@Controller
 @RequestMapping("/oauth")
 public class OAuthAuthorizationController implements InitializingBean {
     private static final Logger log = LoggerFactory.getLogger(OAuthAuthorizationController.class);
@@ -64,55 +65,6 @@ public class OAuthAuthorizationController implements InitializingBean {
     }
 
     /**
-     * Validate given token and return its type
-     * @see TokenStatus
-     */
-    public Pair<Grant, TokenStatus> getTokenStatus(String access_token){
-        if(access_token == null)
-            return new Pair<>(null, TokenStatus.INVALID);
-        try {
-            final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(access_token);
-            // first check version
-            int type = (int) claims.get("vt");
-            if(type != 1 && type != 2){
-                return new Pair<>(null, TokenStatus.INVALID);
-            }
-            // check expiry date
-            int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
-                return new Pair<>(null, TokenStatus.INVALID);
-            // check grant
-            String grant_id = (String) claims.get("grant");
-            Grant grant = grantRepository.findOne(grant_id);
-            if(grant == null){
-                return new Pair<>(null, TokenStatus.INVALID);
-            }
-            Client client = clientRepository.findOne(grant.getClientId());
-            if(client == null){
-                return new Pair<>(null, TokenStatus.INVALID); // how can this be?
-            }
-            // check hash value
-            int receivedHash = (int) claims.get("h");
-            int correctHash = Objects.hash(client.getId(), client.getSecret());
-            if(receivedHash != correctHash) {
-                return new Pair<>(null, TokenStatus.INVALID);
-            }
-            // check token type & version
-			if(type == 1){
-                return new Pair<>(grant, TokenStatus.VALID_ACCESS);
-            } else {
-                return new Pair<>(grant, TokenStatus.VALID_REFRESH);
-            }
-        } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
-            return new Pair<>(null, TokenStatus.INVALID);
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return new Pair<>(null, TokenStatus.INVALID);
-        }
-    }
-
-    /**
      * Issues new tokens.
      *
      * @param client_id id of the client (required)
@@ -126,8 +78,8 @@ public class OAuthAuthorizationController implements InitializingBean {
      * @param scope requested scope when grant_type is 'password'
      * @return token
      */
-    @RequestMapping(value = "/token", method = RequestMethod.POST)
-    public ResponseEntity<Token> token(
+    @RequestMapping(value = "/token", method = {RequestMethod.POST})
+    public @ResponseBody ResponseEntity<Token> token(
             @RequestParam(value = "client_id") String client_id,
             @RequestParam(value = "client_secret") String client_secret,
             @RequestParam(value = "grant_type") String grant_type,
@@ -209,6 +161,17 @@ public class OAuthAuthorizationController implements InitializingBean {
         }
     }
 
+    @RequestMapping(value = "/authorize", method = RequestMethod.GET)
+    public ModelAndView authorize(
+            @RequestParam(value = "client_id") String client_id,
+            @RequestParam(value = "response_type") String response_type,
+            @RequestParam(value = "state", required = false) String state,
+            @RequestParam(value = "redirect_uri", required = false) String redirect_uri,
+            @RequestParam(value = "scope", required = false) String scope) {
+
+        return null;
+    }
+
     /**
      * Prepares & issues a new token and returns it.
      * It puts the following information to the token:
@@ -248,4 +211,54 @@ public class OAuthAuthorizationController implements InitializingBean {
         /* The last parameter (scope) is entirely optional. You can use it to implement scoping requirements. If you would like so, put it to claims map to verify it. */
         return new Token(token_a, token_r, "bearer", expireAccessToken, scopes == null ? "" : String.join(" ", scopes));
     }
+
+    /**
+     * Validate given token and return its type
+     * @see TokenStatus
+     */
+    public Pair<Grant, TokenStatus> getTokenStatus(String access_token){
+        if(access_token == null)
+            return new Pair<>(null, TokenStatus.INVALID);
+        try {
+            final JWTVerifier verifier = new JWTVerifier(jwtSecret);
+            final Map<String,Object> claims = verifier.verify(access_token);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 1 && type != 2){
+                return new Pair<>(null, TokenStatus.INVALID);
+            }
+            // check expiry date
+            int exp = (int) claims.get("exp");
+            if(exp < (System.currentTimeMillis() / 1000L))
+                return new Pair<>(null, TokenStatus.INVALID);
+            // check grant
+            String grant_id = (String) claims.get("grant");
+            Grant grant = grantRepository.findOne(grant_id);
+            if(grant == null){
+                return new Pair<>(null, TokenStatus.INVALID);
+            }
+            Client client = clientRepository.findOne(grant.getClientId());
+            if(client == null){
+                return new Pair<>(null, TokenStatus.INVALID); // how can this be?
+            }
+            // check hash value
+            int receivedHash = (int) claims.get("h");
+            int correctHash = Objects.hash(client.getId(), client.getSecret());
+            if(receivedHash != correctHash) {
+                return new Pair<>(null, TokenStatus.INVALID);
+            }
+            // check token type & version
+            if(type == 1){
+                return new Pair<>(grant, TokenStatus.VALID_ACCESS);
+            } else {
+                return new Pair<>(grant, TokenStatus.VALID_REFRESH);
+            }
+        } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
+            return new Pair<>(null, TokenStatus.INVALID);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return new Pair<>(null, TokenStatus.INVALID);
+        }
+    }
+
 }

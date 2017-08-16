@@ -1,8 +1,6 @@
 package com.sebworks.oauthly;
 
 import com.sebworks.oauthly.controller.OAuthAuthorizationController;
-import com.sebworks.oauthly.entity.Grant;
-import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -16,18 +14,18 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 /**
- * This filter is responsible for protecting resources. It sends 401 if no token found in the request.
+ * This filter is responsible for protecting authorization server endpoint, such as authorize and profile
+ * It redirects to login page if no session was found.
  *
  * @author Selim Eren Bekçe
  *
  */
-public class OAuthFilter implements Filter{
+public class LoginFilter implements Filter{
 
 	public static final String PROTECTED_URL_PATTERN = "protectedURLPattern";
-	private static final Logger logger = LoggerFactory.getLogger(OAuthFilter.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoginFilter.class);
 	
 	private Pattern pattern;
-	private boolean oauthFilterEnabled;
 	private OAuthAuthorizationController controller;
 	private WebApplicationContext context;
 
@@ -37,29 +35,23 @@ public class OAuthFilter implements Filter{
 		if(context == null){
 			throw new ServletException("Spring context not found");
 		}
-		oauthFilterEnabled = context.getEnvironment().getRequiredProperty("oauth.server.filter.enabled", Boolean.class);
 		controller = context.getBean(OAuthAuthorizationController.class);
 
 		String protectedURLPattern = filterConfig.getInitParameter(PROTECTED_URL_PATTERN);
 		if(protectedURLPattern == null){
-			throw new ServletException("OAuthFilter requires a "+PROTECTED_URL_PATTERN+" init parameter to work.");
+			throw new ServletException("LoginFilter requires a "+PROTECTED_URL_PATTERN+" init parameter to work.");
 		}
 		try {
 			pattern = Pattern.compile(protectedURLPattern);
 		} catch (Exception e) {
 			throw new ServletException(e.getMessage(), e);
 		}
-		logger.info("Initialized OAuthFilter");
+		logger.info("Initialized LoginFilter");
 	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException,
 			ServletException {
-
-		if (!oauthFilterEnabled) {
-			chain.doFilter(req, res);
-			return;
-		}
 
 		HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
@@ -71,35 +63,31 @@ public class OAuthFilter implements Filter{
 			return;
 		}
 
-		// Check for Authorization header
-		String authorizationHeader = request.getHeader("Authorization");
 		SessionData sessionData = context.getBean(SessionData.class);
-		if (authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")) {
-			String token = authorizationHeader.substring("Bearer ".length());
-			Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
-			if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
-				sessionData.setUserId(tokenStatus.getValue0().getUserId());
-			}
-		} else { //check for access_token query param (/url?access_token=xyz)
-			String token = request.getParameter("access_token");
-			if (token != null && !token.isEmpty()) {
-				Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
-				if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
-					sessionData.setUserId(tokenStatus.getValue0().getUserId());
-				}
-			}
-		}
-
-		// check if user is currently authenticated in the session
 		if(sessionData.getUserId() != null){
 			chain.doFilter(request, response);
 			return;
 		}
 
-		response.sendError(401, "Invalid or missing bearer token");
+		//save current url to a session param
+		request.getSession().setAttribute("redir", getFullURL(request));
+
+		//redirect to login
+		response.sendRedirect("/login");
 	}
 
 	@Override
 	public void destroy() {
+	}
+
+	public static String getFullURL(HttpServletRequest request) {
+		StringBuffer requestURL = request.getRequestURL();
+		String queryString = request.getQueryString();
+
+		if (queryString == null) {
+			return requestURL.toString();
+		} else {
+			return requestURL.append('?').append(queryString).toString();
+		}
 	}
 }
