@@ -24,6 +24,26 @@
 <div class="container">
 
     <h2 class="form-heading">Welcome ${username}!</h2>
+
+    <#if canCreateClients>
+        <table class="table table-striped">
+            <thead><tr><td>id</td><td>secret</td><td>name</td><td>redirect_uri</td></tr></thead>
+            <tbody>
+            <#list clients as client>
+                <tr>
+                    <td>${client.id}</td>
+                    <td>${client.secret}</td>
+                    <form action="/client" method="post">
+                        <td><input type="text" name="name" value="${client.name}"></td>
+                        <td><input type="text" name="redirectUri" value="${client.redirectUri?default('')}"></td>
+                        <td><input type="hidden" value="${client.id}" name="id"/><button class="btn" type="submit">Save</button></td>
+                    </form>
+                </tr>
+            </#list>
+            </tbody>
+        </table>
+        <br>Create new client <form action="/client" method="post"><input type="text" name="name" /><button class="btn" type="submit">Save</button></form>
+    </#if>
     <h4 class="text-center"><a href="/logout">Logout</a></h4>
 
 </div>

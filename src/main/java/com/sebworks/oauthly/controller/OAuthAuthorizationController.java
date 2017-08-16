@@ -201,6 +201,7 @@ public class OAuthAuthorizationController implements InitializingBean {
                 grant.setRedirectUri(redirect_uri);
                 grantRepository.save(grant);
                 UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
+                uriComponentsBuilder.queryParam("code", grant.getCode());
                 if(state != null){
                     uriComponentsBuilder.queryParam("state", state);
                 }
@@ -244,6 +245,7 @@ public class OAuthAuthorizationController implements InitializingBean {
         grant.setRedirectUri(redirect_uri);
         grantRepository.save(grant);
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
+        uriComponentsBuilder.queryParam("code", grant.getCode());
         if(state != null){
             uriComponentsBuilder.queryParam("state", state);
         }

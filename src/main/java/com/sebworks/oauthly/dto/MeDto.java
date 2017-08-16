@@ -8,6 +8,6 @@ import lombok.Data;
 @Data
 public class MeDto {
     private String id;
-    private String username;
+    private String name;
     private String email;
 }

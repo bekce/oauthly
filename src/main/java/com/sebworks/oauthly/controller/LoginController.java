@@ -7,7 +7,9 @@ import com.sebworks.oauthly.RegistrationValidator;
 import com.sebworks.oauthly.SessionDataAccessor;
 import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.dto.RegistrationDto;
+import com.sebworks.oauthly.entity.Client;
 import com.sebworks.oauthly.entity.User;
+import com.sebworks.oauthly.repository.ClientRepository;
 import com.sebworks.oauthly.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +44,8 @@ public class LoginController {
     private RegistrationValidator registrationValidator;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ClientRepository clientRepository;
     @Autowired
     private SessionDataAccessor sessionDataAccessor;
 
@@ -87,16 +91,6 @@ public class LoginController {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public String login(HttpServletRequest request, HttpSession session, Model model) {
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) for (Cookie cookie : cookies) {
-            if("ltat".equals(cookie.getName())){
-                User user = validateCookie(cookie.getValue());
-                if(user != null){
-                    sessionDataAccessor.access().setUserId(user.getId());
-                }
-            }
-        }
-
         if(sessionDataAccessor.access().getUserId() != null){
             String redir = (String) session.getAttribute("redir");
             if(redir == null) redir = "/";
@@ -145,9 +139,12 @@ public class LoginController {
         }
 
         User user = new User();
+        user.setId(UUID.randomUUID().toString().replace("-",""));
         user.setEmail(dto.getEmail());
         user.setUsername(dto.getUsername());
         user.encryptThenSetPassword(dto.getPassword());
+        if(userRepository.count() == 0)
+            user.setAdmin(true);
         user = userRepository.save(user);
 
         sessionDataAccessor.access().setUserId(user.getId());
@@ -167,6 +164,10 @@ public class LoginController {
         User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
         model.addAttribute("username", user.getUsername());
         model.addAttribute("email", user.getEmail());
+        model.addAttribute("canCreateClients", user.isAdmin());
+        if(user.isAdmin()){
+            model.addAttribute("clients", clientRepository.findByOwnerId(user.getId()));
+        }
         return "profile";
     }
 
@@ -174,10 +175,36 @@ public class LoginController {
     public @ResponseBody MeDto me(){
         User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
         MeDto dto = new MeDto();
-        dto.setUsername(user.getUsername());
+        dto.setName(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setId(user.getId());
         return dto;
+    }
+
+    @PostMapping("/client")
+    public String addUpdateClient(@RequestParam(required = false) String id, String name, String redirectUri){
+        User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
+        if(!user.isAdmin()){
+            return "error";
+        }
+        if(id != null){
+            Client client = clientRepository.findOne(id);
+            if(!client.getOwnerId().equals(user.getId())){
+                return "error";
+            }
+            client.setName(name);
+            client.setRedirectUri(redirectUri);
+            clientRepository.save(client);
+        } else {
+            Client client = new Client();
+            client.setId(UUID.randomUUID().toString().replace("-",""));
+            client.setSecret(UUID.randomUUID().toString().replace("-",""));
+            client.setName(name);
+            client.setRedirectUri(redirectUri);
+            client.setOwnerId(user.getId());
+            clientRepository.save(client);
+        }
+        return "redirect:profile";
     }
 
     private String prepareCookie(User user) {
@@ -194,7 +221,7 @@ public class LoginController {
         return signer.sign(claims);
     }
 
-    private User validateCookie(String cookie_value){
+    public User validateCookie(String cookie_value){
         if(cookie_value == null)
             return null;
         try {

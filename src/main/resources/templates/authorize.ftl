@@ -23,8 +23,8 @@
 
 <div class="container">
 
-    <h2 class="text-center">Authorize {app_name}</h2>
-    <h4 class="text-center">{app_name} would like to access your account. Your password will not be shared.</h4>
+    <h2 class="text-center">Authorize ${app_name}</h2>
+    <h4 class="text-center">${app_name} would like to access your account. Your password will not be shared.</h4>
 
     <form action="" method="POST" class="form-signin">
         <button class="btn btn-lg btn-primary btn-block" type="submit">Grant Access</button>

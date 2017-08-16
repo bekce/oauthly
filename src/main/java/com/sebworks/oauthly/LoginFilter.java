@@ -1,7 +1,9 @@
 package com.sebworks.oauthly;
 
+import com.sebworks.oauthly.controller.LoginController;
 import com.sebworks.oauthly.controller.OAuthAuthorizationController;
 import com.sebworks.oauthly.entity.Grant;
+import com.sebworks.oauthly.entity.User;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.*;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,6 +32,7 @@ public class LoginFilter implements Filter{
 	
 	private Pattern pattern;
 	private OAuthAuthorizationController controller;
+	private LoginController loginController;
 	private WebApplicationContext context;
 
 	@Override
@@ -38,6 +42,7 @@ public class LoginFilter implements Filter{
 			throw new ServletException("Spring context not found");
 		}
 		controller = context.getBean(OAuthAuthorizationController.class);
+		loginController = context.getBean(LoginController.class);
 
 		String protectedURLPattern = filterConfig.getInitParameter(PROTECTED_URL_PATTERN);
 		if(protectedURLPattern == null){
@@ -65,9 +70,20 @@ public class LoginFilter implements Filter{
 			return;
 		}
 
+		SessionData sessionData = context.getBean(SessionData.class);
+		// Check for cookie
+		Cookie[] cookies = request.getCookies();
+		if(cookies != null) for (Cookie cookie : cookies) {
+			if("ltat".equals(cookie.getName())){
+				User user = loginController.validateCookie(cookie.getValue());
+				if(user != null){
+					sessionData.setUserId(user.getId());
+				}
+			}
+		}
+
 		// Check for Authorization header
 		String authorizationHeader = request.getHeader("Authorization");
-		SessionData sessionData = context.getBean(SessionData.class);
 		if (authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")) {
 			String token = authorizationHeader.substring("Bearer ".length());
 			Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
