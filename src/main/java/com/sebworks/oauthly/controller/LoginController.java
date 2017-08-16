@@ -4,7 +4,7 @@ import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 import com.sebworks.oauthly.RegistrationValidator;
-import com.sebworks.oauthly.SessionData;
+import com.sebworks.oauthly.SessionDataAccessor;
 import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.entity.User;
@@ -42,7 +42,7 @@ public class LoginController {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private SessionData sessionData;
+    private SessionDataAccessor sessionDataAccessor;
 
     /** In seconds */
     @Value("${expire.cookie}")
@@ -70,7 +70,7 @@ public class LoginController {
             model.addAttribute("error", "invalid login");
             return "login";
         }
-        sessionData.setUserId(user.getId());
+        sessionDataAccessor.access().setUserId(user.getId());
 
         String cookie_value = prepareCookie(user);
         Cookie cookie = new Cookie("ltat", cookie_value);
@@ -91,7 +91,7 @@ public class LoginController {
             if("ltat".equals(cookie.getName())){
                 User user = validateCookie(cookie.getValue());
                 if(user != null){
-                    sessionData.setUserId(user.getId());
+                    sessionDataAccessor.access().setUserId(user.getId());
                     String redir = (String) session.getAttribute("redir");
                     if(redir == null) redir = "/";
                     return "redirect:"+redir;
@@ -101,23 +101,12 @@ public class LoginController {
 
         String csrf_token = UUID.randomUUID().toString().replace("-", "");
         session.setAttribute("csrf_token", csrf_token);
-
-        return "login";
-    }
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String login(Model model, String error, String logout) {
-        if (error != null)
-            model.addAttribute("error", "Your username and password is invalid.");
-
-        if (logout != null)
-            model.addAttribute("message", "You have been logged out successfully.");
-
         return "login";
     }
 
     @RequestMapping(value = "/logout", method = {RequestMethod.GET, RequestMethod.POST})
     public String logout() {
-        sessionData.setUserId(null);
+        sessionDataAccessor.access().setUserId(null);
         return "redirect:/login";
     }
 
@@ -128,7 +117,8 @@ public class LoginController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public String register(@ModelAttribute("dto") RegistrationDto dto, BindingResult bindingResult, Model model) {
+    public String register(@ModelAttribute("dto") RegistrationDto dto, BindingResult bindingResult,
+                           Model model, HttpSession session) {
         registrationValidator.validate(dto, bindingResult);
 
         if (bindingResult.hasErrors()) {
@@ -141,9 +131,11 @@ public class LoginController {
         user.encryptThenSetPassword(dto.getPassword());
         user = userRepository.save(user);
 
-        sessionData.setUserId(user.getId());
+        sessionDataAccessor.access().setUserId(user.getId());
 
-        return "redirect:/welcome";
+        String redir = (String) session.getAttribute("redir");
+        if(redir == null) redir = "/";
+        return "redirect:"+redir;
     }
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -153,7 +145,7 @@ public class LoginController {
 
     @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public String profile(Model model) {
-        User user = userRepository.findOne(sessionData.getUserId());
+        User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
         model.addAttribute("username", user.getUsername());
         model.addAttribute("email", user.getEmail());
         return "profile";
@@ -161,7 +153,7 @@ public class LoginController {
 
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public @ResponseBody MeDto me(){
-        User user = userRepository.findOne(sessionData.getUserId());
+        User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
         MeDto dto = new MeDto();
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
