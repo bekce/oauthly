@@ -20,4 +20,5 @@ import org.springframework.stereotype.Component;
 @Setter
 public class SessionData {
     private String userId;
+    private String clientId;
 }

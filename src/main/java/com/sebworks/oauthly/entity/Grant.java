@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ public class Grant {
     private String id;
     private String userId;
     private String clientId;
-    private List<String> scopes;
+    private List<String> scopes = new ArrayList<>();
     /**
      * Used while getting the token, then removed
      */

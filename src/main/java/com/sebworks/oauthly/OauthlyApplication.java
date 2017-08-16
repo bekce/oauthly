@@ -29,7 +29,7 @@ public class OauthlyApplication {
 	protected FilterRegistrationBean loginFilter() {
 		FilterRegistrationBean bean = new FilterRegistrationBean(new LoginFilter());
 		bean.addUrlPatterns("/*");
-		bean.addInitParameter(LoginFilter.PROTECTED_URL_PATTERN, "^/(?:oauth/authorize|profile|me)(?:|(?:[\\?#/].*))$" );
+		bean.addInitParameter(LoginFilter.PROTECTED_URL_PATTERN, "^/(?:oauth/authorize|profile|me|client)(?:|(?:[\\?#/].*))$" );
 		bean.setName("Login Filter");
 		return bean;
 	}

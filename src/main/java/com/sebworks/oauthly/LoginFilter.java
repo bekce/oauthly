@@ -1,6 +1,8 @@
 package com.sebworks.oauthly;
 
 import com.sebworks.oauthly.controller.OAuthAuthorizationController;
+import com.sebworks.oauthly.entity.Grant;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -63,7 +65,27 @@ public class LoginFilter implements Filter{
 			return;
 		}
 
+		// Check for Authorization header
+		String authorizationHeader = request.getHeader("Authorization");
 		SessionData sessionData = context.getBean(SessionData.class);
+		if (authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")) {
+			String token = authorizationHeader.substring("Bearer ".length());
+			Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
+			if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
+				sessionData.setUserId(tokenStatus.getValue0().getUserId());
+				sessionData.setClientId(tokenStatus.getValue0().getClientId());
+			}
+		} else { //check for access_token query param (/url?access_token=xyz)
+			String token = request.getParameter("access_token");
+			if (token != null && !token.isEmpty()) {
+				Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
+				if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
+					sessionData.setUserId(tokenStatus.getValue0().getUserId());
+					sessionData.setClientId(tokenStatus.getValue0().getClientId());
+				}
+			}
+		}
+
 		if(sessionData.getUserId() != null){
 			chain.doFilter(request, response);
 			return;

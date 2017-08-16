@@ -79,6 +79,7 @@ public class OAuthFilter implements Filter{
 			Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
 			if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
 				sessionData.setUserId(tokenStatus.getValue0().getUserId());
+				sessionData.setClientId(tokenStatus.getValue0().getClientId());
 			}
 		} else { //check for access_token query param (/url?access_token=xyz)
 			String token = request.getParameter("access_token");
@@ -86,6 +87,7 @@ public class OAuthFilter implements Filter{
 				Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
 				if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
 					sessionData.setUserId(tokenStatus.getValue0().getUserId());
+					sessionData.setClientId(tokenStatus.getValue0().getClientId());
 				}
 			}
 		}

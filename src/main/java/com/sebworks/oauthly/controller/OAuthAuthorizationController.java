@@ -4,6 +4,7 @@ import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 import com.sebworks.oauthly.OAuthFilter;
+import com.sebworks.oauthly.SessionDataAccessor;
 import com.sebworks.oauthly.Token;
 import com.sebworks.oauthly.TokenStatus;
 import com.sebworks.oauthly.entity.Client;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
@@ -51,6 +54,8 @@ public class OAuthAuthorizationController implements InitializingBean {
     private UserRepository userRepository;
     @Autowired
     private GrantRepository grantRepository;
+    @Autowired
+    private SessionDataAccessor sessionDataAccessor;
     @Value("${oauth.server.jwt.secret}")
     private String jwtSecret;
     /** In seconds */
@@ -165,12 +170,97 @@ public class OAuthAuthorizationController implements InitializingBean {
     public ModelAndView authorize(
             @RequestParam(value = "client_id") String client_id,
             @RequestParam(value = "response_type") String response_type,
-            @RequestParam(value = "state", required = false) String state,
-            @RequestParam(value = "redirect_uri", required = false) String redirect_uri,
-            @RequestParam(value = "scope", required = false) String scope) {
+            @RequestParam(value = "redirect_uri") String redirect_uri,
+            @RequestParam(value = "scope", required = false) String scope,
+            @RequestParam(value = "state", required = false) String state) {
 
-        return null;
+        Client client = clientRepository.findOne(client_id);
+        if(client == null){
+            return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        }
+        if(!redirect_uri.startsWith(client.getRedirectUri())){
+            return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        }
+        if(!"code".equals(response_type)){
+            return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        }
+        Grant grant = grantRepository.findByClientIdAndUserId(client_id, sessionDataAccessor.access().getUserId());
+        if(grant != null){
+            boolean scopeOK = true;
+            if(scope != null){
+                List<String> scopes = Arrays.asList(scope.split(" "));
+                for (String s : scopes) {
+                    if(!grant.getScopes().contains(s)){
+                        scopeOK = false;
+                        break;
+                    }
+                }
+            }
+            if(scopeOK){
+                grant.setCode(UUID.randomUUID().toString().replace("-",""));
+                grant.setRedirectUri(redirect_uri);
+                grantRepository.save(grant);
+                UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
+                if(state != null){
+                    uriComponentsBuilder.queryParam("state", state);
+                }
+                return new ModelAndView("redirect:"+uriComponentsBuilder.build().toUriString());
+            }
+        }
+        ModelAndView modelAndView = new ModelAndView("authorize");
+        modelAndView.addObject("app_name", client.getName());
+        return modelAndView;
     }
+
+    @RequestMapping(value = "/authorize", method = RequestMethod.POST)
+    public ModelAndView authorizeDo(
+            @RequestParam(value = "client_id") String client_id,
+            @RequestParam(value = "response_type") String response_type,
+            @RequestParam(value = "redirect_uri") String redirect_uri,
+            @RequestParam(value = "scope", required = false) String scope,
+            @RequestParam(value = "state", required = false) String state) {
+
+        Client client = clientRepository.findOne(client_id);
+        if(client == null){
+            return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        }
+        if(!redirect_uri.startsWith(client.getRedirectUri())){
+            return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        }
+        if(!"code".equals(response_type)){
+            return new ModelAndView("error", HttpStatus.BAD_REQUEST);
+        }
+        Grant grant = grantRepository.findByClientIdAndUserId(client_id, sessionDataAccessor.access().getUserId());
+        if(grant == null){
+            grant = new Grant();
+            grant.setUserId(sessionDataAccessor.access().getUserId());
+            grant.setClientId(client_id);
+        }
+        if(scope != null){
+            List<String> scopes = Arrays.asList(scope.split(" "));
+            grant.getScopes().addAll(scopes);
+        }
+        grant.setCode(UUID.randomUUID().toString().replace("-",""));
+        grant.setRedirectUri(redirect_uri);
+        grantRepository.save(grant);
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
+        if(state != null){
+            uriComponentsBuilder.queryParam("state", state);
+        }
+        return new ModelAndView("redirect:"+uriComponentsBuilder.build().toUriString());
+    }
+
+//    public static void main(String[] args) {
+//        String redirect_uri = "http://localhost:8080/return#!tablefortwo";
+//        String state = "dsfsfsd";
+//        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
+//        if(state != null){
+//            uriComponentsBuilder.fragment("a21321321");
+//            uriComponentsBuilder.queryParam("state", state);
+//        }
+//        System.out.println(uriComponentsBuilder.build().toUriString());;
+//
+//    }
 
     /**
      * Prepares & issues a new token and returns it.

@@ -18,6 +18,10 @@ public class User {
     @Indexed(unique = true)
     private String email;
     private String password;
+    /**
+     * Can create his/her own clients
+     */
+    private boolean admin;
 
     public void encryptThenSetPassword(String password_plaintext){
         String salt = BCrypt.gensalt(12);
