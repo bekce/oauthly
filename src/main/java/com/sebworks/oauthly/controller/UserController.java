@@ -8,6 +8,7 @@ import com.sebworks.oauthly.common.SessionDataAccessor;
 import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.entity.Client;
+import com.sebworks.oauthly.entity.Grant;
 import com.sebworks.oauthly.entity.User;
 import com.sebworks.oauthly.repository.ClientRepository;
 import com.sebworks.oauthly.repository.UserRepository;
@@ -50,9 +51,9 @@ public class UserController {
     private SessionDataAccessor sessionDataAccessor;
 
     /** In seconds */
-    @Value("${expire.cookie}")
+    @Value("${jwt.expire.cookie}")
     private int expireCookie;
-    @Value("${oauth.server.jwt.secret}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
@@ -172,8 +173,8 @@ public class UserController {
     }
 
     @RequestMapping(value = "/api/me", method = RequestMethod.GET)
-    public @ResponseBody MeDto me(){
-        User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
+    public @ResponseBody MeDto me(@RequestAttribute("grant") Grant grant) {
+        User user = userRepository.findOne(grant.getUserId());
         MeDto dto = new MeDto();
         dto.setName(user.getUsername());
         dto.setEmail(user.getEmail());

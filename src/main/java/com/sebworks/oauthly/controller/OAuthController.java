@@ -56,14 +56,17 @@ public class OAuthController implements InitializingBean {
     private GrantRepository grantRepository;
     @Autowired
     private SessionDataAccessor sessionDataAccessor;
-    @Value("${oauth.server.jwt.secret}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
     /** In seconds */
-    @Value("${oauth.server.expire.access.token}")
+    @Value("${jwt.expire.accessToken}")
     private long expireAccessToken;
     /** In seconds */
-    @Value("${oauth.server.expire.refresh.token}")
+    @Value("${jwt.expire.refreshToken}")
     private long expireRefreshToken;
+    /** In seconds */
+    @Value("${jwt.expire.authorizationCode}")
+    private long expireAuthorizationCode;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -114,16 +117,10 @@ public class OAuthController implements InitializingBean {
                 return ResponseEntity.ok(token);
             }
             case "authorization_code": {
-                Grant grant = grantRepository.findByCode(code);
+                Grant grant = validateCode(code, redirect_uri);
                 if(grant == null){
-                    return ResponseEntity.badRequest().body(new Token("invalid code"));
+                    return ResponseEntity.badRequest().body(new Token("invalid code or redirect_uri"));
                 }
-                if(!Objects.equals(grant.getRedirectUri(), redirect_uri)){
-                    return ResponseEntity.badRequest().body(new Token("invalid redirect_uri"));
-                }
-                grant.setCode(null);
-                grant.setRedirectUri(null);
-                grant = grantRepository.save(grant);
                 Token token = prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
                 return ResponseEntity.ok(token);
             }
@@ -197,11 +194,8 @@ public class OAuthController implements InitializingBean {
                 }
             }
             if(scopeOK){
-                grant.setCode(UUID.randomUUID().toString().replace("-",""));
-                grant.setRedirectUri(redirect_uri);
-                grantRepository.save(grant);
                 UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
-                uriComponentsBuilder.queryParam("code", grant.getCode());
+                uriComponentsBuilder.queryParam("code", prepareCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri));
                 if(state != null){
                     uriComponentsBuilder.queryParam("state", state);
                 }
@@ -234,6 +228,7 @@ public class OAuthController implements InitializingBean {
         Grant grant = grantRepository.findByClientIdAndUserId(client_id, sessionDataAccessor.access().getUserId());
         if(grant == null){
             grant = new Grant();
+            grant.setId(UUID.randomUUID().toString().replace("-",""));
             grant.setUserId(sessionDataAccessor.access().getUserId());
             grant.setClientId(client_id);
         }
@@ -241,11 +236,9 @@ public class OAuthController implements InitializingBean {
             List<String> scopes = Arrays.asList(scope.split(" "));
             grant.getScopes().addAll(scopes);
         }
-        grant.setCode(UUID.randomUUID().toString().replace("-",""));
-        grant.setRedirectUri(redirect_uri);
-        grantRepository.save(grant);
+        grant = grantRepository.save(grant);
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(redirect_uri);
-        uriComponentsBuilder.queryParam("code", grant.getCode());
+        uriComponentsBuilder.queryParam("code", prepareCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri));
         if(state != null){
             uriComponentsBuilder.queryParam("state", state);
         }
@@ -350,6 +343,59 @@ public class OAuthController implements InitializingBean {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return new Pair<>(null, TokenStatus.INVALID);
+        }
+    }
+
+    private String prepareCode(String client_id, String client_secret, String grant_id, String redirect_uri) {
+        int hash = Objects.hash(client_id, client_secret);
+        final long iat = System.currentTimeMillis() / 1000L; // issued at claim
+        final long exp = iat + expireAuthorizationCode;
+        final JWTSigner signer = new JWTSigner(jwtSecret);
+
+        final HashMap<String, Object> claims = new HashMap<>();
+        claims.put("exp", exp);
+        claims.put("h", hash);
+        claims.put("g", grant_id);
+        claims.put("r", redirect_uri);
+        return signer.sign(claims);
+    }
+
+    private Grant validateCode(String code, String redirect_uri){
+        if(code == null || redirect_uri == null)
+            return null;
+        try {
+            final JWTVerifier verifier = new JWTVerifier(jwtSecret);
+            final Map<String,Object> claims = verifier.verify(code);
+            // check expiry date
+            int exp = (int) claims.get("exp");
+            if(exp < (System.currentTimeMillis() / 1000L))
+                return null;
+            // check grant
+            String grant_id = (String) claims.get("g");
+            Grant grant = grantRepository.findOne(grant_id);
+            if(grant == null){
+                return null;
+            }
+            // check hash value
+            int receivedHash = (int) claims.get("h");
+            Client client = clientRepository.findOne(grant.getClientId());
+            if(client == null){
+                return null;
+            }
+            int correctHash = Objects.hash(client.getId(), client.getSecret());
+            if(receivedHash != correctHash) {
+                return null;
+            }
+            // check redirect_uri
+            if(!Objects.equals(claims.get("r"), redirect_uri)){
+                return null;
+            }
+            return grant;
+        } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
+            return null;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
     }
 
