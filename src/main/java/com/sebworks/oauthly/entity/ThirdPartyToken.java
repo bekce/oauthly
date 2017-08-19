@@ -1,6 +1,6 @@
 package com.sebworks.oauthly.entity;
 
-import com.sebworks.oauthly.Token;
+import com.sebworks.oauthly.common.Token;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;

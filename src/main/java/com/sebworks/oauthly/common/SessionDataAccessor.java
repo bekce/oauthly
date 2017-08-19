@@ -1,4 +1,4 @@
-package com.sebworks.oauthly;
+package com.sebworks.oauthly.common;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

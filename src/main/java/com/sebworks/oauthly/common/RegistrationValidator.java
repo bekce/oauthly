@@ -1,4 +1,4 @@
-package com.sebworks.oauthly;
+package com.sebworks.oauthly.common;
 
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.repository.UserRepository;

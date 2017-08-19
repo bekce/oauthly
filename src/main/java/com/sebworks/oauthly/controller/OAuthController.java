@@ -3,10 +3,10 @@ package com.sebworks.oauthly.controller;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
-import com.sebworks.oauthly.OAuthFilter;
-import com.sebworks.oauthly.SessionDataAccessor;
-import com.sebworks.oauthly.Token;
-import com.sebworks.oauthly.TokenStatus;
+import com.sebworks.oauthly.filter.ResourceServerFilter;
+import com.sebworks.oauthly.common.SessionDataAccessor;
+import com.sebworks.oauthly.common.Token;
+import com.sebworks.oauthly.common.TokenStatus;
 import com.sebworks.oauthly.entity.Client;
 import com.sebworks.oauthly.entity.Grant;
 import com.sebworks.oauthly.entity.User;
@@ -38,15 +38,15 @@ import java.util.*;
  * Supports refresh tokens.<br>
  * Works with request params in token post method for the requirement, it is best to modify it for generic usage.<br>
  * It uses JWT to issue tokens, so tokens are self contained and there is no token store.<br>
- * It works with {@link OAuthFilter} to protect resources.<br>
+ * It works with {@link ResourceServerFilter} to protect resources.<br>
  * Currently it works with a single user and client id, but it is easy to extend for multiple users.</p>
  *
  * Created by Selim Eren Bekçe on 2016-08-25.
  */
 @Controller
 @RequestMapping("/oauth")
-public class OAuthAuthorizationController implements InitializingBean {
-    private static final Logger log = LoggerFactory.getLogger(OAuthAuthorizationController.class);
+public class OAuthController implements InitializingBean {
+    private static final Logger log = LoggerFactory.getLogger(OAuthController.class);
 
     @Autowired
     private ClientRepository clientRepository;

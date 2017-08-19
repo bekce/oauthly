@@ -3,8 +3,8 @@ package com.sebworks.oauthly.controller;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
-import com.sebworks.oauthly.RegistrationValidator;
-import com.sebworks.oauthly.SessionDataAccessor;
+import com.sebworks.oauthly.common.RegistrationValidator;
+import com.sebworks.oauthly.common.SessionDataAccessor;
 import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.entity.Client;
@@ -36,9 +36,9 @@ import java.util.UUID;
  * Created by Selim Eren Bekçe on 16.08.2017.
  */
 @Controller
-public class LoginController {
+public class UserController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private RegistrationValidator registrationValidator;
@@ -171,7 +171,7 @@ public class LoginController {
         return "profile";
     }
 
-    @RequestMapping(value = "/me", method = RequestMethod.GET)
+    @RequestMapping(value = "/api/me", method = RequestMethod.GET)
     public @ResponseBody MeDto me(){
         User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
         MeDto dto = new MeDto();

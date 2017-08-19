@@ -1,4 +1,4 @@
-package com.sebworks.oauthly;
+package com.sebworks.oauthly.common;
 
 /**
  * Created by Selim Eren Bekçe on 2016-10-10.

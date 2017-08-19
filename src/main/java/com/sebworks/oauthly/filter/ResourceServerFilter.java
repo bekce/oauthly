@@ -1,6 +1,7 @@
-package com.sebworks.oauthly;
+package com.sebworks.oauthly.filter;
 
-import com.sebworks.oauthly.controller.OAuthAuthorizationController;
+import com.sebworks.oauthly.common.TokenStatus;
+import com.sebworks.oauthly.controller.OAuthController;
 import com.sebworks.oauthly.entity.Grant;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
@@ -21,45 +22,37 @@ import java.util.regex.Pattern;
  * @author Selim Eren Bekçe
  *
  */
-public class OAuthFilter implements Filter{
+public class ResourceServerFilter implements Filter{
 
 	public static final String PROTECTED_URL_PATTERN = "protectedURLPattern";
-	private static final Logger logger = LoggerFactory.getLogger(OAuthFilter.class);
+	private static final Logger logger = LoggerFactory.getLogger(ResourceServerFilter.class);
 	
 	private Pattern pattern;
-	private boolean oauthFilterEnabled;
-	private OAuthAuthorizationController controller;
-	private WebApplicationContext context;
+	private OAuthController controller;
 
 	@Override
 	public void init(FilterConfig filterConfig) throws ServletException {
-		context = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
+		WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(filterConfig.getServletContext());
 		if(context == null){
 			throw new ServletException("Spring context not found");
 		}
-		oauthFilterEnabled = context.getEnvironment().getRequiredProperty("oauth.server.filter.enabled", Boolean.class);
-		controller = context.getBean(OAuthAuthorizationController.class);
+		controller = context.getBean(OAuthController.class);
 
 		String protectedURLPattern = filterConfig.getInitParameter(PROTECTED_URL_PATTERN);
 		if(protectedURLPattern == null){
-			throw new ServletException("OAuthFilter requires a "+PROTECTED_URL_PATTERN+" init parameter to work.");
+			throw new ServletException("ResourceServerFilter requires a "+PROTECTED_URL_PATTERN+" init parameter to work.");
 		}
 		try {
 			pattern = Pattern.compile(protectedURLPattern);
 		} catch (Exception e) {
 			throw new ServletException(e.getMessage(), e);
 		}
-		logger.info("Initialized OAuthFilter");
+		logger.info("Initialized ResourceServerFilter");
 	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException,
 			ServletException {
-
-		if (!oauthFilterEnabled) {
-			chain.doFilter(req, res);
-			return;
-		}
 
 		HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
@@ -73,27 +66,24 @@ public class OAuthFilter implements Filter{
 
 		// Check for Authorization header
 		String authorizationHeader = request.getHeader("Authorization");
-		SessionData sessionData = context.getBean(SessionData.class);
 		if (authorizationHeader != null && StringUtils.startsWithIgnoreCase(authorizationHeader, "Bearer ")) {
-			String token = authorizationHeader.substring("Bearer ".length());
+			String token = authorizationHeader.substring("Bearer ".length()).trim();
 			Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
 			if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
-				sessionData.setUserId(tokenStatus.getValue0().getUserId());
-				sessionData.setClientId(tokenStatus.getValue0().getClientId());
+				request.setAttribute("grant", tokenStatus.getValue0());
 			}
 		} else { //check for access_token query param (/url?access_token=xyz)
 			String token = request.getParameter("access_token");
 			if (token != null && !token.isEmpty()) {
 				Pair<Grant, TokenStatus> tokenStatus = controller.getTokenStatus(token);
 				if(tokenStatus.getValue1() == TokenStatus.VALID_ACCESS){
-					sessionData.setUserId(tokenStatus.getValue0().getUserId());
-					sessionData.setClientId(tokenStatus.getValue0().getClientId());
+					request.setAttribute("grant", tokenStatus.getValue0());
 				}
 			}
 		}
 
-		// check if user is currently authenticated in the session
-		if(sessionData.getUserId() != null){
+		// check if user is currently authenticated in the request scope
+		if(request.getAttribute("grant") != null){
 			chain.doFilter(request, response);
 			return;
 		}

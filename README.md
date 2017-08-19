@@ -18,7 +18,7 @@ First account will be given admin access
 
 - Token endpoint: http://localhost:8080/oauth/token
 - Authorize endpoint: http://localhost:8080/oauth/authorize
-- User info endpoint: http://localhost:8080/me
+- User info endpoint: http://localhost:8080/api/me
 
 ## Features
 

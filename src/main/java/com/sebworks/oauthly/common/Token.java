@@ -1,4 +1,4 @@
-package com.sebworks.oauthly;
+package com.sebworks.oauthly.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
