@@ -3,6 +3,8 @@ package com.sebworks.oauthly.controller;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebworks.oauthly.common.RegistrationValidator;
 import com.sebworks.oauthly.common.SessionDataAccessor;
 import com.sebworks.oauthly.dto.MeDto;
@@ -16,16 +18,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.util.HashMap;
@@ -41,6 +52,8 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Autowired
     private RegistrationValidator registrationValidator;
     @Autowired
@@ -55,6 +68,8 @@ public class UserController {
     private int expireCookie;
     @Value("${jwt.secret}")
     private String jwtSecret;
+    @Value("${recaptcha.secret}")
+    private String recaptchaSecret;
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model,
@@ -132,10 +147,17 @@ public class UserController {
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
     public String register(@ModelAttribute("dto") @Valid RegistrationDto dto, BindingResult bindingResult,
-                           Model model, HttpSession session) {
+                           Model model, HttpSession session, HttpServletRequest request,
+                           @RequestParam("g-recaptcha-response") String g_recaptcha_response) {
         registrationValidator.validate(dto, bindingResult);
 
         if (bindingResult.hasErrors()) {
+            return "register";
+        }
+
+        if (!checkRecaptcha(request.getRemoteHost(), g_recaptcha_response)){
+            log.info("recaptcha failed, g_recaptcha_response={}", g_recaptcha_response);
+            bindingResult.addError(new ObjectError("recaptcha", "Invalid recaptcha"));
             return "register";
         }
 
@@ -251,6 +273,30 @@ public class UserController {
             log.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    private boolean checkRecaptcha(String ipAddress, String response){
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        map.add("response", response);
+        map.add("secret", recaptchaSecret);
+        map.add("remoteip", ipAddress);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity( "https://www.google.com/recaptcha/api/siteverify", request , String.class );
+        if(responseEntity.getStatusCodeValue() == 200){
+            try {
+                JsonNode jsonNode = objectMapper.readValue(responseEntity.getBody(), JsonNode.class);
+                return jsonNode.get("success").asBoolean();
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return false;
     }
 
 }

@@ -19,6 +19,8 @@
     <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <script src='https://www.google.com/recaptcha/api.js'></script>
 </head>
 
 <body>
@@ -26,6 +28,8 @@
 <div class="container">
 
     <form action="" method="POST" class="form-signin">
+        <h2 class="form-heading">Register</h2>
+
         <@spring.bind "dto.username"/>
         <div class="form-group">
             <input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" class="form-control" placeholder="Username" autofocus="true"/>
@@ -46,6 +50,8 @@
             <input type="password" name="${spring.status.expression}" value="${spring.status.value?default("")}" class="form-control" placeholder="Password"/>
             <@spring.showErrors "<br>"/>
         </div>
+
+        <div class="g-recaptcha" data-sitekey="6LfpYy0UAAAAALI0zTdsq9AzUE1Mi2KeCy-bpoEx"></div>
 
         <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
 
