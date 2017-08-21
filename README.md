@@ -25,16 +25,14 @@ First account will be given admin access
 - Does NOT use Spring Security which means no configuration mess or cryptic class names
 - Fully supported oauth2 grant types: client credentials, authorization code, resource owner password, refresh token
 - Login, register and authorize client views with Bootstrap
-- JWT is used to issue tokens and cookies
+- JWT is used to issue tokens, authorization codes and cookies
 - Logged-in users are remembered with long-term safe cookies
 - Multiple client id and secret pairs are supported, managed by a view
 - Customizable expiry times for generated tokens (see `application.properties` file)
+- Implements reCAPTCHA on register page
 - OAuth2 scopes support
 - MongoDB backend
-- User info endpoint to retrieve the current user
-- Uses bcrypt for user passwords
-- Uses freemarker for templates
-- Implements csrf protection on login page
+- Uses bcrypt for user passwords, freemarker for templating
 
 ## Screenshots
 
@@ -46,13 +44,14 @@ First account will be given admin access
 ## TODO (PRs are welcome!)
 - Third Party Provider login: ability to Login with Facebook, etc, on the login page.
   This feature should ask the user's email if he/she had not authorized on that provider
-- Scope CRUD screen
-- Reset password routine via email
+- Change password routine
+- Reset password routine via email (SMTP, Mailgun and SES)
 - Email validation routine by sending a code
 - OpenID default scopes with their meaning
 - User management view
-- Enable reCAPTCHA on login page
+- Enable reCAPTCHA on login page after X number of failed requests
 - Access logging
 - Security checkup to see whether it has any vulnerabilities or not
 - Possible production example with let's encrypt certificates, docker container and nginx
 - Customized error pages
+- Scope CRUD screen
