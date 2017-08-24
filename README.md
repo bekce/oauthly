@@ -68,11 +68,11 @@ your system.
 2. Tick enabled in discourse settings panel, enter sso return url. It is usually `http://DISCOURSE_SERVER/session/sso_login`
 3. Hit save and copy the generated secret
 4. Open discourse Admin -> Settings -> Login,
-    a. 'enable sso' -> true
-    b. 'sso url' -> `http://OAUTHLY_SERVER/discourse/sso`
-    c. 'sso secret' -> (secret from step 3)
-    d. 'sso overrides username and email' -> true
-    e. Users -> 'logout redirect' -> `http://OAUTHLY_SERVER/logout`
+    1. 'enable sso' -> true
+    2. 'sso url' -> `http://OAUTHLY_SERVER/discourse/sso`
+    3. 'sso secret' -> (secret from step 3)
+    4. 'sso overrides username and email' -> true
+    5. Users -> 'logout redirect' -> `http://OAUTHLY_SERVER/logout`
 5. Done, you may test the integration. Remember that the admin account must have the same email address on both
 systems, or you'll get locked out.
 
