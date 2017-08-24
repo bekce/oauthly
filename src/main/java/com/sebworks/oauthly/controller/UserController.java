@@ -127,7 +127,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/logout", method = {RequestMethod.GET, RequestMethod.POST})
-    public String logout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+    public String logout(HttpSession session, HttpServletRequest request, HttpServletResponse response,
+                         @RequestParam(value = "redirect_uri", required = false) String redirect_uri,
+                         @RequestHeader(value = "Referer", required = false) String referer) {
         Cookie[] cookies = request.getCookies();
         if(cookies != null) for (Cookie cookie : cookies) {
             if("ltat".equals(cookie.getName())){
@@ -138,6 +140,26 @@ public class UserController {
 
         sessionDataAccessor.access().setUserId(null);
         session.invalidate();
+        if(redirect_uri != null){
+            boolean found = false;
+            for (Client client : clientRepository.findAll()) {
+                if(client.getRedirectUri() != null && client.getRedirectUri().startsWith(redirect_uri)){
+                    found = true;
+                    break;
+                }
+            }
+            if(!found){
+                if(discourseController.getDto().getRedirectUri() != null && discourseController.getDto().getRedirectUri().startsWith(redirect_uri)){
+                    found = true;
+                }
+            }
+            if(found){
+                return "redirect:"+redirect_uri;
+            }
+        }
+        if(referer != null){
+            return "redirect:"+referer;
+        }
         return "redirect:/login";
     }
 
