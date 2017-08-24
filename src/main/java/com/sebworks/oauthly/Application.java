@@ -30,7 +30,7 @@ public class Application {
 	protected FilterRegistrationBean authorizationServerFilter() {
 		FilterRegistrationBean bean = new FilterRegistrationBean(new AuthorizationServerFilter());
 		bean.addUrlPatterns("/*");
-		bean.addInitParameter(AuthorizationServerFilter.PROTECTED_URL_PATTERN, "^/(?:oauth/authorize|profile|client)(?:|(?:[\\?#/].*))$" );
+		bean.addInitParameter(AuthorizationServerFilter.PROTECTED_URL_PATTERN, "^/(?:oauth/authorize|profile|client|discourse)(?:|(?:[\\?#/].*))$" );
 		return bean;
 	}
 

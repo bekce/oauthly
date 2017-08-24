@@ -26,6 +26,7 @@
     <h2 class="form-heading">Welcome ${username}!</h2>
 
     <#if canCreateClients>
+        <h3>Clients</h3>
         <table class="table table-striped">
             <thead><tr><td>id</td><td>secret</td><td>name</td><td>redirect_uri</td></tr></thead>
             <tbody>
@@ -42,8 +43,35 @@
             </#list>
             </tbody>
         </table>
-        <br>Create new client <form action="/client" method="post"><input type="text" name="name" /><button class="btn" type="submit">Save</button></form>
+        <form class="form-inline" action="/client" method="post">
+            <div class="form-group">
+                <input type="text" name="name" class="form-control" placeholder="name"/>
+            </div>
+            <div class="form-group">
+                <input type="text" name="redirectUri" class="form-control" placeholder="redirect_uri"/>
+            </div>
+            <button class="btn" type="submit">Create new client</button>
+        </form>
     </#if>
+
+    <#if isAdmin>
+        <h3>Discourse Settings</h3>
+        <form class="form-inline" action="/discourse/settings" method="post">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="enabled" <#if discourse.enabled>checked</#if>> Enabled
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="text" name="redirectUri" value="${discourse.redirectUri?default('')}" class="form-control" placeholder="redirect_uri">
+            </div>
+            <button type="submit" class="btn">Save</button>
+            <div class="form-group">
+                <p class="form-control-static">Secret: ${discourse.secret?default('(enable first)')}</p>
+            </div>
+        </form>
+    </#if>
+
     <h4 class="text-center"><a href="/logout">Logout</a></h4>
 
 </div>

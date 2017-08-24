@@ -62,6 +62,8 @@ public class UserController {
     private ClientRepository clientRepository;
     @Autowired
     private SessionDataAccessor sessionDataAccessor;
+    @Autowired
+    private DiscourseController discourseController;
 
     /** In seconds */
     @Value("${jwt.expire.cookie}")
@@ -188,8 +190,10 @@ public class UserController {
         model.addAttribute("username", user.getUsername());
         model.addAttribute("email", user.getEmail());
         model.addAttribute("canCreateClients", user.isAdmin());
+        model.addAttribute("isAdmin", user.isAdmin());
         if(user.isAdmin()){
             model.addAttribute("clients", clientRepository.findByOwnerId(user.getId()));
+            model.addAttribute("discourse", discourseController.getDto());
         }
         return "profile";
     }
@@ -227,7 +231,7 @@ public class UserController {
             client.setOwnerId(user.getId());
             clientRepository.save(client);
         }
-        return "redirect:profile";
+        return "redirect:/profile";
     }
 
     private String prepareCookie(User user) {

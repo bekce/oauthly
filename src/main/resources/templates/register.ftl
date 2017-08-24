@@ -37,7 +37,7 @@
         </div>
         <@spring.bind "dto.email"/>
         <div class="form-group">
-            <input type="text" name="${spring.status.expression}" value="${spring.status.value?default("")}" class="form-control" placeholder="Email"/>
+            <input type="email" name="${spring.status.expression}" value="${spring.status.value?default("")}" class="form-control" placeholder="Email"/>
             <@spring.showErrors "<br>"/>
         </div>
         <@spring.bind "dto.password"/>
