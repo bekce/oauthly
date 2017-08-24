@@ -10,7 +10,7 @@ auth0, will be better in the future (with your PRs, of course).
 ## Instructions
 
 0. Have a running mongodb instance
-1. `./mvnw spring-boot:run` For a different port, append `-Dserver.port=8181` to this command.
+1. `./mvnw -Dserver.port=8080 -Djwt.secret=your-new-secret-here spring-boot:run`
 2. Go to <http://localhost:8080>, register a new account for yourself.
 First account will be given admin access
 3. Create a client, set its `name` and `redirect_uri` (required) through profile screen
@@ -33,6 +33,7 @@ First account will be given admin access
 - OAuth2 scopes support
 - MongoDB backend
 - Uses bcrypt for user passwords, freemarker for templating
+- [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045) support
 
 ## Screenshots
 
@@ -55,3 +56,25 @@ First account will be given admin access
 - Possible production example with let's encrypt certificates, docker container and nginx
 - Customized error pages
 - Scope CRUD screen
+
+## Discourse SSO Instructions
+Oauthly fully supports [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045)
+integration. In this configuration, the single source of users becomes oauthly. When Login button is clicked on Discourse,
+user is redirected to oauthly login page. If the user has already authenticated with oauthly with a long term token,
+he/she immediately gets redirected back to discourse with user information. Follow the instructions below to configure
+your system.
+
+1. Login with admin and go to /profile
+2. Tick enabled in discourse settings panel, enter sso return url. It is usually `http://DISCOURSE_SERVER/session/sso_login`
+3. Hit save and copy the generated secret
+4. Open discourse Admin -> Settings -> Login,
+    a. 'enable sso' -> true
+    b. 'sso url' -> `http://OAUTHLY_SERVER/discourse/sso`
+    c. 'sso secret' -> (secret from step 3)
+    d. 'sso overrides username and email' -> true
+    e. Users -> 'logout redirect' -> `http://OAUTHLY_SERVER/logout`
+5. Done, you may test the integration. Remember that the admin account must have the same email address on both
+systems, or you'll get locked out.
+
+Important note: currently, oauthly does NOT implement email address normalization, username normalization and email
+code validation, which are essential for running in production environments. If you're interested, please submit a PR!
