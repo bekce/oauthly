@@ -24,18 +24,19 @@
 <div class="container">
 
     <form method="POST" action="/login" class="form-signin">
-        <h2 class="form-heading">Log in</h2>
+        <h2 class="form-heading">Log In</h2>
 
         <div class="form-group">
             <span>${message}</span>
-            <input name="username" type="text" class="form-control" placeholder="Username"
+            <input name="username" type="text" class="form-control" placeholder="Username or Email"
                    autofocus="true"/>
             <input name="password" type="password" class="form-control" placeholder="Password"/>
             <span>${error}</span>
             <input type="hidden" name="csrf_token" value="${csrf_token}"/>
 
             <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
-            <h4 class="text-center"><a href="/register">Create an account</a></h4>
+            <h4 class="text-center"><a href="/register">Register new account</a></h4>
+            <h4 class="text-center"><a href="/reset-password">Reset password</a></h4>
         </div>
 
     </form>

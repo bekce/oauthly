@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebworks.oauthly.common.RegistrationValidator;
 import com.sebworks.oauthly.common.SessionDataAccessor;
+import com.sebworks.oauthly.common.Utils;
 import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.entity.Client;
@@ -41,10 +42,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Selim Eren Bekçe on 16.08.2017.
@@ -87,9 +85,10 @@ public class UserController {
             model.addAttribute("error", "Request failed");
             return login(request, session, model);
         }
-        User user = userRepository.findByUsername(username);
+        String normalizedUsername = Utils.normalizeUsername(username);
+        User user = userRepository.findByUsernameNormalized(normalizedUsername);
         if(user == null){
-            user = userRepository.findByEmail(username);
+            user = userRepository.findByEmail(username.toLowerCase(Locale.ENGLISH));
         }
         if(user == null || !user.checkPassword(password)){
             model.addAttribute("error", "Invalid login");
@@ -216,6 +215,9 @@ public class UserController {
             return;
         }
         User user = userRepository.findOne(userId);
+        if(user == null){
+            return;
+        }
         model.addAttribute("username", user.getUsername());
         model.addAttribute("email", user.getEmail());
         model.addAttribute("canCreateClients", user.isAdmin());

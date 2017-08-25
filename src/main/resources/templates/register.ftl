@@ -47,7 +47,7 @@
         </div>
         <@spring.bind "dto.passwordConfirm"/>
         <div class="form-group">
-            <input type="password" name="${spring.status.expression}" value="${spring.status.value?default('')}" class="form-control" placeholder="Password"/>
+            <input type="password" name="${spring.status.expression}" value="${spring.status.value?default('')}" class="form-control" placeholder="Password (again)"/>
             <@spring.showErrors "<br>"/>
         </div>
 

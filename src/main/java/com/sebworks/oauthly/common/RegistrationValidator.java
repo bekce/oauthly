@@ -30,7 +30,7 @@ public class RegistrationValidator implements Validator {
             errors.rejectValue("username", "Size.userForm.username");
         }
         // normalize username
-        dto.setUsernameNormalized(dto.getUsername().replaceAll("[-\\\\.]","_").toLowerCase(Locale.ENGLISH));
+        dto.setUsernameNormalized(Utils.normalizeUsername(dto.getUsername()));
         if (userRepository.findByUsernameNormalized(dto.getUsernameNormalized()) != null) {
             errors.rejectValue("username", "Duplicate.userForm.username");
         }
