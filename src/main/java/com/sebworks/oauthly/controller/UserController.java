@@ -31,7 +31,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -209,9 +209,13 @@ public class UserController {
         return "redirect:/profile";
     }
 
-    @RequestMapping(value = "/profile", method = RequestMethod.GET)
-    public String profile(Model model) {
-        User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
+    @ModelAttribute
+    public void populateModel(Model model){
+        String userId = sessionDataAccessor.access().getUserId();
+        if(userId == null) {
+            return;
+        }
+        User user = userRepository.findOne(userId);
         model.addAttribute("username", user.getUsername());
         model.addAttribute("email", user.getEmail());
         model.addAttribute("canCreateClients", user.isAdmin());
@@ -220,33 +224,35 @@ public class UserController {
             model.addAttribute("clients", clientRepository.findByOwnerId(user.getId()));
             model.addAttribute("discourse", discourseController.getDto());
         }
-        model.addAttribute("error", "current password is invalid");
+    }
 
+    @GetMapping("/profile")
+    public String profile() {
         return "profile";
     }
 
     @PostMapping("/profile/password")
-    public ModelAndView changePassword(String oldPassword, String newPassword, String newPassword2){
-        Map<String, String> model = new HashMap<>();
+    public String changePassword(String oldPassword, String newPassword, String newPassword2,
+                                       RedirectAttributes redirectAttributes){
         User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
-        if(!user.checkPassword(oldPassword)){
-            model.put("error", "current password is invalid");
+        if(StringUtils.isAnyBlank(oldPassword, newPassword, newPassword2)){
+            redirectAttributes.addFlashAttribute("error", "All fields are required");
         }
-        else if(StringUtils.isAnyBlank(oldPassword, newPassword, newPassword2)){
-            model.put("error", "please input values");
+        else if(!user.checkPassword(oldPassword)){
+            redirectAttributes.addFlashAttribute("error", "Current password is invalid");
         }
         else if (newPassword.length() < 4 || newPassword.length() > 32) {
-            model.put("error", "Please use between 4 and 20");
+            redirectAttributes.addFlashAttribute("error", "Please use between 4 and 32");
         }
         else if (!newPassword.equals(newPassword2)) {
-            model.put("error", "These passwords don't match");
+            redirectAttributes.addFlashAttribute("error", "These passwords don't match");
         }
         else {
             user.encryptThenSetPassword(newPassword);
             userRepository.save(user);
-            model.put("success", "Success! You have changed your password.");
+            redirectAttributes.addFlashAttribute("success", "Success! You have changed your password.");
         }
-        return new ModelAndView("redirect:/profile", model);
+        return "redirect:/profile";
     }
 
     @RequestMapping(value = "/api/me", method = RequestMethod.GET)
