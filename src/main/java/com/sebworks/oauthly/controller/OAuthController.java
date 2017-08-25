@@ -279,7 +279,7 @@ public class OAuthController implements InitializingBean {
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
-        claims.put("vt", 1); //version=1 & type=access
+        claims.put("vt", 1); //version=1 & type=access_token
         claims.put("exp", exp);
         claims.put("h", hash);
         claims.put("grant", grant_id);
@@ -287,7 +287,7 @@ public class OAuthController implements InitializingBean {
 
         final HashMap<String, Object> claims_r = new HashMap<>();
         final long exp_r = iat + expireRefreshToken; // refresh token expire time: 1 week
-        claims_r.put("vt", 2); //version=1 & type=refresh
+        claims_r.put("vt", 2); //version=1 & type=refresh_token
         claims_r.put("exp", exp_r);
         claims_r.put("h", hash);
         claims_r.put("grant", grant_id);
@@ -353,6 +353,7 @@ public class OAuthController implements InitializingBean {
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
+        claims.put("vt", 3); //type=authorization_code
         claims.put("exp", exp);
         claims.put("h", hash);
         claims.put("g", grant_id);
@@ -366,6 +367,11 @@ public class OAuthController implements InitializingBean {
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
             final Map<String,Object> claims = verifier.verify(code);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 3){
+                return null;
+            }
             // check expiry date
             int exp = (int) claims.get("exp");
             if(exp < (System.currentTimeMillis() / 1000L))

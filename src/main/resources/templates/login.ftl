@@ -24,20 +24,27 @@
 <div class="container">
 
     <form method="POST" action="/login" class="form-signin">
+        <#if info??>
+            <div class="alert alert-info" role="alert">${info}</div>
+        </#if>
+        <#if success??>
+            <div class="alert alert-success" role="alert">${success}</div>
+        </#if>
+        <#if error??>
+            <div class="alert alert-danger" role="alert">${error}</div>
+        </#if>
+
         <h2 class="form-heading">Log In</h2>
-
         <div class="form-group">
-            <span>${message}</span>
-            <input name="username" type="text" class="form-control" placeholder="Username or Email"
-                   autofocus="true"/>
-            <input name="password" type="password" class="form-control" placeholder="Password"/>
-            <span>${error}</span>
-            <input type="hidden" name="csrf_token" value="${csrf_token}"/>
-
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
-            <h4 class="text-center"><a href="/register">Register new account</a></h4>
-            <h4 class="text-center"><a href="/reset-password">Reset password</a></h4>
+            <input name="username" type="text" class="form-control" placeholder="Username or Email" autofocus/>
         </div>
+        <div class="form-group">
+            <input name="password" type="password" class="form-control" placeholder="Password"/>
+        </div>
+        <input type="hidden" name="csrf_token" value="${csrf_token}"/>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
+        <h4 class="text-center"><a href="/register">Register new account</a></h4>
+        <h4 class="text-center"><a href="/reset-password">Reset password</a></h4>
 
     </form>
 

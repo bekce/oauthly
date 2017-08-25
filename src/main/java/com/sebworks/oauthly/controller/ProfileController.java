@@ -1,6 +1,7 @@
 package com.sebworks.oauthly.controller;
 
 import com.sebworks.oauthly.common.SessionDataAccessor;
+import com.sebworks.oauthly.common.Utils;
 import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.entity.Client;
 import com.sebworks.oauthly.entity.Grant;
@@ -78,11 +79,8 @@ public class ProfileController {
         else if(!user.checkPassword(oldPassword)){
             redirectAttributes.addFlashAttribute("error", "Current password is invalid");
         }
-        else if (newPassword.length() < 4 || newPassword.length() > 32) {
-            redirectAttributes.addFlashAttribute("error", "Please use between 4 and 32");
-        }
-        else if (!newPassword.equals(newPassword2)) {
-            redirectAttributes.addFlashAttribute("error", "These passwords don't match");
+        if(Utils.newPasswordCheck(newPassword, newPassword2) != null){
+            redirectAttributes.addFlashAttribute("error", Utils.newPasswordCheck(newPassword, newPassword2));
         }
         else {
             user.encryptThenSetPassword(newPassword);

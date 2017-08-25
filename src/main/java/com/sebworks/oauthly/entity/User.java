@@ -24,10 +24,19 @@ public class User {
      * Can create his/her own clients
      */
     private boolean admin;
+    /**
+     * Last update time to important changes like email and password in millis
+     */
+    private long lastUpdateTime;
+    /**
+     * User creation time in millis
+     */
+    private long creationTime;
 
     public void encryptThenSetPassword(String password_plaintext){
         String salt = BCrypt.gensalt(12);
         this.password = BCrypt.hashpw(password_plaintext, salt);
+        this.lastUpdateTime = System.currentTimeMillis();
     }
 
     public boolean checkPassword(String password_plaintext){

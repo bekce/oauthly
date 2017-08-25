@@ -8,12 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sebworks.oauthly.common.RegistrationValidator;
 import com.sebworks.oauthly.common.SessionDataAccessor;
 import com.sebworks.oauthly.common.Utils;
-import com.sebworks.oauthly.dto.MeDto;
 import com.sebworks.oauthly.dto.RegistrationDto;
-import com.sebworks.oauthly.entity.Client;
-import com.sebworks.oauthly.entity.Grant;
 import com.sebworks.oauthly.entity.User;
-import com.sebworks.oauthly.repository.ClientRepository;
 import com.sebworks.oauthly.repository.UserRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -64,13 +60,30 @@ public class UserController {
     /** In seconds */
     @Value("${jwt.expire.cookie}")
     private int expireCookie;
+    @Value("${jwt.expire.resetCode}")
+    private int expireResetCode;
     @Value("${jwt.secret}")
     private String jwtSecret;
     @Value("${recaptcha.secret}")
     private String recaptchaSecret;
 
+
+    @RequestMapping(value = "/login", method = RequestMethod.GET)
+    public String login(HttpServletRequest request, HttpSession session, Model model) {
+        if(sessionDataAccessor.access().getUserId() != null){
+            String redir = (String) session.getAttribute("redir");
+            if(redir == null) redir = "/";
+            return "redirect:"+redir;
+        }
+        String csrf_token = UUID.randomUUID().toString().replace("-", "");
+        session.setAttribute("csrf_token", csrf_token);
+        model.addAttribute("csrf_token", csrf_token);
+        return "login";
+    }
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, HttpServletResponse response, HttpSession session, Model model,
+                        RedirectAttributes redirectAttributes,
                         @RequestParam(value = "csrf_token") String csrf_token,
                         @RequestParam(value = "username") String username,
                         @RequestParam(value = "password") String password) {
@@ -78,17 +91,13 @@ public class UserController {
         String csrf_token1 = (String) session.getAttribute("csrf_token");
         session.removeAttribute("csrf_token");
         if(csrf_token1 == null || !csrf_token1.equals(csrf_token)){
-            model.addAttribute("error", "Request failed");
-            return login(request, session, model);
+            redirectAttributes.addFlashAttribute("error", "Request failed");
+            return "redirect:login";
         }
-        String normalizedUsername = Utils.normalizeUsername(username);
-        User user = userRepository.findByUsernameNormalized(normalizedUsername);
-        if(user == null){
-            user = userRepository.findByEmail(username.toLowerCase(Locale.ENGLISH));
-        }
+        User user = findUser(username);
         if(user == null || !user.checkPassword(password)){
-            model.addAttribute("error", "Invalid login");
-            return login(request, session, model);
+            redirectAttributes.addFlashAttribute("error", "Invalid login");
+            return "redirect:login";
         }
         sessionDataAccessor.access().setUserId(user.getId());
 
@@ -104,23 +113,13 @@ public class UserController {
         return "redirect:"+redir;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public String login(HttpServletRequest request, HttpSession session, Model model) {
-        if(sessionDataAccessor.access().getUserId() != null){
-            String redir = (String) session.getAttribute("redir");
-            if(redir == null) redir = "/";
-            return "redirect:"+redir;
+    private User findUser(@RequestParam(value = "username") String username) {
+        String normalizedUsername = Utils.normalizeUsername(username);
+        User user = userRepository.findByUsernameNormalized(normalizedUsername);
+        if(user == null){
+            user = userRepository.findByEmail(username.toLowerCase(Locale.ENGLISH));
         }
-
-        String csrf_token = UUID.randomUUID().toString().replace("-", "");
-        session.setAttribute("csrf_token", csrf_token);
-
-        model.addAttribute("message", "");
-        if(!model.containsAttribute("error"))
-            model.addAttribute("error", "");
-        model.addAttribute("csrf_token", csrf_token);
-
-        return "login";
+        return user;
     }
 
     @RequestMapping(value = "/logout", method = {RequestMethod.GET, RequestMethod.POST})
@@ -149,18 +148,18 @@ public class UserController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public String register(@ModelAttribute("dto") @Valid RegistrationDto dto, BindingResult bindingResult,
-                           Model model, HttpSession session, HttpServletRequest request,
-                           @RequestParam("g-recaptcha-response") String g_recaptcha_response) {
-        registrationValidator.validate(dto, bindingResult);
-
-        if (bindingResult.hasErrors()) {
-            return "register";
-        }
+    public String register(@ModelAttribute("dto") @Valid RegistrationDto dto, BindingResult bindingResult, HttpSession session,
+                           HttpServletRequest request, @RequestParam("g-recaptcha-response") String g_recaptcha_response) {
 
         if (!checkRecaptcha(request.getRemoteHost(), g_recaptcha_response)){
             log.info("recaptcha failed, g_recaptcha_response={}", g_recaptcha_response);
-            bindingResult.addError(new ObjectError("recaptcha", "Invalid recaptcha"));
+            bindingResult.addError(new ObjectError("g-recaptcha-response", "Invalid captcha"));
+            return "register";
+        }
+
+        registrationValidator.validate(dto, bindingResult);
+
+        if (bindingResult.hasErrors()) {
             return "register";
         }
 
@@ -169,6 +168,7 @@ public class UserController {
         user.setEmail(dto.getEmail());
         user.setUsername(dto.getUsername());
         user.setUsernameNormalized(dto.getUsernameNormalized());
+        user.setCreationTime(System.currentTimeMillis());
         user.encryptThenSetPassword(dto.getPassword());
         if(userRepository.count() == 0)
             user.setAdmin(true);
@@ -181,6 +181,133 @@ public class UserController {
         return "redirect:"+redir;
     }
 
+    @GetMapping("reset-password")
+    public String resetPassword(Model model, @RequestParam(required = false) String reset_code){
+
+        if(StringUtils.isNotBlank(reset_code)){
+            User user = validateResetCode(reset_code);
+            if(user != null) {
+                model.addAttribute("step", 3);
+                model.addAttribute("reset_code", reset_code);
+                model.addAttribute("username", user.getUsername());
+            }
+            else {
+                model.addAttribute("step", 1);
+                model.addAttribute("error", "Invalid reset code");
+            }
+        } else {
+            model.addAttribute("step", 1);
+        }
+        return "reset-password";
+    }
+    @PostMapping("reset-password")
+    public String resetPassword(Model model,
+                                @ModelAttribute("step") Integer step,
+                                @RequestParam(required = false) String username,
+                                @RequestParam(required = false) String newPassword,
+                                @RequestParam(required = false) String newPassword2,
+                                @RequestParam(required = false) String reset_code,
+                                HttpServletRequest request, @RequestParam("g-recaptcha-response") String g_recaptcha_response,
+                                HttpSession session, RedirectAttributes redirectAttributes){
+
+        if (!checkRecaptcha(request.getRemoteHost(), g_recaptcha_response)){
+            log.info("recaptcha failed, g_recaptcha_response={}", g_recaptcha_response);
+            redirectAttributes.addFlashAttribute("error", "Invalid captcha");
+            return "redirect:reset-password" + (reset_code != null ? "?reset_code="+reset_code : "");
+        }
+
+        if(step == 1){
+            User user = findUser(username);
+            if(user == null){
+                model.addAttribute("error", "Given user was not found.");
+                return "reset-password";
+            }
+            sendResetCode(user, prepareResetCode(user));
+            model.addAttribute("info", "Your password was just sent to your email address. Please check your inbox and click on the provided link to continue.");
+            model.addAttribute("step", 2);
+            return "reset-password";
+        }
+
+        if(step == 3){
+            User user = validateResetCode(reset_code);
+            if(user == null){
+                redirectAttributes.addFlashAttribute("step", 1);
+                redirectAttributes.addFlashAttribute("error", "Invalid reset code");
+            } else {
+                if(StringUtils.isAnyBlank(newPassword, newPassword2)){
+                    redirectAttributes.addFlashAttribute("error", "All fields are required");
+                } else if(Utils.newPasswordCheck(newPassword, newPassword2) != null){
+                    redirectAttributes.addFlashAttribute("error", Utils.newPasswordCheck(newPassword, newPassword2));
+                } else {
+                    // pass
+                    user.encryptThenSetPassword(newPassword);
+                    userRepository.save(user);
+                    redirectAttributes.addFlashAttribute("success", "Your password was reset! Please login to continue");
+                    return "redirect:/login";
+                }
+            }
+            return "redirect:reset-password?reset_code="+reset_code;
+        }
+
+        return "error";
+    }
+
+    private void sendResetCode(User user, String resetCode){
+        System.out.println("resetCode:"+resetCode);
+    }
+
+    private String prepareResetCode(User user) {
+        int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword(), user.getLastUpdateTime());
+        final long iat = System.currentTimeMillis() / 1000L; // issued at claim
+        final long exp = iat + expireResetCode; // expires claim
+        final JWTSigner signer = new JWTSigner(jwtSecret);
+
+        final HashMap<String, Object> claims = new HashMap<>();
+        claims.put("vt", 5); //type=reset_code
+        claims.put("exp", exp);
+        claims.put("hash", hash);
+        claims.put("user", user.getId());
+
+        return signer.sign(claims);
+    }
+
+    public User validateResetCode(String reset_code){
+        if(reset_code == null)
+            return null;
+        try {
+            final JWTVerifier verifier = new JWTVerifier(jwtSecret);
+            final Map<String,Object> claims = verifier.verify(reset_code);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 5){
+                return null;
+            }
+            // check expiry date
+            int exp = (int) claims.get("exp");
+            if(exp < (System.currentTimeMillis() / 1000L))
+                return null;
+            // check user
+            String user_id = (String) claims.get("user");
+            User user = userRepository.findOne(user_id);
+            if(user == null){
+                return null;
+            }
+            // check hash value
+            int receivedHash = (int) claims.get("hash");
+            int correctHash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword(), user.getLastUpdateTime());
+            if(receivedHash != correctHash) {
+                return null;
+            }
+            return user;
+        } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
+            return null;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
+
     private String prepareCookie(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
@@ -188,6 +315,7 @@ public class UserController {
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
+        claims.put("vt", 4); //type=cookie_ltat
         claims.put("exp", exp);
         claims.put("hash", hash);
         claims.put("user", user.getId());
@@ -201,6 +329,11 @@ public class UserController {
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
             final Map<String,Object> claims = verifier.verify(cookie_value);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 4){
+                return null;
+            }
             // check expiry date
             int exp = (int) claims.get("exp");
             if(exp < (System.currentTimeMillis() / 1000L))
