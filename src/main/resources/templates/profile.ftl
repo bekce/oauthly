@@ -100,7 +100,7 @@
                         <tr>
                             <td>${client.id}</td>
                             <td>${client.secret}</td>
-                            <form action="/client" method="post">
+                            <form action="/profile/client" method="post">
                                 <td><input type="text" name="name" class="form-control" value="${client.name}"></td>
                                 <td><input type="text" name="redirectUri" class="form-control" value="${client.redirectUri?default('')}"></td>
                                 <td><input type="hidden" value="${client.id}" name="id"/><button class="btn btn-default" type="submit">Save</button></td>
@@ -109,7 +109,7 @@
                     </#list>
                     </tbody>
                 </table>
-                <form class="form-inline" action="/client" method="post">
+                <form class="form-inline" action="/profile/client" method="post">
                     <div class="form-group">
                         <input type="text" name="name" class="form-control" placeholder="name"/>
                     </div>
