@@ -14,6 +14,7 @@ import com.sebworks.oauthly.entity.Grant;
 import com.sebworks.oauthly.entity.User;
 import com.sebworks.oauthly.repository.ClientRepository;
 import com.sebworks.oauthly.repository.UserRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -189,6 +191,7 @@ public class UserController {
         user.setId(UUID.randomUUID().toString().replace("-",""));
         user.setEmail(dto.getEmail());
         user.setUsername(dto.getUsername());
+        user.setUsernameNormalized(dto.getUsernameNormalized());
         user.encryptThenSetPassword(dto.getPassword());
         if(userRepository.count() == 0)
             user.setAdmin(true);
@@ -217,7 +220,33 @@ public class UserController {
             model.addAttribute("clients", clientRepository.findByOwnerId(user.getId()));
             model.addAttribute("discourse", discourseController.getDto());
         }
+        model.addAttribute("error", "current password is invalid");
+
         return "profile";
+    }
+
+    @PostMapping("/profile/password")
+    public ModelAndView changePassword(String oldPassword, String newPassword, String newPassword2){
+        Map<String, String> model = new HashMap<>();
+        User user = userRepository.findOne(sessionDataAccessor.access().getUserId());
+        if(!user.checkPassword(oldPassword)){
+            model.put("error", "current password is invalid");
+        }
+        else if(StringUtils.isAnyBlank(oldPassword, newPassword, newPassword2)){
+            model.put("error", "please input values");
+        }
+        else if (newPassword.length() < 4 || newPassword.length() > 32) {
+            model.put("error", "Please use between 4 and 20");
+        }
+        else if (!newPassword.equals(newPassword2)) {
+            model.put("error", "These passwords don't match");
+        }
+        else {
+            user.encryptThenSetPassword(newPassword);
+            userRepository.save(user);
+            model.put("success", "Success! You have changed your password.");
+        }
+        return new ModelAndView("redirect:/profile", model);
     }
 
     @RequestMapping(value = "/api/me", method = RequestMethod.GET)

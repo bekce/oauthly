@@ -9,6 +9,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import java.util.Locale;
+
 @Component
 public class RegistrationValidator implements Validator {
     @Autowired
@@ -24,17 +26,21 @@ public class RegistrationValidator implements Validator {
         RegistrationDto dto = (RegistrationDto) o;
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "username", "NotEmpty");
-        if (dto.getUsername().length() < 4 || dto.getUsername().length() > 20) {
+        if (dto.getUsername().length() < 3 || dto.getUsername().length() > 20) {
             errors.rejectValue("username", "Size.userForm.username");
         }
-        if (userRepository.findByUsername(dto.getUsername()) != null) {
+        // normalize username
+        dto.setUsernameNormalized(dto.getUsername().replaceAll("[-\\\\.]","_").toLowerCase(Locale.ENGLISH));
+        if (userRepository.findByUsernameNormalized(dto.getUsernameNormalized()) != null) {
             errors.rejectValue("username", "Duplicate.userForm.username");
-        }
-        if (userRepository.findByEmail(dto.getEmail()) != null) {
-            errors.rejectValue("email", "Duplicate.userForm.email");
         }
         if(!EmailValidator.getInstance().isValid(dto.getEmail())){
             errors.rejectValue("email", "Invalid.userForm.email");
+        }
+        // normalize email
+        dto.setEmail(dto.getEmail().toLowerCase(Locale.ENGLISH));
+        if (userRepository.findByEmail(dto.getEmail()) != null) {
+            errors.rejectValue("email", "Duplicate.userForm.email");
         }
 
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "password", "NotEmpty");

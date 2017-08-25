@@ -25,6 +25,42 @@
 
     <h2 class="form-heading">Welcome ${username}!</h2>
 
+    <#if success??>
+        <div class="alert alert-success" role="alert">${success}</div>
+    </#if>
+    <div class="alert alert-danger" role="alert">${error?default('')}</div>
+    <#if error??>
+    </#if>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Change Password</h3>
+        </div>
+        <div class="panel-body">
+            <form class="form-horizontal" action="/profile/password" method="post">
+                <div class="form-group">
+                    <label for="oldPassword" class="col-sm-2 control-label">Old Password</label>
+                    <div class="col-sm-10">
+                        <input type="password" name="oldPassword" class="form-control" id="oldPassword" placeholder="Old Password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword" class="col-sm-2 control-label">New Password</label>
+                    <div class="col-sm-10">
+                        <input type="password" name="newPassword" class="form-control" id="newPassword" placeholder="New Password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword2" class="col-sm-2 control-label">New Password</label>
+                    <div class="col-sm-10">
+                        <input type="password" name="newPassword2" class="form-control" id="newPassword2" placeholder="(again)">
+                    </div>
+                </div>
+                <button class="btn" type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
     <#if canCreateClients>
         <h3>Clients</h3>
         <table class="table table-striped">

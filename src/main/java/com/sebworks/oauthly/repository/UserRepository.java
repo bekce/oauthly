@@ -8,5 +8,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  */
 public interface UserRepository extends MongoRepository<User, String> {
     User findByUsername(String username);
+    User findByUsernameNormalized(String usernameLowercase);
     User findByEmail(String email);
 }
