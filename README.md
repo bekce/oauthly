@@ -37,15 +37,15 @@ First account will be given admin access
 
 ## Screenshots
 
-![login](https://i.imgur.com/DpHykoJ.png)
-![register](https://i.imgur.com/kksvw9p.png)
+![login](http://i.imgur.com/WpLsqYY.png)
+![register](http://i.imgur.com/dCoEENL.png)
+![reset-password](http://i.imgur.com/XeSO0vB.png)
+![profile](http://i.imgur.com/oRrz6Iz.png)
 ![authorize](https://i.imgur.com/5FMlHCz.png)
-![client management](https://i.imgur.com/vVXfNbL.png)
 
 ## TODO (PRs are welcome!)
 - Third Party Provider login: ability to Login with Facebook, etc, on the login page.
   This feature should ask the user's email if he/she had not authorized on that provider
-- Change password routine
 - Reset password routine via email (SMTP, Mailgun and SES)
 - Email validation routine by sending a code
 - OpenID default scopes with their meaning
@@ -76,5 +76,5 @@ your system.
 5. Done, you may test the integration. Remember that the admin account must have the same email address on both
 systems, or you'll get locked out.
 
-Important note: currently, oauthly does NOT implement email address normalization, username normalization and email
-code validation, which are essential for running in production environments. If you're interested, please submit a PR!
+Important note: currently, oauthly does NOT implement email code validation,
+which is essential for running in production environments. If you're interested, please submit a PR!
