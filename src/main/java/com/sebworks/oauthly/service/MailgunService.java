@@ -2,21 +2,20 @@ package com.sebworks.oauthly.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sebworks.oauthly.entity.User;
-import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Selim Eren Bekçe on 6.09.2017.
  */
+@Component
 public class MailgunService implements MailService {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MailgunService.class);

@@ -11,6 +11,8 @@ import com.sebworks.oauthly.common.Utils;
 import com.sebworks.oauthly.dto.RegistrationDto;
 import com.sebworks.oauthly.entity.User;
 import com.sebworks.oauthly.repository.UserRepository;
+import com.sebworks.oauthly.service.MailService;
+import com.sebworks.oauthly.service.TemplateService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,10 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private SessionDataAccessor sessionDataAccessor;
+    @Autowired
+    private TemplateService templateService;
+    @Autowired
+    private MailService mailService;
 
     /** In seconds */
     @Value("${jwt.expire.cookie}")
@@ -222,8 +228,13 @@ public class UserController {
                 model.addAttribute("error", "Given user was not found.");
                 return "reset-password";
             }
-            sendResetCode(user, prepareResetCode(user));
-            model.addAttribute("info", "Your password was just sent to your email address. Please check your inbox and click on the provided link to continue.");
+
+            String prepareResetCode = prepareResetCode(user);
+            log.info("Sending reset-password email. reset_code="+prepareResetCode);
+            String content = templateService.getResetPasswordTemplate(request, user, prepareResetCode);
+            mailService.sendEmail(user.getEmail(), "Reset your password", content);
+
+            model.addAttribute("info", "Your password reset link was just sent to your email address. Please check your inbox and click on the provided link to continue.");
             model.addAttribute("step", 2);
             return "reset-password";
         }
@@ -252,9 +263,6 @@ public class UserController {
         return "error";
     }
 
-    private void sendResetCode(User user, String resetCode){
-        System.out.println("resetCode:"+resetCode);
-    }
 
     private String prepareResetCode(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword(), user.getLastUpdateTime());

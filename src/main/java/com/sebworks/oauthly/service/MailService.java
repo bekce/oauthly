@@ -1,7 +1,5 @@
 package com.sebworks.oauthly.service;
 
-import com.sebworks.oauthly.entity.User;
-
 import java.util.concurrent.CompletableFuture;
 
 /**
