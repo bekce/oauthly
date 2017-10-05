@@ -132,7 +132,7 @@ public class OAuthController implements InitializingBean {
                 if(user == null){
                     user = userRepository.findByEmail(username);
                 }
-                if(user == null || user.checkPassword(password)){
+                if(user == null || !user.checkPassword(password)){
                     return ResponseEntity.badRequest().body(new Token("invalid login"));
                 }
                 Grant grant = grantRepository.findByClientIdAndUserId(client_id, user.getId());
