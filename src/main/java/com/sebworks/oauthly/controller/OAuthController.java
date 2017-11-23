@@ -3,20 +3,19 @@ package com.sebworks.oauthly.controller;
 import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
-import com.sebworks.oauthly.filter.ResourceServerFilter;
 import com.sebworks.oauthly.common.SessionDataAccessor;
 import com.sebworks.oauthly.common.Token;
 import com.sebworks.oauthly.common.TokenStatus;
 import com.sebworks.oauthly.entity.Client;
 import com.sebworks.oauthly.entity.Grant;
 import com.sebworks.oauthly.entity.User;
+import com.sebworks.oauthly.filter.ResourceServerFilter;
 import com.sebworks.oauthly.repository.ClientRepository;
 import com.sebworks.oauthly.repository.GrantRepository;
 import com.sebworks.oauthly.repository.UserRepository;
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -45,7 +44,7 @@ import java.util.*;
  */
 @Controller
 @RequestMapping("/oauth")
-public class OAuthController implements InitializingBean {
+public class OAuthController {
     private static final Logger log = LoggerFactory.getLogger(OAuthController.class);
 
     @Autowired
@@ -67,10 +66,6 @@ public class OAuthController implements InitializingBean {
     /** In seconds */
     @Value("${jwt.expire.authorizationCode}")
     private long expireAuthorizationCode;
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-    }
 
     /**
      * Issues new tokens.

@@ -1,15 +1,13 @@
 package com.sebworks.oauthly.controller;
 
+import com.sebworks.oauthly.common.DiscourseDto;
 import com.sebworks.oauthly.common.SessionDataAccessor;
 import com.sebworks.oauthly.entity.User;
 import com.sebworks.oauthly.repository.UserRepository;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,15 +29,6 @@ import java.util.UUID;
 @Controller
 @RequestMapping("/discourse")
 public class DiscourseController {
-
-    @Getter @Setter
-    public static class DiscourseDto {
-        @Id
-        private String id;
-        private boolean enabled;
-        private String redirectUri;
-        private String secret;
-    }
 
     @Autowired
     private MongoTemplate mongoTemplate;

@@ -1,6 +1,7 @@
 # oauthly
 
 [![Build Status](https://travis-ci.org/bekce/oauthly.svg?branch=master)](https://travis-ci.org/bekce/oauthly)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/18e70942adcf440e8c85d3e186c0e916)](https://www.codacy.com/app/seb_4/oauthly)
 
 OAuth2 Authorization and Resource Server in Java with Spring Boot
 
