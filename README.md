@@ -1,4 +1,7 @@
 # oauthly
+
+[![Build Status](https://travis-ci.org/bekce/oauthly.svg?branch=master)](https://travis-ci.org/bekce/oauthly)
+
 OAuth2 Authorization and Resource Server in Java with Spring Boot
 
 Suitable for being the Oauth2 authorization server for your software platform, with SSO support.
