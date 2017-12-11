@@ -3,9 +3,14 @@
 [![Build Status](https://travis-ci.org/bekce/oauthly.svg?branch=master)](https://travis-ci.org/bekce/oauthly)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/18e70942adcf440e8c85d3e186c0e916)](https://www.codacy.com/app/seb_4/oauthly)
 
-OAuth2 Authorization and Resource Server in Java with Spring Boot
+OAuth2 Authorization and Resource Server in Java with Play Framework
 
-Suitable for being the Oauth2 authorization server for your software platform, with SSO support.
+**Important Note** I am in the middle of converting this project from Spring Boot to Play Framework, feature by feature. 
+Therefore, some features may not be available in Play version. 
+`spring-boot` branch will point to the Spring Boot version, but I won't maintain or develop it anymore.
+The reason for this change is the superior features of Play Framework, and a little bit of curiousity on my side.
+
+Suitable for being the OAuth2 authorization server for your software platform, with SSO support.
 
 There are a lot of authorization server examples on many platforms, such as Spring Boot, Play Framework, etc,
 but none works as a full-fledged authorization server. This one does, for free. The functionality is comparable to
@@ -13,21 +18,21 @@ auth0, will be better in the future (with your PRs, of course).
 
 ## Instructions
 
-0. Have a running mongodb instance
-1. `./mvnw -Dserver.port=8080 -Djwt.secret=your-new-secret-here spring-boot:run`
-2. Go to <http://localhost:8080>, register a new account for yourself.
+0. Have a running mongodb instance and `sbt` installed.
+1. `sbt run`
+2. Go to <http://localhost:9000>, register a new account for yourself.
 First account will be given admin access
 3. Create a client, set its `name` and `redirect_uri` (required) through profile screen
 4. Set following endpoint addresses on your application:
 
-- Token endpoint: http://localhost:8080/oauth/token
-- Authorize endpoint: http://localhost:8080/oauth/authorize
-- User info endpoint: http://localhost:8080/api/me
+- Token endpoint: http://localhost:9000/oauth/token
+- Authorize endpoint: http://localhost:9000/oauth/authorize
+- User info endpoint: http://localhost:9000/api/me
 
 ## Features
 
-- Does NOT use Spring Security which means no configuration mess or cryptic class names
-- Fully supported oauth2 grant types: client credentials, authorization code, resource owner password, refresh token
+- Uses Play Framework (Java) 2.6.x 
+- Fully supported OAuth2 grant types: client credentials, authorization code, resource owner password, refresh token
 - Login, register and authorize client views with Bootstrap
 - JWT is used to issue tokens, authorization codes and cookies
 - Logged-in users are remembered with long-term safe cookies
