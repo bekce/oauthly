@@ -9,7 +9,7 @@ import java.util.List;
  * Models a grant made by user to client
  * Created by Selim Eren Bekçe on 15.08.2017.
  */
-public class AuthGrant {
+public class Grant {
     @MongoId
     private String id;
     private String userId;

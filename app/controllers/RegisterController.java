@@ -14,7 +14,6 @@ import repositories.UserRepository;
 
 import javax.inject.Inject;
 import java.util.Locale;
-import java.util.UUID;
 
 public class RegisterController extends Controller {
 
@@ -66,7 +65,7 @@ public class RegisterController extends Controller {
         }
 
         User user = new User();
-        user.setId(UUID.randomUUID().toString().replace("-",""));
+        user.setId(Utils.newId());
         user.setEmail(dto.getEmail());
         user.setUsername(dto.getUsername());
         user.setUsernameNormalized(dto.getUsernameNormalized());

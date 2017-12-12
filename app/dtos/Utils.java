@@ -1,6 +1,7 @@
 package dtos;
 
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Created by Selim Eren Bekçe on 25.08.2017.
@@ -17,5 +18,9 @@ public class Utils {
             return "These passwords don't match";
         }
         return null;
+    }
+
+    public static String newId(){
+        return UUID.randomUUID().toString().replace("-","");
     }
 }

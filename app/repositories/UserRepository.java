@@ -1,6 +1,5 @@
 package repositories;
 
-import com.mongodb.WriteResult;
 import dtos.Utils;
 import models.User;
 import org.jongo.MongoCollection;
@@ -21,16 +20,15 @@ public class UserRepository {
     }
 
     public User findById(String id) {
-        System.err.println("id:"+id);
         return collection.findOne("{_id:#}", id).as(User.class);
     }
 
     public void save(User u){
-        WriteResult result = collection.save(u);
+        collection.save(u);
     }
 
-    public User findByUsernameNormalized(String normalizedUsername) {
-        return collection.findOne("{normalizedUsername:#}",normalizedUsername).as(User.class);
+    public User findByUsernameNormalized(String usernameNormalized) {
+        return collection.findOne("{usernameNormalized:#}",usernameNormalized).as(User.class);
     }
 
     public User findByEmail(String email) {

@@ -59,6 +59,7 @@ public class LoginController extends Controller {
         Http.Cookie ltat = Http.Cookie.builder("ltat", "")
                 .withPath("/").withHttpOnly(true).withMaxAge(0).build();
         Optional<String> referer = request().header("Referer");
+        flash("info", "Logout successful");
         if(referer.isPresent()){
             return redirect(referer.get()).withCookies(ltat);
         } else {

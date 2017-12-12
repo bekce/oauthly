@@ -22,12 +22,6 @@ public class Token {
     private Long expiresIn;
     @JsonProperty("scope")
     private String scope;
-    @JsonProperty("error")
-    private String error;
-
-    public Token(String error) {
-        this.error = error;
-    }
 
     public Token(String accessToken, String refreshToken, String tokenType, long expires_in, String scope) {
         this.accessToken = accessToken;
@@ -85,14 +79,6 @@ public class Token {
         this.scope = scope;
     }
 
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -103,13 +89,12 @@ public class Token {
                 Objects.equals(tokenType, token.tokenType) &&
                 Objects.equals(createdAt, token.createdAt) &&
                 Objects.equals(expiresIn, token.expiresIn) &&
-                Objects.equals(scope, token.scope) &&
-                Objects.equals(error, token.error);
+                Objects.equals(scope, token.scope);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(accessToken, refreshToken, tokenType, createdAt, expiresIn, scope, error);
+        return Objects.hash(accessToken, refreshToken, tokenType, createdAt, expiresIn, scope);
     }
 
     @Override
@@ -121,7 +106,6 @@ public class Token {
                 ", createdAt=" + createdAt +
                 ", expiresIn=" + expiresIn +
                 ", scope='" + scope + '\'' +
-                ", error='" + error + '\'' +
                 '}';
     }
 }
