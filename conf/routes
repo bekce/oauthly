@@ -16,8 +16,11 @@ GET     /register       controllers.RegisterController.step1(next: String ?= nul
 GET     /register/2     controllers.RegisterController.step2(next: String ?= null)
 POST    /register       controllers.RegisterController.post1(next: String ?= null)
 
-GET     /profile        controllers.ProfileController.get
-POST    /client         controllers.ProfileController.addUpdateClient
+GET     /profile                controllers.ProfileController.get
+POST    /profile/password       controllers.ProfileController.changePassword
+
+GET     /client         controllers.ClientController.get
+POST    /client         controllers.ClientController.addUpdateClient
 
 GET     /logout         controllers.LoginController.logout
 

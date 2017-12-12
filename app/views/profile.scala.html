@@ -1,51 +1,60 @@
-@()(user: models.User, clients: List[models.Client])
+@()(user: models.User)
 @import helper._
 
 @main("Profile") {
-
+@if(user.isAdmin) {@adminNavigator("profile")}
 @alert(flash())
-<h2 class="form-heading">Welcome @user.getEmail!</h2>
 
-@if(user.isAdmin) {
-    @adminNavigator("profile")
-
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Client Management</h3>
-        </div>
-        <div class="panel-body">
-            <table class="table table-striped">
-                <thead><tr><td>id</td><td>secret</td><td>name</td><td>redirect_uri</td></tr></thead>
-                <tbody>
-                @for(client <- clients) {
-                    <tr>
-                        <td>@client.getId</td>
-                        <td>@client.getSecret</td>
-                        @form(action = routes.ProfileController.addUpdateClient) {
-                            @CSRF.formField
-                            <td><input type="text" name="name" class="form-control" value="@client.getName"></td>
-                            <td><input type="text" name="redirectUri" class="form-control" value="@client.getRedirectUri"></td>
-                            <td><input type="hidden" value="@client.getId" name="id"/>
-                                <button class="btn btn-default" type="submit">Save</button>
-                            </td>
-                        }
-                    </tr>
-                }
-                </tbody>
-            </table>
-            @form(action = routes.ProfileController.addUpdateClient, 'class -> "form-inline") {
-                @CSRF.formField
-                <div class="form-group">
-                    <input type="text" name="name" class="form-control" placeholder="name"/>
-                </div>
-                <div class="form-group">
-                    <input type="text" name="redirectUri" class="form-control" placeholder="redirect_uri"/>
-                </div>
-                <button class="btn btn-default" type="submit">Create new client</button>
-            }
+<div class="row">
+    <div class="col-sm-12 col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Your Information</h3>
+            </div>
+            <div class="panel-body">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Username</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">@user.getUsername</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">Email</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">@user.getEmail</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-}
+    <div class="col-sm-12 col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Change Password</h3>
+            </div>
+            <div class="panel-body">
+                @form(action = routes.ProfileController.changePassword, 'class -> "form-horizontal") {
+                    @CSRF.formField
+                    <div class="form-group">
+                        <label for="oldPassword" class="col-sm-2 control-label">Current</label>
+                        <div class="col-sm-10">
+                            <input type="password" name="oldPassword" class="form-control" id="oldPassword" placeholder="Password">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword" class="col-sm-2 control-label">New</label>
+                        <div class="col-sm-10">
+                            <input type="password" name="newPassword" class="form-control" id="newPassword" placeholder="Password">
+                        </div>
+                    </div>
+                    <button class="btn btn-default" type="submit">Submit</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
 
 <h4 class="text-center"><a href="/logout">Logout</a></h4>
 
