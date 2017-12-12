@@ -44,6 +44,10 @@ public class UserRepository {
         return user;
     }
 
+    public Iterable<User> findAll(){
+        return collection.find().as(User.class);
+    }
+
     public long count() {
         return collection.count();
     }

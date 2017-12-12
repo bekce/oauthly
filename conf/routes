@@ -22,6 +22,8 @@ POST    /profile/password       controllers.ProfileController.changePassword
 GET     /client         controllers.ClientController.get
 POST    /client         controllers.ClientController.addUpdateClient
 
+GET     /user           controllers.UserController.get
+
 GET     /logout         controllers.LoginController.logout
 
 POST    /oauth/token        controllers.OAuthController.token
