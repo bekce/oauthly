@@ -23,7 +23,7 @@ public class HomeControllerTest extends WithApplication {
     public void testIndex() {
         Http.RequestBuilder request = new Http.RequestBuilder()
                 .method(GET)
-                .uri("/");
+                .uri("/login");
 
         Result result = route(app, request);
         assertEquals(OK, result.status());
