@@ -17,6 +17,7 @@ GET     /register/2     controllers.RegisterController.step2(next: String ?= nul
 POST    /register       controllers.RegisterController.post1(next: String ?= null)
 
 GET     /profile        controllers.ProfileController.get
+POST    /client         controllers.ProfileController.addUpdateClient
 
 GET     /logout         controllers.LoginController.logout
 
