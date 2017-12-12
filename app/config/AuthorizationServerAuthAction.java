@@ -2,6 +2,7 @@ package config;
 
 import controllers.routes;
 import models.User;
+import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -9,7 +10,7 @@ import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-public class AuthorizationServerAuthAction extends play.mvc.Action.Simple {
+public class AuthorizationServerAuthAction extends play.mvc.Action<AuthorizationServerSecure> {
 
     private final JwtUtils jwtUtils;
 
@@ -25,8 +26,14 @@ public class AuthorizationServerAuthAction extends play.mvc.Action.Simple {
         if(ltat != null){
             User user = jwtUtils.validateCookie(ltat.value());
             if(user != null) {
-                ctx = ctx.withRequest(ctx.request().addAttr(AuthorizationServerSecure.USER, user));
-                valid = true;
+                if(!configuration.requireAdmin() || user.isAdmin()){
+                    ctx = ctx.withRequest(ctx.request().addAttr(AuthorizationServerSecure.USER, user));
+                    valid = true;
+                } else {
+                    return CompletableFuture.completedFuture(unauthorized(Json.newObject()
+                            .put("message", "you are not authorized for this operation")
+                    ));
+                }
             }
         }
         if(!valid) {

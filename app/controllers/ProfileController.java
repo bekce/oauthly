@@ -7,16 +7,13 @@ import models.Client;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.*;
 import repositories.ClientRepository;
 
 import javax.inject.Inject;
 import java.util.List;
 
-@AuthorizationServerSecure
 public class ProfileController extends Controller {
 
     @Inject
@@ -24,6 +21,7 @@ public class ProfileController extends Controller {
     @Inject
     private FormFactory formFactory;
 
+    @AuthorizationServerSecure
     public Result get() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         List<Client> clients = null;
@@ -33,11 +31,9 @@ public class ProfileController extends Controller {
         return ok(views.html.profile.render(user, clients));
     }
 
+    @AuthorizationServerSecure(requireAdmin = true)
     public Result addUpdateClient() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        if (!user.isAdmin()) {
-            return unauthorized(Json.newObject().put("message", "you don't have permission for this operation"));
-        }
         try {
             Form<ClientDto> form = formFactory.form(ClientDto.class).bindFromRequest();
             ClientDto dto = form.get();

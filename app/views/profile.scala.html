@@ -2,11 +2,13 @@
 @import helper._
 
 @main("Profile") {
-    @alert(flash())
-    <h2 class="form-heading">Welcome @user.getEmail!</h2>
-    <h4 class="text-center"><a href="/logout">Logout</a></h4>
+
+@alert(flash())
+<h2 class="form-heading">Welcome @user.getEmail!</h2>
 
 @if(user.isAdmin) {
+    @adminNavigator("profile")
+
     <div class="panel panel-default">
         <div class="panel-heading">
             <h3 class="panel-title">Client Management</h3>
@@ -44,5 +46,7 @@
         </div>
     </div>
 }
+
+<h4 class="text-center"><a href="/logout">Logout</a></h4>
 
 }
