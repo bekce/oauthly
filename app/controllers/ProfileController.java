@@ -36,7 +36,7 @@ public class ProfileController extends Controller {
     public Result addUpdateClient() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         if (!user.isAdmin()) {
-            return badRequest(Json.newObject().put("error", "unauthorized"));
+            return unauthorized(Json.newObject().put("message", "you don't have permission for this operation"));
         }
         try {
             Form<ClientDto> form = formFactory.form(ClientDto.class).bindFromRequest();

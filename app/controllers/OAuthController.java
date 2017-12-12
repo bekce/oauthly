@@ -64,13 +64,13 @@ public class OAuthController extends play.mvc.Controller {
         DynamicForm form = formFactory.form().bindFromRequest();
         String grant_type = form.get("grant_type");
         if(grant_type == null){
-            return badRequest(Json.newObject().put("error", "missing grant_type"));
+            return badRequest(Json.newObject().put("message", "missing grant_type"));
         }
         String client_id = form.get("client_id");
         String client_secret = form.get("client_secret");
         Client client = clientRepository.findById(client_id);
         if(client == null || !Objects.equals(client.getSecret(), client_secret)){
-            return badRequest(Json.newObject().put("error", "either client_id or client_secret is missing or invalid"));
+            return badRequest(Json.newObject().put("message", "either client_id or client_secret is missing or invalid"));
         }
         String username = form.get("username");
         String password = form.get("password");
@@ -96,21 +96,21 @@ public class OAuthController extends play.mvc.Controller {
             case "authorization_code": {
                 Grant grant = jwtUtils.validateCode(code, redirect_uri);
                 if(grant == null){
-                    return badRequest(Json.newObject().put("error", "invalid code or redirect_uri"));
+                    return badRequest(Json.newObject().put("message", "invalid code or redirect_uri"));
                 }
                 Token token = jwtUtils.prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
                 return ok(Json.toJson(token));
             }
             case "password": {
                 if(!client.isTrusted()){
-                    return badRequest(Json.newObject().put("error", "client not trusted for password type grant"));
+                    return badRequest(Json.newObject().put("message", "client not trusted for password type grant"));
                 }
                 User user = userRepository.findByUsernameNormalized(Utils.normalizeUsername(username));
                 if(user == null){
                     user = userRepository.findByEmail(username);
                 }
                 if(user == null || !user.checkPassword(password)){
-                    return badRequest(Json.newObject().put("error", "invalid username/password"));
+                    return badRequest(Json.newObject().put("message", "invalid username or password"));
                 }
                 Grant grant = grantRepository.findByClientAndUser(client_id, user.getId());
                 if(grant == null){
@@ -131,14 +131,14 @@ public class OAuthController extends play.mvc.Controller {
 
                 Tuple2<Grant, TokenStatus> tokenStatus = jwtUtils.getTokenStatus(refresh_token);
                 if (tokenStatus._2() != TokenStatus.VALID_REFRESH) {
-                    return badRequest(Json.newObject().put("error", "invalid_refresh_token"));
+                    return badRequest(Json.newObject().put("message", "invalid_refresh_token"));
                 }
                 Grant grant = tokenStatus._1();
                 Token token = jwtUtils.prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());
                 return ok(Json.toJson(token));
             }
             default:
-                return badRequest(Json.newObject().put("error", "unsupported_grant_type"));
+                return badRequest(Json.newObject().put("message", "unsupported_grant_type"));
         }
     }
 
@@ -147,13 +147,13 @@ public class OAuthController extends play.mvc.Controller {
 
         Client client = clientRepository.findById(client_id);
         if(client == null){
-            return badRequest(Json.newObject().put("error", "invalid client_id"));
+            return badRequest(Json.newObject().put("message", "invalid client_id"));
         }
         if(!redirect_uri.startsWith(client.getRedirectUri())){
-            return badRequest(Json.newObject().put("error", "invalid redirect_uri"));
+            return badRequest(Json.newObject().put("message", "invalid redirect_uri"));
         }
         if(!"code".equals(response_type)){
-            return badRequest(Json.newObject().put("error", "invalid response_type"));
+            return badRequest(Json.newObject().put("message", "invalid response_type"));
         }
 
         User user = request().attrs().get(AuthorizationServerSecure.USER);
@@ -188,13 +188,13 @@ public class OAuthController extends play.mvc.Controller {
 
         Client client = clientRepository.findById(client_id);
         if(client == null){
-            return badRequest(Json.newObject().put("error", "invalid client_id"));
+            return badRequest(Json.newObject().put("message", "invalid client_id"));
         }
         if(!redirect_uri.startsWith(client.getRedirectUri())){
-            return badRequest(Json.newObject().put("error", "invalid redirect_uri"));
+            return badRequest(Json.newObject().put("message", "invalid redirect_uri"));
         }
         if(!"code".equals(response_type)){
-            return badRequest(Json.newObject().put("error", "invalid response_type"));
+            return badRequest(Json.newObject().put("message", "invalid response_type"));
         }
 
         User user = request().attrs().get(AuthorizationServerSecure.USER);

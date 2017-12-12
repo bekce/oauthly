@@ -20,19 +20,12 @@ public class AuthorizationServerAuthAction extends play.mvc.Action.Simple {
 
     @Override
     public CompletionStage<Result> call(Http.Context ctx) {
-//        HandlerDef handler = requestHeader.attrs().get(Router.Attrs.HANDLER_DEF);
-//        List<String> modifiers = handler.getModifiers();
-//        if(modifiers.contains("authorization")){
-//        }
         Http.Cookie ltat = ctx.request().cookie("ltat");
         boolean valid = false;
         if(ltat != null){
             User user = jwtUtils.validateCookie(ltat.value());
             if(user != null) {
-                // uses request attr
                 ctx = ctx.withRequest(ctx.request().addAttr(AuthorizationServerSecure.USER, user));
-                // uses ctx args
-//                ctx.args.put("user", user);
                 valid = true;
             }
         }

@@ -22,5 +22,5 @@ POST    /client         controllers.ProfileController.addUpdateClient
 GET     /logout         controllers.LoginController.logout
 
 POST    /oauth/token        controllers.OAuthController.token
-GET     /oauth/authorize    controllers.OAuthController.authorize(client_id: String, response_type: String, redirect_uri: String, scope: String ?= null, state: String ?= null)
-POST    /oauth/authorize    controllers.OAuthController.authorizeDo(client_id: String, response_type: String, redirect_uri: String, scope: String ?= null, state: String ?= null)
+GET     /oauth/authorize    controllers.OAuthController.authorize(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "read", state: String ?= null)
+POST    /oauth/authorize    controllers.OAuthController.authorizeDo(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "read", state: String ?= null)
