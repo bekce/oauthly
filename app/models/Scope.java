@@ -1,15 +1,13 @@
 package models;
 
-//import org.mongodb.morphia.annotations.Entity;
-//import org.mongodb.morphia.annotations.Id;
+import org.jongo.marshall.jackson.oid.MongoId;
 
 /**
  * Scope record for clients
  * Created by Selim Eren Bekçe on 15.08.2017.
  */
-//@Entity
 public class Scope {
-//    @Id
+    @MongoId
     private String id;
     /**
      * belonging client

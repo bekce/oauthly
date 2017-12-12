@@ -2,7 +2,6 @@ package controllers;
 
 import config.AuthorizationServerSecure;
 import config.JwtUtils;
-import config.LoggingFilter;
 import dtos.LoginDto;
 import models.User;
 import play.data.Form;
@@ -26,19 +25,14 @@ public class LoginController extends Controller {
     }
 
     public Result get(String next) {
-//        Object key = request().attrs().get(LoggingFilter.KEY);
-//        System.out.println(key);
-//        User user = userRepository.findById(session("user"));
         Optional<User> user = request().attrs().getOptional(AuthorizationServerSecure.USER);
         if(user.isPresent()){ // already authenticated
             if(next != null && next.matches("^/.*$"))
                 return redirect(next);
             else
                 return redirect(routes.ProfileController.get());
-//            flash("info", "Authenticated user id: "+user.getId());
-//            ok(views.html.login.render(flash()));
         }
-        return ok(views.html.login.render(next, flash()));
+        return ok(views.html.login.render(next));
     }
 
     public Result post(String next) {
@@ -56,7 +50,6 @@ public class LoginController extends Controller {
             else
                 return redirect(routes.ProfileController.get()).withCookies(ltat);
         } else {
-//            flash("info", info);
             flash("error", "Invalid login");
             return redirect(routes.LoginController.get(next));
         }

@@ -16,7 +16,6 @@ public class HomeController extends Controller {
      */
     public Result index() {
         return redirect(routes.ProfileController.get());
-//        return ok(views.html.index.render());
     }
 
 }

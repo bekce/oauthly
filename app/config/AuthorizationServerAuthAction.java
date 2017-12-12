@@ -2,7 +2,6 @@ package config;
 
 import controllers.routes;
 import models.User;
-import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
 

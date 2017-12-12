@@ -1,17 +1,14 @@
 package models;
 
 import dtos.Token;
-//import org.mongodb.morphia.annotations.Entity;
-//import org.mongodb.morphia.annotations.Id;
-//import org.mongodb.morphia.annotations.Indexed;
+import org.jongo.marshall.jackson.oid.MongoId;
 
 /**
  * Models a third party token, such as from facebook
  * Created by Selim Eren Bekçe on 15.08.2017.
  */
-//@Entity
 public class ThirdPartyConnection {
-//    @Id
+    @MongoId
     private String id;
     /**
      * belonging user

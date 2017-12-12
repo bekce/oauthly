@@ -1,7 +1,6 @@
 package repositories;
 
-//import static config.MongoConfig.datastore;
-
+import com.mongodb.WriteResult;
 import dtos.Utils;
 import models.User;
 import org.jongo.MongoCollection;
@@ -24,22 +23,18 @@ public class UserRepository {
     public User findById(String id) {
         System.err.println("id:"+id);
         return collection.findOne("{_id:#}", id).as(User.class);
-//        return datastore().createQuery(User.class).field("id").equal(id).get();
     }
 
     public void save(User u){
-        collection.save(u);
-//        datastore().save(u);
+        WriteResult result = collection.save(u);
     }
 
     public User findByUsernameNormalized(String normalizedUsername) {
         return collection.findOne("{normalizedUsername:#}",normalizedUsername).as(User.class);
-//        return datastore().createQuery(User.class).field("normalizedUsername").equal(normalizedUsername).get();
     }
 
     public User findByEmail(String email) {
         return collection.findOne("{email:#}",email).as(User.class);
-//        return datastore().createQuery(User.class).field("email").equal(email).get();
     }
 
     public User findByUsernameOrEmail(String login) {
@@ -51,4 +46,7 @@ public class UserRepository {
         return user;
     }
 
+    public long count() {
+        return collection.count();
+    }
 }

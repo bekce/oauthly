@@ -1,20 +1,14 @@
 package models;
 
 import org.jongo.marshall.jackson.oid.MongoId;
-import org.jongo.marshall.jackson.oid.MongoObjectId;
 import org.mindrot.jbcrypt.BCrypt;
-//import org.mongodb.morphia.annotations.Entity;
-//import org.mongodb.morphia.annotations.Id;
-//import org.mongodb.morphia.annotations.Indexed;
 
 /**
  * Models a user, more specifically a 'resource owner'
  * Created by Selim Eren Bekçe on 15.08.2017.
  */
-//@Entity
 public class User {
     @MongoId
-    @MongoObjectId
     private String id;
 //    @Indexed
     private String username;

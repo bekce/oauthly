@@ -1,13 +1,9 @@
-@(next: String)(implicit flash: play.mvc.Http.Flash)
+@(next: String)()
 @import helper._
 
 @main("Login") {
     @form(action = routes.LoginController.post(next), 'class -> "form-signin") {
-        @alert(flash)
-        @* @if(alert.success) {<div class="alert alert-success" role="alert">@alert.success</div>}
-        @if(alert.info) {<div class="alert alert-info" role="alert">@alert.info</div>}
-        @if(alert.warning) {<div class="alert alert-warning" role="alert">@alert.warning</div>}
-        @if(alert.error) {<div class="alert alert-danger" role="alert">@alert.error</div>}*@
+        @alert(flash())
         @CSRF.formField
         <h2 class="form-heading">Please Log In</h2>
         <div class="form-group">
@@ -17,7 +13,7 @@
             <input name="password" type="password" class="form-control" placeholder="Password"/>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
-        <h4 class="text-center"><a href="/register">Register new account</a></h4>
+        <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">Register new account</a></h4>
         <h4 class="text-center"><a href="/reset-password">Reset password</a></h4>
     }
 

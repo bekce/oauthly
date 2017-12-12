@@ -12,8 +12,9 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /login          controllers.LoginController.get(next: String ?= null)
 POST    /login          controllers.LoginController.post(next: String ?= null)
 
-GET     /register       controllers.RegisterController.get
-POST    /register       controllers.RegisterController.post1()
+GET     /register       controllers.RegisterController.step1(next: String ?= null)
+GET     /register/2     controllers.RegisterController.step2(next: String ?= null)
+POST    /register       controllers.RegisterController.post1(next: String ?= null)
 
 GET     /profile        controllers.ProfileController.get
 

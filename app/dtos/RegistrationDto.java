@@ -1,20 +1,28 @@
 package dtos;
 
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * Created by Selim Eren Bekçe on 16.08.2017.
  */
-public class RegistrationDto {
-    @Size(min=3, max=20)
-    @Pattern(regexp = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores")
+public class RegistrationDto implements Constraints.Validatable<List<ValidationError>> {
+    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores")
+    @Constraints.MaxLength(20)
+    @Constraints.MinLength(3)
     private String username;
     private String usernameNormalized;
+    @Constraints.Required
+    @Constraints.Email
     private String email;
+    @Constraints.MaxLength(24)
+    @Constraints.MinLength(4)
+    @Constraints.Required
     private String password;
-    private String passwordConfirm;
 
     public String getUsername() {
         return username;
@@ -48,14 +56,6 @@ public class RegistrationDto {
         this.password = password;
     }
 
-    public String getPasswordConfirm() {
-        return passwordConfirm;
-    }
-
-    public void setPasswordConfirm(String passwordConfirm) {
-        this.passwordConfirm = passwordConfirm;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -64,13 +64,12 @@ public class RegistrationDto {
         return Objects.equals(username, that.username) &&
                 Objects.equals(usernameNormalized, that.usernameNormalized) &&
                 Objects.equals(email, that.email) &&
-                Objects.equals(password, that.password) &&
-                Objects.equals(passwordConfirm, that.passwordConfirm);
+                Objects.equals(password, that.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, usernameNormalized, email, password, passwordConfirm);
+        return Objects.hash(username, usernameNormalized, email, password);
     }
 
     @Override
@@ -80,7 +79,11 @@ public class RegistrationDto {
                 ", usernameNormalized='" + usernameNormalized + '\'' +
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
-                ", passwordConfirm='" + passwordConfirm + '\'' +
                 '}';
+    }
+
+    @Override
+    public List<ValidationError> validate() {
+        return new ArrayList<>();
     }
 }

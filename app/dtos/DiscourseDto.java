@@ -1,9 +1,6 @@
 package dtos;
 
-//import org.mongodb.morphia.annotations.Id;
-
 public class DiscourseDto {
-//    @Id
     private String id;
     private boolean enabled;
     private String redirectUri;
