@@ -5,18 +5,22 @@ import config.JwtUtils;
 import dtos.Token;
 import dtos.TokenStatus;
 import dtos.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import models.Client;
+import models.Grant;
+import models.User;
 import play.data.DynamicForm;
 import play.data.FormFactory;
 import play.libs.Json;
 import play.mvc.Result;
-import repositories.*;
-import models.*;
+import repositories.ClientRepository;
+import repositories.GrantRepository;
+import repositories.UserRepository;
 import scala.Tuple2;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * <p>This controller implements oauth2 authorization server semantics with password grant type.<br>
@@ -29,8 +33,6 @@ import java.util.*;
  * Created by Selim Eren Bekçe on 2016-08-25.
  */
 public class OAuthController extends play.mvc.Controller {
-    private static final Logger log = LoggerFactory.getLogger(OAuthController.class);
-
     private final FormFactory formFactory;
     private final JwtUtils jwtUtils;
     private final ClientRepository clientRepository;

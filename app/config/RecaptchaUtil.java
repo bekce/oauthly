@@ -3,12 +3,10 @@ package config;
 import com.typesafe.config.Config;
 import play.Logger;
 import play.libs.ws.WSClient;
-import play.libs.ws.WSResponse;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.concurrent.CompletionStage;
-import java.util.function.BiConsumer;
 
 @Singleton
 public class RecaptchaUtil {

@@ -25,7 +25,6 @@ public class MailgunService implements MailService {
     private final String mailgunKey;
     private final String mailgunFrom;
     private final String mailgunDomain;
-    private final String brandName;
     private final WSClient ws;
 
     @Inject
@@ -33,7 +32,6 @@ public class MailgunService implements MailService {
         this.mailgunKey = config.getString("mail.mailgun.key");
         this.mailgunFrom = config.getString("mail.mailgun.from");
         this.mailgunDomain = config.getString("mail.mailgun.domain");
-        this.brandName = config.getString("brand.name");
         this.ws = ws;
     }
 

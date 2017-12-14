@@ -17,6 +17,17 @@ import javax.inject.Inject;
 
 public class ResetPasswordController extends Controller {
 
+    @Inject
+    private JwtUtils jwtUtils;
+    @Inject
+    private FormFactory formFactory;
+    @Inject
+    private UserRepository userRepository;
+    @Inject //TODO change this to use generic MailService
+    private MailgunService mailService;
+    @Inject
+    private Config config;
+
     public static class Step1Dto {
         @Constraints.Required
         public String login;
@@ -28,17 +39,6 @@ public class ResetPasswordController extends Controller {
         @Constraints.MinLength(4)
         public String password;
     }
-
-    @Inject
-    private JwtUtils jwtUtils;
-    @Inject
-    private FormFactory formFactory;
-    @Inject
-    private UserRepository userRepository;
-    @Inject //TODO change this to use generic MailService
-    private MailgunService mailService;
-    @Inject
-    private Config config;
 
     public Result step1(String next){
         return ok(views.html.resetPassword1.render(next, formFactory.form(Step1Dto.class)));
