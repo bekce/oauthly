@@ -16,6 +16,11 @@ GET     /register       controllers.RegisterController.step1(next: String ?= nul
 GET     /register/2     controllers.RegisterController.step2(next: String ?= null)
 POST    /register       controllers.RegisterController.post1(next: String ?= null)
 
+GET     /reset-password     controllers.ResetPasswordController.step1(next: String ?= null)
+POST    /reset-password     controllers.ResetPasswordController.step2(next: String ?= null)
+GET     /reset-password/c   controllers.ResetPasswordController.step3(code: String, next: String ?= null)
+POST    /reset-password/c   controllers.ResetPasswordController.step4(code: String, next: String ?= null)
+
 GET     /profile                controllers.ProfileController.get
 POST    /profile/password       controllers.ProfileController.changePassword
 

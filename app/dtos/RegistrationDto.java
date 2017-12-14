@@ -19,7 +19,7 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     @Constraints.Required
     @Constraints.Email
     private String email;
-    @Constraints.MaxLength(24)
+    @Constraints.MaxLength(32)
     @Constraints.MinLength(4)
     @Constraints.Required
     private String password;

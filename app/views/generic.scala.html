@@ -1,0 +1,7 @@
+@(title:String, message:String)
+@import helper._
+
+@main(title) {
+@alert(flash())
+<div class="well well-lg">@message</div>
+}

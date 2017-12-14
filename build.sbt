@@ -6,6 +6,7 @@ version := "1.0-SNAPSHOT"
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
 resolvers += Resolver.mavenLocal
+resolvers += Resolver.jcenterRepo
 
 scalaVersion := "2.12.2"
 
@@ -25,7 +26,8 @@ libraryDependencies ++= Seq(
   "org.mindrot"%"jbcrypt"%"0.4",
 //  "commons-validator"%"commons-validator"%"1.4.1",
   "com.auth0"%"java-jwt"%"2.2.0",
-  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3"
+  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
+//  "com.palominolabs.http"%"url-builder"%"1.1.1"
 )
 
 // "org.mongodb.morphia" % "morphia" % "1.3.2",

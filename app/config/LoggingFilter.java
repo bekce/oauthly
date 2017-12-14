@@ -26,8 +26,8 @@ public class LoggingFilter extends Filter {
             long endTime = System.currentTimeMillis();
             long requestTime = endTime - startTime;
 
-            Logger.info("{} {} took {}ms and returned {}",
-                requestHeader.method(), requestHeader.uri(), requestTime, result.status());
+            Logger.info("{} {} took {}ms and returned {} (host:{}, uri:{})",
+                requestHeader.method(), requestHeader.uri(), requestTime, result.status(), requestHeader.uri(), requestHeader.host());
 
             return result.withHeader("Request-Time", "" + requestTime);
         });
