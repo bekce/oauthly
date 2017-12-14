@@ -1,0 +1,29 @@
+@(form: play.data.Form[dtos.RegistrationDto], next: String)()
+
+@main("Register") {
+    @helper.form(action = routes.RegisterController.post1(next), 'class -> "form-signin") {
+        @if(form.hasGlobalErrors) {
+            <p class="error">
+                @for(error <- form.globalErrors) {<p>@error.format(messages())</p>}
+            </p>
+        }
+        @alert(flash())
+        @helper.CSRF.formField
+        <h2 class="form-heading">Register</h2>
+        <div class="form-group">
+            <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
+            @for(error <- form("email").errors) {<p>@error.format(messages())</p>}
+        </div>
+        <div class="form-group">
+            <input name="username" type="text" class="form-control" placeholder="Username"/>
+            @for(error <- form("username").errors) {<p>@error.format(messages())</p>}
+        </div>
+        <div class="form-group">
+            <input name="password" type="password" class="form-control" placeholder="Pick a password"/>
+            @for(error <- form("password").errors) {<p>@error.format(messages())</p>}
+        </div>
+        <div class="g-recaptcha" data-sitekey="6LfpYy0UAAAAALI0zTdsq9AzUE1Mi2KeCy-bpoEx"></div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Continue</button>
+        <h4 class="text-center"><a href="@routes.LoginController.get(next)">Back to login</a></h4>
+    }
+}

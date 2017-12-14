@@ -1,0 +1,20 @@
+@(next: String)()
+@import helper._
+
+@main("Login") {
+    @form(action = routes.LoginController.post(next), 'class -> "form-signin") {
+        @alert(flash())
+        @CSRF.formField
+        <h2 class="form-heading">Please Log In</h2>
+        <div class="form-group">
+            <input name="username" type="text" class="form-control" placeholder="Username or Email" autofocus/>
+        </div>
+        <div class="form-group">
+            <input name="password" type="password" class="form-control" placeholder="Password"/>
+        </div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
+        <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">Register new account</a></h4>
+        <h4 class="text-center"><a href="@routes.ResetPasswordController.step1(next)">Reset password</a></h4>
+    }
+
+}

@@ -1,6 +1,8 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
 .DS_Store
+.g8/
+logs/
 
 ### STS ###
 .classpath
@@ -22,5 +24,3 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
-
-src/main/resources/application-my.properties

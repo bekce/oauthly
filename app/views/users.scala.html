@@ -1,0 +1,31 @@
+@()(users: List[models.User])
+@import helper._
+
+@main("User Management") {
+@adminNavigator("users")
+@alert(flash())
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">User Management</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-striped">
+            <thead><tr><td>id</td><td>username</td><td>email</td><td>creation_time</td></tr></thead>
+            <tbody>
+            @for(user <- users) {
+            <tr>
+                <td>@user.getId</td>
+                <td>@user.getUsername</td>
+                <td>@user.getEmail</td>
+                <td>@user.getCreationTime</td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<h4 class="text-center"><a href="/logout">Logout</a></h4>
+
+}
