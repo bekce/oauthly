@@ -23,6 +23,9 @@ public class Token {
     @JsonProperty("scope")
     private String scope;
 
+    public Token() {
+    }
+
     public Token(String accessToken, String refreshToken, String tokenType, long expires_in, String scope) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;

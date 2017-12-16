@@ -5,7 +5,7 @@
     <h2 class="text-center">Authorize @app_name</h2>
     <h4 class="text-center">@app_name would like to know your name and e-mail address. Your password will not be shared.</h4>
 
-    @form(action = routes.OAuthController.authorizeDo(client_id, response_type, redirect_uri, scope, state), 'class -> "form-signin") {
+    @form(action = routes.OAuthAuthorizationServerController.authorizeDo(client_id, response_type, redirect_uri, scope, state), 'class -> "form-signin") {
         @alert(flash())
         @CSRF.formField
         <button class="btn btn-lg btn-primary btn-block" type="submit">Grant Access</button>
