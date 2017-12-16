@@ -32,7 +32,7 @@ import java.util.Objects;
  *
  * Created by Selim Eren Bekçe on 2016-08-25.
  */
-public class OAuthController extends play.mvc.Controller {
+public class OAuthAuthorizationServerController extends play.mvc.Controller {
     private final FormFactory formFactory;
     private final JwtUtils jwtUtils;
     private final ClientRepository clientRepository;
@@ -40,7 +40,7 @@ public class OAuthController extends play.mvc.Controller {
     private final GrantRepository grantRepository;
 
     @Inject
-    public OAuthController(FormFactory formFactory, JwtUtils jwtUtils, ClientRepository clientRepository, UserRepository userRepository, GrantRepository grantRepository) {
+    public OAuthAuthorizationServerController(FormFactory formFactory, JwtUtils jwtUtils, ClientRepository clientRepository, UserRepository userRepository, GrantRepository grantRepository) {
         this.formFactory = formFactory;
         this.jwtUtils = jwtUtils;
         this.clientRepository = clientRepository;
