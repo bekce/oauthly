@@ -10,6 +10,15 @@ public class MeDto {
     private String name;
     private String email;
 
+    public MeDto() {
+    }
+
+    public MeDto(String id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+
     public String getId() {
         return id;
     }

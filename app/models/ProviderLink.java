@@ -4,27 +4,28 @@ import dtos.Token;
 import org.jongo.marshall.jackson.oid.MongoId;
 
 /**
- * Models a third party token, such as from facebook
+ * Models an authorization from an oauth provider (facebook, twitter, etc)
+ * to one of oauthly users.
  * Created by Selim Eren Bekçe on 15.08.2017.
  */
-public class ThirdPartyConnection {
+public class ProviderLink {
     @MongoId
     private String id;
     /**
-     * belonging user
+     * belonging user, could be null while setting up
      */
 //    @Indexed
     private String userId;
     /**
      * e.g. 'facebook' or 'twitter'
      */
-    private String party;
+    private String providerKey;
     /**
      * last retrieved token
      */
     private Token token;
     /**
-     * User id on the remote party (e.g. user id on facebook)
+     * External user id (e.g. on facebook)
      */
 //    @Indexed
     private String remoteUserId;
@@ -45,12 +46,12 @@ public class ThirdPartyConnection {
         this.userId = userId;
     }
 
-    public String getParty() {
-        return party;
+    public String getProviderKey() {
+        return providerKey;
     }
 
-    public void setParty(String party) {
-        this.party = party;
+    public void setProviderKey(String providerKey) {
+        this.providerKey = providerKey;
     }
 
     public Token getToken() {

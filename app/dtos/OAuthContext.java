@@ -58,33 +58,7 @@ public class OAuthContext {
 //		return ws.url(provider.getTokenUrl())
 //				.setContentType("application/x-www-form-urlencoded")
 //				.post(String.format("client_id=%s&client_secret=%s&grant_type=authorization_code&code=%s&redirect_uri=%s", provider.getClientId(), provider.getClientSecret(), code, redirectUri))
-		try {
-//			String url = provider.getTokenUrl() + String.format("?client_id=%s&client_secret=%s&code=%s&redirect_uri=%s", provider.getClientId(), provider.getClientSecret(), URLEncoder.encode(code, "utf-8"), URLEncoder.encode(redirectUri, "utf-8"));
-//			System.out.println("URL="+url);
-			return ws.url(provider.getTokenUrl())
-					.addQueryParameter("client_id", provider.getClientId())
-					.addQueryParameter("client_secret", provider.getClientSecret())
-					.addQueryParameter("code", code)
-					.addQueryParameter("redirect_uri", redirectUri)
-					.addQueryParameter("grant_type", "authorization_code")
-					.get()
-                    .handleAsync((res, e) -> {
-                        if(e != null) {
-                            play.Logger.error("retrieveToken: exception", e);
-                            throw new CompletionException(e);
-                        } else if(res.getStatus() != 200) {
-                            String message = String.format("retrieveToken: status=%s, body=%s", res.getStatus(), res.getBody());
-                            play.Logger.error(message);
-                            throw new CompletionException(new IllegalStateException(message));
-                        }
-                        Token token = Json.fromJson(res.asJson(), Token.class);
-                        token.setCreatedAt(System.currentTimeMillis());
-                        this.token = token;
-                        return token;
-                    });
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		return provider.getTokenRetriever().apply(this);
 	}
 
 	public Token getToken() {
@@ -125,6 +99,14 @@ public class OAuthContext {
 
 	public void setState(String state) {
 		this.state = state;
+	}
+
+	public OAuthProvider getProvider() {
+		return provider;
+	}
+
+	public WSClient getWs() {
+		return ws;
 	}
 
 	@Override

@@ -41,7 +41,6 @@ public class LoginController extends Controller {
         System.out.println(info);
         User user = userRepository.findByUsernameOrEmail(loginForm.get().getUsername());
         if(user != null && user.checkPassword(loginForm.get().getPassword())){
-            System.err.println("login success");
             String cookieValue = jwtUtils.prepareCookie(user);
             Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();
             flash("info", "Login successful");
