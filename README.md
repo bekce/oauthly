@@ -3,14 +3,9 @@
 [![Build Status](https://travis-ci.org/bekce/oauthly.svg?branch=master)](https://travis-ci.org/bekce/oauthly)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/18e70942adcf440e8c85d3e186c0e916)](https://www.codacy.com/app/seb_4/oauthly)
 
-OAuth2 Authorization and Resource Server in Java with Play Framework
+OAuth2 Authorization and Resource Server in Java with Play Framework. Suitable for being the OAuth2 authorization server for your software platform, with SSO support.
 
-**Important Note** I am in the middle of converting this project from Spring Boot to Play Framework, feature by feature. 
-Therefore, some features may not be available in Play version. 
-`spring-boot` branch will point to the Spring Boot version, but I won't maintain or develop it anymore.
-The reason for this change is the superior features of Play Framework, and a little bit of curiousity on my side.
-
-Suitable for being the OAuth2 authorization server for your software platform, with SSO support.
+**Important Note** This project was started as a Spring Boot project (on branch `spring-boot`) then I have recently fully converted it to Play Framework. The reason for this change is the superior features of Play Framework, and a little bit of curiousity on my side.
 
 There are a lot of authorization server examples on many platforms, such as Spring Boot, Play Framework, etc,
 but none works as a full-fledged authorization server. This one does, for free. The functionality is comparable to
@@ -33,15 +28,18 @@ First account will be given admin access
 
 - Uses Play Framework (Java) 2.6.x 
 - Fully supported OAuth2 grant types: client credentials, authorization code, resource owner password, refresh token
-- Login, register and authorize client views with Bootstrap
-- JWT is used to issue tokens, authorization codes and cookies
+- Login, register, profile, user management, client management and authorize client views with Bootstrap
+- Supports logging in with social providers and advanced account linking features
+- Utilizes JWT for tokens, authorization codes and cookies
+- Completely stateless server side logic
 - Logged-in users are remembered with long-term safe cookies
 - Multiple client id and secret pairs are supported, managed by a view
-- Customizable expiry times for generated tokens (see `application.properties` file)
-- Implements reCAPTCHA on register page
+- Customizable expiry times for generated tokens (see `application.conf` file)
+- Google reCAPTCHA support on endpoints (with `@RecaptchaSecured` annotation)
 - OAuth2 scopes support
 - MongoDB backend
-- Uses bcrypt for user passwords, freemarker for templating
+- Mailgun API integration for sending emails
+- Uses bcrypt for user passwords, [twirl](https://playframework.com/documentation/2.6.x/JavaTemplates) for templating
 - [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045) support
 
 ## Screenshots
@@ -53,21 +51,18 @@ First account will be given admin access
 ![authorize](https://i.imgur.com/5FMlHCz.png)
 
 ## TODO (PRs are welcome!)
-- Third Party Provider login: ability to Login with Facebook, etc, on the login page.
-  This feature should ask the user's email if he/she had not authorized on that provider
-- Reset password routine via email (SMTP, Mailgun and SES)
-- Email validation routine by sending a code
+- Change email function
 - OpenID default scopes with their meaning
-- User management view
+- Enable/disable user account function on user management view
 - Enable reCAPTCHA on login page after X number of failed requests
 - Access logging
-- Security checkup to see whether it has any vulnerabilities or not
+- Security checkup
 - Possible production example with let's encrypt certificates, docker container and nginx
 - Customized error pages
 - Scope CRUD screen
 
 ## Discourse SSO Instructions
-Oauthly fully supports [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045)
+OAuthly fully supports [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045)
 integration. In this configuration, the single source of users becomes oauthly. When Login button is clicked on Discourse,
 user is redirected to oauthly login page. If the user has already authenticated with oauthly with a long term token,
 he/she immediately gets redirected back to discourse with user information. Follow the instructions below to configure
