@@ -1,7 +1,20 @@
-@(form: play.data.Form[dtos.RegistrationDto], next: String)()
+@(state: Int, providerKey: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String)()
 
 @main("Register") {
-    @helper.form(action = routes.RegisterController.post1(next), 'class -> "form-signin") {
+    @*@if(state == 1){*@
+        @*<div class="form-signin">*@
+            @*<h2 class="form-heading">Register with Provider</h2>*@
+            @*It is easier to register with a social provider*@
+            @*<a class="btn btn-block btn-social btn-facebook" href="@routes.OAuthClientController.authorize("facebook", next)">*@
+                @*<span class="fa fa-facebook"></span> Continue with Facebook*@
+            @*</a>*@
+            @*<a class="btn btn-block btn-social btn-twitter" href="@routes.OAuthClientController.authorize("twitter", next)">*@
+                @*<span class="fa fa-twitter"></span> Continue with Twitter*@
+            @*</a>*@
+        @*</div>*@
+        @*<hr>*@
+    @*}*@
+    @helper.form(action = routes.RegisterController.post1(next, link), 'class -> "form-signin") {
         @if(form.hasGlobalErrors) {
             <p class="error">
                 @for(error <- form.globalErrors) {<p>@error.format(messages())</p>}
@@ -9,20 +22,45 @@
         }
         @alert(flash())
         @helper.CSRF.formField
-        <h2 class="form-heading">Register</h2>
-        <div class="form-group">
-            <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
-            @for(error <- form("email").errors) {<p>@error.format(messages())</p>}
-        </div>
-        <div class="form-group">
-            <input name="username" type="text" class="form-control" placeholder="Username"/>
-            @for(error <- form("username").errors) {<p>@error.format(messages())</p>}
-        </div>
-        <div class="form-group">
-            <input name="password" type="password" class="form-control" placeholder="Pick a password"/>
-            @for(error <- form("password").errors) {<p>@error.format(messages())</p>}
-        </div>
-        <div class="g-recaptcha" data-sitekey="6LfpYy0UAAAAALI0zTdsq9AzUE1Mi2KeCy-bpoEx"></div>
+        @if(state == 1){
+            <h2 class="form-heading">Register with email</h2>
+            <div class="form-group">
+                <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
+                @for(error <- form("email").errors) {<p>@error.format(messages())</p>}
+            </div>
+            <div class="form-group">
+                <input name="username" type="text" class="form-control" placeholder="Username"/>
+                @for(error <- form("username").errors) {<p>@error.format(messages())</p>}
+            </div>
+            <div class="form-group">
+                <input name="password" type="password" class="form-control" placeholder="Pick a password"/>
+                @for(error <- form("password").errors) {<p>@error.format(messages())</p>}
+            </div>
+            <div class="g-recaptcha" data-sitekey="6LfpYy0UAAAAALI0zTdsq9AzUE1Mi2KeCy-bpoEx"></div>
+        }
+        @if(state == 2){
+            <h2 class="form-heading">Complete Registration</h2>
+            You have successfully connected with your @providerKey account. Please enter an email address to complete your registration with us, the address will be used for communicating with you. We will also need to validate your e-mail address with a confirmation link.
+            <div class="form-group">
+                <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
+                @for(error <- form("email").errors) {<p>@error.format(messages())</p>}
+            </div>
+            <div class="form-group">
+                <input name="username" type="text" class="form-control" placeholder="Username"/>
+                @for(error <- form("username").errors) {<p>@error.format(messages())</p>}
+            </div>
+        }
+        @if(state == 3){
+            <h2 class="form-heading">Complete Registration</h2>
+            You have successfully linked your @providerKey account with us, please pick a username to complete the registration.
+            <div class="form-group">
+                <p class="form-control-static">@email</p>
+            </div>
+            <div class="form-group">
+                <input name="username" type="text" class="form-control" placeholder="Username"/>
+                @for(error <- form("username").errors) {<p>@error.format(messages())</p>}
+            </div>
+        }
         <button class="btn btn-lg btn-primary btn-block" type="submit">Continue</button>
         <h4 class="text-center"><a href="@routes.LoginController.get(next)">Back to login</a></h4>
     }

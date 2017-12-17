@@ -37,7 +37,9 @@ public class User {
     }
 
     public boolean checkPassword(String password_plaintext){
-        if(null == this.password || !this.password.startsWith("$2a$"))
+        if(this.password == null)
+            return false;
+        if(!this.password.startsWith("$2a$"))
             throw new IllegalArgumentException("Invalid hash provided for comparison");
         return BCrypt.checkpw(password_plaintext, password);
     }

@@ -96,7 +96,7 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
                 return ok(Json.toJson(token));
             }
             case "authorization_code": {
-                Grant grant = jwtUtils.validateCode(code, redirect_uri);
+                Grant grant = jwtUtils.validateAuthorizationCode(code, redirect_uri);
                 if(grant == null){
                     return badRequest(Json.newObject().put("message", "invalid code or redirect_uri"));
                 }
@@ -173,7 +173,7 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
                 }
             }
             if(scopeOK){
-                String code = jwtUtils.prepareCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri);
+                String code = jwtUtils.prepareAuthorizationCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri);
                 String uri = String.format("%s?code=%s", redirect_uri, code);
                 if(state != null){
                     uri += "&state="+state;
@@ -214,7 +214,7 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
         }
         grantRepository.save(grant);
 
-        String code = jwtUtils.prepareCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri);
+        String code = jwtUtils.prepareAuthorizationCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri);
         String uri = String.format("%s?code=%s", redirect_uri, code);
         if(state != null){
             uri += "&state="+state;

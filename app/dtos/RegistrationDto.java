@@ -10,18 +10,20 @@ import java.util.Objects;
 /**
  * Created by Selim Eren Bekçe on 16.08.2017.
  */
+
 public class RegistrationDto implements Constraints.Validatable<List<ValidationError>> {
-    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores")
-    @Constraints.MaxLength(20)
-    @Constraints.MinLength(3)
+    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores", groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
+    @Constraints.MaxLength(value = 20, groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
+    @Constraints.MinLength(value = 3, groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
+    @Constraints.Required(groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
     private String username;
     private String usernameNormalized;
-    @Constraints.Required
-    @Constraints.Email
+    @Constraints.Required(groups = {ConstraintGroups.Login.class, ConstraintGroups.Register1.class, ConstraintGroups.Register2.class})
+    @Constraints.Email(groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class})
     private String email;
-    @Constraints.MaxLength(32)
-    @Constraints.MinLength(4)
-    @Constraints.Required
+    @Constraints.MaxLength(value = 32, groups = {ConstraintGroups.Register1.class})
+    @Constraints.MinLength(value = 4, groups = {ConstraintGroups.Register1.class})
+    @Constraints.Required(groups = {ConstraintGroups.Login.class, ConstraintGroups.Register1.class})
     private String password;
 
     public String getUsername() {

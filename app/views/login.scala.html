@@ -15,6 +15,12 @@
         <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
         <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">Register new account</a></h4>
         <h4 class="text-center"><a href="@routes.ResetPasswordController.step1(next)">Reset password</a></h4>
-        <h4 class="text-center"><a href="@routes.OAuthClientController.authorize("facebook", next)">Login with Facebook</a></h4>
+        <hr>
+        <a class="btn btn-block btn-social btn-facebook" href="@routes.OAuthClientController.authorize("facebook", next)">
+            <span class="fa fa-facebook"></span> Continue with Facebook
+        </a>
+        <a class="btn btn-block btn-social btn-twitter" href="@routes.OAuthClientController.authorize("twitter", next)">
+            <span class="fa fa-twitter"></span> Continue with Twitter
+        </a>
     }
 }

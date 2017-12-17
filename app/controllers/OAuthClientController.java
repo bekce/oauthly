@@ -16,6 +16,7 @@ import repositories.ProviderLinkRepository;
 import repositories.UserRepository;
 
 import javax.inject.Inject;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -71,18 +72,20 @@ public class OAuthClientController extends Controller {
 				.thenApplyAsync(dto -> {
 					ProviderLink link = providerLinkRepository.findByProvider(providerKey, dto.getId());
 					User user = null;
-					if(link == null || link.getUserId() == null) {
+					if(link == null) {
 						link = new ProviderLink();
 						link.setId(Utils.newId());
 						link.setProviderKey(providerKey);
 						link.setRemoteUserId(dto.getId());
+						link.setRemoteUserName(dto.getName());
+						link.setRemoteUserEmail(dto.getEmail() != null ? dto.getEmail().toLowerCase(Locale.ENGLISH) : null);
 						link.setToken(context.getToken());
 						providerLinkRepository.save(link);
-					} else {
+					} else if(link.getUserId() != null) {
 						user = userRepository.findById(link.getUserId());
 					}
-					if(user == null) { // TODO continue to final step of registration
-						return redirect(routes.RegisterController.step1(next.orElse(null)));
+					if(user == null) { // need to register
+						return redirect(routes.RegisterController.step2(next.orElse(null), link.getId()));
 					} else { // we have a valid user here!
 						String cookieValue = jwtUtils.prepareCookie(user);
 						Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();

@@ -103,6 +103,55 @@ public class JwtUtils {
         }
     }
 
+    public String prepareEmailConfirmationCode(User user, String linkId) {
+        final long iat = System.currentTimeMillis() / 1000L; // issued at claim
+        final long exp = iat + expireResetCode; // expires claim
+        final JWTSigner signer = new JWTSigner(jwtSecret);
+
+        final HashMap<String, Object> claims = new HashMap<>();
+        claims.put("vt", 6); //type=email_confirm_code
+        claims.put("exp", exp);
+        claims.put("email", user.getEmail());
+        claims.put("username", user.getUsername());
+        if(user.getPassword() != null)
+            claims.put("password", user.getPassword());
+        if(linkId != null)
+            claims.put("linkId", linkId);
+
+        return signer.sign(claims);
+    }
+
+    public Tuple2<User, String> validateEmailConfirmationCode(String code){
+        if(code == null)
+            return null;
+        try {
+            final JWTVerifier verifier = new JWTVerifier(jwtSecret);
+            final Map<String,Object> claims = verifier.verify(code);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 6){
+                return null;
+            }
+            // check expiry date
+            int exp = (int) claims.get("exp");
+            if(exp < (System.currentTimeMillis() / 1000L))
+                return null;
+            // check user
+            User user = new User();
+            user.setEmail((String) claims.get("email"));
+            user.setUsername((String) claims.get("username"));
+            if(claims.containsKey("password"))
+                user.setPassword((String) claims.get("password"));
+            String linkId = claims.containsKey("linkId") ? (String) claims.get("linkId") : null;
+            return Tuple2.apply(user, linkId);
+        } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
+            return null;
+        } catch (Exception e) {
+            Logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
     public String prepareCookie(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
@@ -159,7 +208,7 @@ public class JwtUtils {
     }
 
 
-    public String prepareCode(String client_id, String client_secret, String grant_id, String redirect_uri) {
+    public String prepareAuthorizationCode(String client_id, String client_secret, String grant_id, String redirect_uri) {
         int hash = Objects.hash(client_id, client_secret);
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
         final long exp = iat + expireAuthorizationCode;
@@ -174,7 +223,7 @@ public class JwtUtils {
         return signer.sign(claims);
     }
 
-    public Grant validateCode(String code, String redirect_uri){
+    public Grant validateAuthorizationCode(String code, String redirect_uri){
         if(code == null || redirect_uri == null)
             return null;
         try {

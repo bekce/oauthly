@@ -29,6 +29,8 @@ public class ProviderLink {
      */
 //    @Indexed
     private String remoteUserId;
+    private String remoteUserEmail;
+    private String remoteUserName;
 
     public String getId() {
         return id;
@@ -68,5 +70,21 @@ public class ProviderLink {
 
     public void setRemoteUserId(String remoteUserId) {
         this.remoteUserId = remoteUserId;
+    }
+
+    public String getRemoteUserEmail() {
+        return remoteUserEmail;
+    }
+
+    public void setRemoteUserEmail(String remoteUserEmail) {
+        this.remoteUserEmail = remoteUserEmail;
+    }
+
+    public String getRemoteUserName() {
+        return remoteUserName;
+    }
+
+    public void setRemoteUserName(String remoteUserName) {
+        this.remoteUserName = remoteUserName;
     }
 }
