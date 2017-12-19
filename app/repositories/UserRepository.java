@@ -1,13 +1,12 @@
 package repositories;
 
-import dtos.Utils;
+import config.Utils;
 import models.User;
 import org.jongo.MongoCollection;
 import uk.co.panaxiom.playjongo.PlayJongo;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.Locale;
 
 @Singleton
 public class UserRepository {

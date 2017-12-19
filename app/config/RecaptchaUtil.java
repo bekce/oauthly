@@ -28,11 +28,12 @@ public class RecaptchaUtil {
                 .post(String.format("response=%s&secret=%s&remoteip=%s", response, recaptchaSecret, clientIpAddress))
                 .handle((wsResponse, throwable) -> {
                     if (throwable != null) {
-                        Logger.error(throwable.getMessage(), throwable);
+                        Logger.error("Recaptcha request problem, bypassing check, fix ASAP", throwable);
                         return null;
                     } else return wsResponse;
                 })
-                .thenApply(res -> !recaptchaEnabled || (res != null && res.getStatus() == 200 && res.asJson().get("success").asBoolean()));
+                .thenApply(res -> !recaptchaEnabled || res == null ||
+                        (res.getStatus() == 200 && res.asJson().get("success").asBoolean()));
     }
 
 }

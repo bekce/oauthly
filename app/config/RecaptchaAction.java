@@ -1,21 +1,23 @@
 package config;
 
 import play.Logger;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 
 public class RecaptchaAction extends play.mvc.Action.Simple {
 
     private final RecaptchaUtil recaptchaUtil;
+    private final HttpExecutionContext httpExecutionContext;
 
     @Inject
-    public RecaptchaAction(RecaptchaUtil recaptchaUtil) {
+    public RecaptchaAction(RecaptchaUtil recaptchaUtil, HttpExecutionContext httpExecutionContext) {
         this.recaptchaUtil = recaptchaUtil;
+        this.httpExecutionContext = httpExecutionContext;
     }
 
     @Override
@@ -34,19 +36,15 @@ public class RecaptchaAction extends play.mvc.Action.Simple {
                 ctx.request().body().asMultipartFormData().asFormUrlEncoded().remove("g-recaptcha-response");
             } catch (Exception ignored){}
         }
-        boolean passed = false;
-        try {
-            passed = recaptchaUtil.check(clientIp, recaptchaResponse).toCompletableFuture().get(); //.thenCompose(passed -> { // async composing does not run due to a Play bug, try in later versions
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        if(passed) {
-            Logger.info("Recaptcha passes");
-            return delegate.call(ctx);
-        } else {
-            Logger.info("Recaptcha didn't pass");
-            ctx.flash().put("error", "Your request did not succeed - captcha required");
-            return CompletableFuture.completedFuture(redirect(ctx._requestHeader().asJava().path()));
-        }
+        return recaptchaUtil.check(clientIp, recaptchaResponse).thenComposeAsync(passed -> {
+            if(passed) {
+                Logger.info("Recaptcha passes");
+                return delegate.call(ctx);
+            } else {
+                Logger.info("Recaptcha didn't pass");
+                ctx.flash().put("error", "Your request did not succeed - captcha required");
+                return CompletableFuture.completedFuture(redirect(ctx._requestHeader().asJava().path()));
+            }
+        }, httpExecutionContext.current());
     }
 }

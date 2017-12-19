@@ -6,20 +6,18 @@ import config.MailgunService;
 import config.RecaptchaProtected;
 import dtos.ConstraintGroups;
 import dtos.RegistrationDto;
-import dtos.Utils;
+import config.Utils;
 import models.ProviderLink;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 import repositories.ProviderLinkRepository;
 import repositories.UserRepository;
 import scala.Tuple2;
 
 import javax.inject.Inject;
-import java.util.Locale;
 
 public class RegisterController extends Controller {
 

@@ -35,7 +35,7 @@ First account will be given admin access
 - Logged-in users are remembered with long-term safe cookies
 - Multiple client id and secret pairs are supported, managed by a view
 - Customizable expiry times for generated tokens (see `application.conf` file)
-- Google reCAPTCHA support on endpoints (with `@RecaptchaSecured` annotation)
+- Google reCAPTCHA support on endpoints (with `@RecaptchaProtected` annotation)
 - OAuth2 scopes support
 - MongoDB backend
 - Mailgun API integration for sending emails

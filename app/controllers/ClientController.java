@@ -2,7 +2,7 @@ package controllers;
 
 import config.AuthorizationServerSecure;
 import dtos.ClientDto;
-import dtos.Utils;
+import config.Utils;
 import models.Client;
 import models.User;
 import play.data.Form;

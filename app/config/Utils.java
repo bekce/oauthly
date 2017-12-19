@@ -1,7 +1,8 @@
-package dtos;
+package config;
 
 import com.auth0.jwt.internal.org.apache.commons.lang3.RandomStringUtils;
 
+import java.security.SecureRandom;
 import java.util.Locale;
 
 /**
@@ -11,10 +12,12 @@ public class Utils {
     public static String normalizeUsername(String username){
         return username.replaceAll("[-\\\\.]","_").toLowerCase(Locale.ENGLISH);
     }
+
     public static String normalizeEmail(String email){
         if(email == null) return null;
         return email.toLowerCase(Locale.ENGLISH);
     }
+
     public static String newPasswordCheck(String newPassword, String newPassword2){
         if (newPassword.length() < 4 || newPassword.length() > 32) {
             return "Please use between 4 and 32";
@@ -25,7 +28,18 @@ public class Utils {
         return null;
     }
 
+    private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final SecureRandom rnd = new SecureRandom();
+
+    private static String randomString( int len ){
+        StringBuilder sb = new StringBuilder( len );
+        for( int i = 0; i < len; i++ )
+            sb.append( AB.charAt( rnd.nextInt(AB.length()) ) );
+        return sb.toString();
+    }
+
     public static String newId() {
-        return RandomStringUtils.randomAlphanumeric(20);
+        return randomString(20);
+//        return RandomStringUtils.randomAlphanumeric(20);
     }
 }

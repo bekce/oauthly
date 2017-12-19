@@ -4,7 +4,7 @@ import config.AuthorizationServerSecure;
 import config.JwtUtils;
 import dtos.Token;
 import dtos.TokenStatus;
-import dtos.Utils;
+import config.Utils;
 import models.Client;
 import models.Grant;
 import models.User;

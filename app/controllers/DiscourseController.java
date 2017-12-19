@@ -1,7 +1,7 @@
 package controllers;
 
 import config.AuthorizationServerSecure;
-import dtos.Utils;
+import config.Utils;
 import models.DiscourseSetting;
 import models.User;
 import org.apache.commons.codec.binary.Base64;

@@ -2,12 +2,11 @@ package controllers;
 
 import config.AuthorizationServerSecure;
 import config.JwtUtils;
-import dtos.Utils;
+import config.Utils;
 import models.User;
 import org.apache.commons.lang3.StringUtils;
 import play.data.FormFactory;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 import repositories.UserRepository;
 
