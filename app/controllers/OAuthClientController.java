@@ -41,15 +41,19 @@ public class OAuthClientController extends Controller {
 		}
 		OAuthContext context = new OAuthContext(provider, ws);
 		context.setState(Utils.newId());
-		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, Optional.ofNullable(next), Optional.empty(), Optional.empty()).absoluteURL(request()));
+		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, Optional.ofNullable(next), Optional.empty(), Optional.empty(), Optional.empty()).absoluteURL(request()));
 		flash("state", context.getState());
 		return redirect(context.prepareAuthorizeUrl());
 	}
 
-	public CompletionStage<Result> callback(String providerKey, Optional<String> next, Optional<String> code, Optional<String> state) {
+	public CompletionStage<Result> callback(String providerKey, Optional<String> next, Optional<String> code, Optional<String> error, Optional<String> state) {
 		OAuthProvider provider = manager.getProvider(providerKey);
 		if(provider == null) {
 			return CompletableFuture.completedFuture(notFound("N/A"));
+		}
+		if(error.isPresent()){
+			flash("error", providerKey + " returned "+error.get());
+			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(next.orElse(null))));
 		}
 		if(!code.isPresent()){
 			return CompletableFuture.completedFuture(badRequest("no code parameter"));
@@ -61,7 +65,7 @@ public class OAuthClientController extends Controller {
 
 		OAuthContext context = new OAuthContext(provider, ws);
 		context.setState(state.get());
-		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, next, Optional.empty(), Optional.empty()).absoluteURL(request()));
+		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, next, Optional.empty(), Optional.empty(), Optional.empty()).absoluteURL(request()));
 		context.setCode(code.get());
 
 		return context.retrieveToken()
