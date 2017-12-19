@@ -52,7 +52,7 @@ public class OAuthClientController extends Controller {
 			return CompletableFuture.completedFuture(notFound("N/A"));
 		}
 		if(error.isPresent()){
-			flash("error", providerKey + " returned "+error.get());
+			flash("error", provider.getDisplayName() + " returned "+error.get());
 			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(next.orElse(null))));
 		}
 		if(!code.isPresent()){

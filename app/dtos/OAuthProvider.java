@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 public class OAuthProvider {
 
+	private final String displayName;
 	private final String tokenUrl;
     private final String authorizeUrl;
 	private final String clientId;
@@ -14,7 +15,8 @@ public class OAuthProvider {
 	private final Function<OAuthContext, CompletionStage<Token>> tokenRetriever;
 	private final Function<OAuthContext, CompletionStage<MeDto>> currentUserIdentifier;
 
-	public OAuthProvider(String tokenUrl, String authorizeUrl, String clientId, String clientSecret, String scopes, String userInfoUrl, Function<OAuthContext, CompletionStage<Token>> tokenRetriever, Function<OAuthContext, CompletionStage<MeDto>> currentUserIdentifier) {
+	public OAuthProvider(String displayName, String tokenUrl, String authorizeUrl, String clientId, String clientSecret, String scopes, String userInfoUrl, Function<OAuthContext, CompletionStage<Token>> tokenRetriever, Function<OAuthContext, CompletionStage<MeDto>> currentUserIdentifier) {
+		this.displayName = displayName;
 		this.tokenUrl = tokenUrl;
 		this.authorizeUrl = authorizeUrl;
 		this.clientId = clientId;
@@ -23,6 +25,10 @@ public class OAuthProvider {
 		this.userInfoUrl = userInfoUrl;
 		this.tokenRetriever = tokenRetriever;
 		this.currentUserIdentifier = currentUserIdentifier;
+	}
+
+	public String getDisplayName() {
+		return displayName;
 	}
 
 	public String getTokenUrl() {
@@ -60,12 +66,15 @@ public class OAuthProvider {
 	@Override
 	public String toString() {
 		return "OAuthProvider{" +
-				"tokenUrl='" + tokenUrl + '\'' +
+				"displayName='" + displayName + '\'' +
+				", tokenUrl='" + tokenUrl + '\'' +
 				", authorizeUrl='" + authorizeUrl + '\'' +
 				", clientId='" + clientId + '\'' +
 				", clientSecret='" + clientSecret + '\'' +
 				", scopes='" + scopes + '\'' +
 				", userInfoUrl='" + userInfoUrl + '\'' +
+				", tokenRetriever=" + tokenRetriever +
+				", currentUserIdentifier=" + currentUserIdentifier +
 				'}';
 	}
 }

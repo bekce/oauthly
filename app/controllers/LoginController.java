@@ -1,5 +1,6 @@
 package controllers;
 
+import config.AuthorizationServerManager;
 import config.AuthorizationServerSecure;
 import config.JwtUtils;
 import dtos.ConstraintGroups;
@@ -17,12 +18,14 @@ public class LoginController extends Controller {
     private final FormFactory formFactory;
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
+    private final AuthorizationServerManager authorizationServerManager;
 
     @Inject
-    public LoginController(FormFactory formFactory, UserRepository userRepository, JwtUtils jwtUtils) {
+    public LoginController(FormFactory formFactory, UserRepository userRepository, JwtUtils jwtUtils, AuthorizationServerManager authorizationServerManager) {
         this.formFactory = formFactory;
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
+        this.authorizationServerManager = authorizationServerManager;
     }
 
     public Result get(String next) {
@@ -33,7 +36,7 @@ public class LoginController extends Controller {
             else
                 return redirect(routes.ProfileController.get());
         }
-        return ok(views.html.login.render(next));
+        return ok(views.html.login.render(next, authorizationServerManager.getProviders()));
     }
 
     public Result post(String next) {

@@ -1,12 +1,9 @@
 package controllers;
 
 import com.typesafe.config.Config;
-import config.JwtUtils;
-import config.MailgunService;
-import config.RecaptchaProtected;
+import config.*;
 import dtos.ConstraintGroups;
 import dtos.RegistrationDto;
-import config.Utils;
 import models.ProviderLink;
 import models.User;
 import play.data.Form;
@@ -34,6 +31,8 @@ public class RegisterController extends Controller {
     private MailgunService mailService;
     @Inject
     private Config config;
+    @Inject
+    private AuthorizationServerManager authorizationServerManager;
 
     public Result step1(String next) {
         return ok(views.html.register1.render(1, null, null, null, formFactory.form(RegistrationDto.class), next));
@@ -48,7 +47,7 @@ public class RegisterController extends Controller {
                 return redirect(routes.LoginController.get(next));
             }
             int state = remoteUserEmail != null ? 3 : 2;
-            return ok(views.html.register1.render(state, link.getProviderKey(), remoteUserEmail, linkId, formFactory.form(RegistrationDto.class), next));
+            return ok(views.html.register1.render(state, authorizationServerManager.getProvider(link.getProviderKey()).getDisplayName(), remoteUserEmail, linkId, formFactory.form(RegistrationDto.class), next));
         } else {
             flash("error", "Invalid authentication, please try again");
             return redirect(routes.RegisterController.step1(next));
@@ -59,6 +58,7 @@ public class RegisterController extends Controller {
     public Result post1(String next, String linkId) {
         int state;
         ProviderLink link = null;
+        String providerName = null;
         if(linkId == null){
             state = 1;
         } else {
@@ -66,6 +66,7 @@ public class RegisterController extends Controller {
             if(link != null && link.getUserId() == null) {
                 // TODO validate the remote user email with EmailValidator. If fails, treat as state=2
                 state = link.getRemoteUserEmail() != null ? 3 : 2;
+                providerName = authorizationServerManager.getProvider(link.getProviderKey()).getDisplayName();
             } else {
                 flash("error", "Invalid authentication, please try again");
                 return redirect(routes.RegisterController.step1(next));
@@ -89,7 +90,7 @@ public class RegisterController extends Controller {
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, validationGroupClass).bindFromRequest();
         if(form.hasErrors()){
             flash("warning", "Form has errors");
-            return badRequest(views.html.register1.render(state, link != null ? link.getProviderKey() : null, link != null ? link.getRemoteUserEmail() : null, linkId, form, next));
+            return badRequest(views.html.register1.render(state, providerName, link != null ? link.getRemoteUserEmail() : null, linkId, form, next));
         }
         RegistrationDto dto = form.get();
         if(state == 1 || state == 2){

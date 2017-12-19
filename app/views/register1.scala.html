@@ -1,4 +1,4 @@
-@(state: Int, providerKey: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String)()
+@(state: Int, providerName: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String)()
 
 @main("Register") {
     @*@if(state == 1){*@
@@ -40,7 +40,7 @@
         }
         @if(state == 2){
             <h2 class="form-heading">Complete Registration</h2>
-            You have successfully connected with your @providerKey account. Please enter an email address to complete your registration with us, the address will be used for communicating with you. We will also need to validate your e-mail address with a confirmation link.
+            You have successfully connected with your @providerName account. Please enter an email address to complete your registration with us, the address will be used for communicating with you. We will also need to validate your e-mail address with a confirmation link.
             <div class="form-group">
                 <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
                 @for(error <- form("email").errors) {<p>@error.format(messages())</p>}
@@ -52,7 +52,7 @@
         }
         @if(state == 3){
             <h2 class="form-heading">Complete Registration</h2>
-            You have successfully linked your @providerKey account with us, please pick a username to complete the registration.
+            You have successfully connected with your @providerName account, please pick a username to complete the registration.
             <div class="form-group">
                 <p class="form-control-static">@email</p>
             </div>
