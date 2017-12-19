@@ -1,7 +1,13 @@
 package dtos;
 
+import config.*;
+import dtos.ConstraintGroups.Login;
+import dtos.ConstraintGroups.Register1;
+import dtos.ConstraintGroups.Register2;
+import dtos.ConstraintGroups.Register3;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
+import repositories.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,20 +16,23 @@ import java.util.Objects;
 /**
  * Created by Selim Eren Bekçe on 16.08.2017.
  */
-
-public class RegistrationDto implements Constraints.Validatable<List<ValidationError>> {
-    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores", groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
-    @Constraints.MaxLength(value = 20, groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
-    @Constraints.MinLength(value = 3, groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
-    @Constraints.Required(groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class, ConstraintGroups.Register3.class, ConstraintGroups.Register4.class})
+@ValidateUniqueUsername(groups = {Register1.class, Register2.class, Register3.class})
+@ValidateUniqueEmail(groups = {Register1.class, Register2.class})
+public class RegistrationDto implements Constraints.Validatable<List<ValidationError>>,
+        ValidatableUniqueUsername<ValidationError>,
+        ValidatableUniqueEmail<ValidationError> {
+    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores", groups = {Register1.class, Register2.class, Register3.class})
+    @Constraints.MaxLength(value = 20, groups = {Register1.class, Register2.class, Register3.class})
+    @Constraints.MinLength(value = 3, groups = {Register1.class, Register2.class, Register3.class})
+    @Constraints.Required(groups = {Register1.class, Register2.class, Register3.class})
     private String username;
     private String usernameNormalized;
-    @Constraints.Required(groups = {ConstraintGroups.Login.class, ConstraintGroups.Register1.class, ConstraintGroups.Register2.class})
-    @Constraints.Email(groups = {ConstraintGroups.Register1.class, ConstraintGroups.Register2.class})
+    @Constraints.Required(groups = {Login.class, Register1.class, Register2.class})
+    @Constraints.Email(groups = {Register1.class, Register2.class})
     private String email;
-    @Constraints.MaxLength(value = 32, groups = {ConstraintGroups.Register1.class})
-    @Constraints.MinLength(value = 4, groups = {ConstraintGroups.Register1.class})
-    @Constraints.Required(groups = {ConstraintGroups.Login.class, ConstraintGroups.Register1.class})
+    @Constraints.MaxLength(value = 32, groups = {Register1.class})
+    @Constraints.MinLength(value = 4, groups = {Register1.class})
+    @Constraints.Required(groups = {Login.class, Register1.class})
     private String password;
 
     public String getUsername() {
@@ -87,5 +96,31 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     @Override
     public List<ValidationError> validate() {
         return new ArrayList<>();
+    }
+
+    @Override
+    public ValidationError validateUniqueUsername(UserRepository userRepository) {
+        usernameNormalized = Utils.normalizeUsername(username);
+        if(usernameNormalized == null) return null;
+        if (userRepository.findByUsernameNormalized(usernameNormalized) != null) {
+            return new ValidationError("username", "Username already exists");
+        }
+        return null;
+    }
+
+
+    @Override
+    public ValidationError validateUniqueEmail(UserRepository userRepository) {
+        // advanced email validation with commons-validator
+//        if(!EmailValidator.getInstance().isValid(dto.getEmail())){
+//            form = form.withError("email", "Invalid.userForm.email");
+//        }
+
+        email = Utils.normalizeEmail(email);
+        if(email == null) return null;
+        if (userRepository.findByEmail(email) != null) {
+            return new ValidationError("email", "Email is already registered");
+        }
+        return null;
     }
 }

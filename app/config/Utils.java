@@ -1,7 +1,5 @@
 package config;
 
-import com.auth0.jwt.internal.org.apache.commons.lang3.RandomStringUtils;
-
 import java.security.SecureRandom;
 import java.util.Locale;
 
@@ -10,6 +8,7 @@ import java.util.Locale;
  */
 public class Utils {
     public static String normalizeUsername(String username){
+        if(username == null) return null;
         return username.replaceAll("[-\\\\.]","_").toLowerCase(Locale.ENGLISH);
     }
 

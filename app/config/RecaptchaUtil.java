@@ -6,6 +6,7 @@ import play.libs.ws.WSClient;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.time.Duration;
 import java.util.concurrent.CompletionStage;
 
 @Singleton
@@ -24,6 +25,7 @@ public class RecaptchaUtil {
 
     public CompletionStage<Boolean> check(String clientIpAddress, String response){
         return ws.url("https://www.google.com/recaptcha/api/siteverify")
+                .setRequestTimeout(Duration.ofSeconds(3)) // after this duration, regard as passed to prevent user frustration
                 .setContentType("application/x-www-form-urlencoded")
                 .post(String.format("response=%s&secret=%s&remoteip=%s", response, recaptchaSecret, clientIpAddress))
                 .handle((wsResponse, throwable) -> {

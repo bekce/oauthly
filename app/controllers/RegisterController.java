@@ -92,26 +92,6 @@ public class RegisterController extends Controller {
             return badRequest(views.html.register1.render(state, link != null ? link.getProviderKey() : null, link != null ? link.getRemoteUserEmail() : null, linkId, form, next));
         }
         RegistrationDto dto = form.get();
-        // normalize username
-        dto.setUsernameNormalized(Utils.normalizeUsername(dto.getUsername()));
-        if (userRepository.findByUsernameNormalized(dto.getUsernameNormalized()) != null) {
-            form = form.withError("username", "Username already exists");
-        }
-        if(state == 1 || state == 2){
-            // normalize email
-            dto.setEmail(Utils.normalizeEmail(dto.getEmail()));
-            if (userRepository.findByEmail(dto.getEmail()) != null) {
-                form = form.withError("email", "Email is already registered");
-            }
-        }
-        // advanced email validation with commons-validator
-//        if(!EmailValidator.getInstance().isValid(dto.getEmail())){
-//            form = form.withError("email", "Invalid.userForm.email");
-//        }
-        if(form.hasErrors()){
-            flash("warning", "Form has errors");
-            return badRequest(views.html.register1.render(state, link != null ? link.getProviderKey() : null, link != null ? link.getRemoteUserEmail() : null, linkId, form, next));
-        }
         if(state == 1 || state == 2){
             User user1 = new User();
             user1.setEmail(dto.getEmail());
