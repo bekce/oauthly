@@ -101,7 +101,7 @@ public class RegisterController extends Controller {
         }
         if(state == 1 || state == 2){
             // normalize email
-            dto.setEmail(dto.getEmail().toLowerCase(Locale.ENGLISH));
+            dto.setEmail(Utils.normalizeEmail(dto.getEmail()));
             if (userRepository.findByEmail(dto.getEmail()) != null) {
                 form = form.withError("email", "Email is already registered");
             }

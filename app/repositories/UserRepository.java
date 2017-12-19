@@ -39,7 +39,7 @@ public class UserRepository {
         String normalizedUsername = Utils.normalizeUsername(login);
         User user = findByUsernameNormalized(normalizedUsername);
         if (user == null) {
-            user = findByEmail(login.toLowerCase(Locale.ENGLISH));
+            user = findByEmail(Utils.normalizeEmail(login));
         }
         return user;
     }

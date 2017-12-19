@@ -54,7 +54,7 @@ public class OAuthClientController extends Controller {
 			return CompletableFuture.completedFuture(notFound("N/A"));
 		}
 		if(!code.isPresent()){
-			return CompletableFuture.completedFuture(badRequest("no code param"));
+			return CompletableFuture.completedFuture(badRequest("no code parameter"));
 		}
 		if(!state.isPresent() || !state.get().equals(flash("state"))){
 			flash("error", "Request failed (states don't match), please enable cookies and try again");
@@ -64,7 +64,7 @@ public class OAuthClientController extends Controller {
 		OAuthContext context = new OAuthContext(provider, ws);
 		context.setState(state.get());
 		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, next, Optional.empty(), Optional.empty()).absoluteURL(request()));
-		context.setCode(code.orElse(null));
+		context.setCode(code.get());
 
 		return context.retrieveToken()
 				.thenApplyAsync(token -> context)
@@ -78,7 +78,7 @@ public class OAuthClientController extends Controller {
 						link.setProviderKey(providerKey);
 						link.setRemoteUserId(dto.getId());
 						link.setRemoteUserName(dto.getName());
-						link.setRemoteUserEmail(dto.getEmail() != null ? dto.getEmail().toLowerCase(Locale.ENGLISH) : null);
+						link.setRemoteUserEmail(Utils.normalizeEmail(dto.getEmail()));
 						link.setToken(context.getToken());
 						providerLinkRepository.save(link);
 					} else if(link.getUserId() != null) {

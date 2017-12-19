@@ -1,7 +1,8 @@
 package dtos;
 
+import com.auth0.jwt.internal.org.apache.commons.lang3.RandomStringUtils;
+
 import java.util.Locale;
-import java.util.UUID;
 
 /**
  * Created by Selim Eren Bekçe on 25.08.2017.
@@ -9,6 +10,10 @@ import java.util.UUID;
 public class Utils {
     public static String normalizeUsername(String username){
         return username.replaceAll("[-\\\\.]","_").toLowerCase(Locale.ENGLISH);
+    }
+    public static String normalizeEmail(String email){
+        if(email == null) return null;
+        return email.toLowerCase(Locale.ENGLISH);
     }
     public static String newPasswordCheck(String newPassword, String newPassword2){
         if (newPassword.length() < 4 || newPassword.length() > 32) {
@@ -20,7 +25,7 @@ public class Utils {
         return null;
     }
 
-    public static String newId(){
-        return UUID.randomUUID().toString().replace("-","");
+    public static String newId() {
+        return RandomStringUtils.randomAlphanumeric(20);
     }
 }
