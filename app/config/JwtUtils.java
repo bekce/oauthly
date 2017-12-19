@@ -5,11 +5,14 @@ import com.auth0.jwt.JWTSigner;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.JWTVerifyException;
 import com.typesafe.config.Config;
+import controllers.routes;
 import dtos.Token;
 import dtos.TokenStatus;
 import models.Client;
 import models.Grant;
 import models.User;
+import play.mvc.Http;
+import play.mvc.Result;
 import repositories.ClientRepository;
 import repositories.GrantRepository;
 import repositories.UserRepository;
@@ -25,6 +28,8 @@ import java.util.Objects;
 
 import play.Logger;
 import scala.Tuple2;
+
+import static play.mvc.Results.redirect;
 
 @Singleton
 public class JwtUtils {
@@ -152,7 +157,19 @@ public class JwtUtils {
         }
     }
 
-    public String prepareCookie(User user) {
+    public Result prepareCookieThenRedirect(User user, String next){
+        Http.Cookie ltat = prepareCookie(user);
+        if(next != null && next.matches("^/.*$"))
+            return redirect(next).withCookies(ltat);
+        else
+            return redirect(routes.ProfileController.get()).withCookies(ltat);
+    }
+
+    public Http.Cookie prepareCookie(User user){
+        return Http.Cookie.builder("ltat", prepareCookieValue(user)).withPath("/").withHttpOnly(true).withMaxAge(expireCookie).build();
+    }
+
+    public String prepareCookieValue(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
         final long exp = iat + expireCookie; // expires claim
@@ -201,10 +218,6 @@ public class JwtUtils {
             Logger.error(e.getMessage(), e);
             return null;
         }
-    }
-
-    public int getExpireCookie() {
-        return expireCookie;
     }
 
 

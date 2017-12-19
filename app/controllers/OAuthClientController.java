@@ -87,14 +87,9 @@ public class OAuthClientController extends Controller {
 					if(user == null) { // need to register
 						return redirect(routes.RegisterController.step2(next.orElse(null), link.getId()));
 					} else { // we have a valid user here!
-						String cookieValue = jwtUtils.prepareCookie(user);
-						Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();
 //						flash("info", "Login successful");
 //						flash("info", String.format("Received: %s", dto));
-						if(next.isPresent() && next.get().matches("^/.*$"))
-							return redirect(next.get()).withCookies(ltat);
-						else
-							return redirect(routes.ProfileController.get()).withCookies(ltat);
+						return jwtUtils.prepareCookieThenRedirect(user, next.orElse(null));
 					}
 				}, httpExecutionContext.current());
 	}

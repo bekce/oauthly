@@ -52,9 +52,7 @@ public class ProfileController extends Controller {
             userRepository.save(user);
             flash("success", "You have changed your password!");
             // refresh the cookie here
-            String cookieValue = jwtUtils.prepareCookie(user);
-            Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();
-            return redirect(routes.ProfileController.get()).withCookies(ltat);
+            return jwtUtils.prepareCookieThenRedirect(user, null);
         }
     }
 

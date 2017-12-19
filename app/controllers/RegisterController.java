@@ -140,13 +140,8 @@ public class RegisterController extends Controller {
             link.setUserId(user.getId());
             providerLinkRepository.save(link);
 
-            String cookieValue = jwtUtils.prepareCookie(user);
-            Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();
             flash("info", "Registration successful");
-            if(next != null && next.matches("^/.*$"))
-                return redirect(next).withCookies(ltat);
-            else
-                return redirect(routes.ProfileController.get()).withCookies(ltat);
+            return jwtUtils.prepareCookieThenRedirect(user, next);
         } else {
             throw new IllegalStateException("Unknown state="+state);
         }
@@ -199,14 +194,8 @@ public class RegisterController extends Controller {
             providerLinkRepository.save(link);
         }
 
-        String cookieValue = jwtUtils.prepareCookie(user);
-        Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();
         flash("info", "Registration successful");
-        if(next != null && next.matches("^/.*$"))
-            return redirect(next).withCookies(ltat);
-        else
-            return redirect(routes.ProfileController.get()).withCookies(ltat);
-
+        return jwtUtils.prepareCookieThenRedirect(user, next);
     }
 
     public Result await(){

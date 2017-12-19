@@ -2,7 +2,8 @@ package controllers;
 
 import config.AuthorizationServerSecure;
 import config.JwtUtils;
-import dtos.LoginDto;
+import dtos.ConstraintGroups;
+import dtos.RegistrationDto;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
@@ -13,13 +14,13 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 public class LoginController extends Controller {
-    private final Form<LoginDto> form;
+    private final FormFactory formFactory;
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
     @Inject
     public LoginController(FormFactory formFactory, UserRepository userRepository, JwtUtils jwtUtils) {
-        this.form = formFactory.form(LoginDto.class);
+        this.formFactory = formFactory;
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
     }
@@ -36,18 +37,15 @@ public class LoginController extends Controller {
     }
 
     public Result post(String next) {
-        Form<LoginDto> loginForm = form.bindFromRequest();
-        String info = String.format("received %s:%s", loginForm.get().getUsername(), loginForm.get().getPassword());
-        System.out.println(info);
-        User user = userRepository.findByUsernameOrEmail(loginForm.get().getUsername());
-        if(user != null && user.checkPassword(loginForm.get().getPassword())){
-            String cookieValue = jwtUtils.prepareCookie(user);
-            Http.Cookie ltat = Http.Cookie.builder("ltat", cookieValue).withPath("/").withHttpOnly(true).withMaxAge(jwtUtils.getExpireCookie()).build();
+        Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.Login.class).bindFromRequest();
+        if(form.hasErrors()) {
+            flash("warning", "Please fill in the form");
+            return redirect(routes.LoginController.get(next));
+        }
+        User user = userRepository.findByUsernameOrEmail(form.get().getEmail());
+        if(user != null && user.checkPassword(form.get().getPassword())){
             flash("info", "Login successful");
-            if(next != null && next.matches("^/.*$"))
-                return redirect(next).withCookies(ltat);
-            else
-                return redirect(routes.ProfileController.get()).withCookies(ltat);
+            return jwtUtils.prepareCookieThenRedirect(user, next);
         } else {
             flash("error", "Invalid login");
             return redirect(routes.LoginController.get(next));
