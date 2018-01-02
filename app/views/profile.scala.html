@@ -1,4 +1,4 @@
-@()(user: models.User)
+@()(user: models.User, providers: List[(String, String)], userProviders: Map[String, String])
 @import helper._
 
 @main("Profile") {
@@ -54,6 +54,27 @@
             </div>
         </div>
     </div>
+    @for(provider <- providers) {
+      <div class="col-sm-12 col-md-6">
+          <div class="panel panel-default">
+              <div class="panel-heading">
+                  <h3 class="panel-title">@{provider._2} Login</h3>
+              </div>
+              <div class="panel-body">
+                @if(userProviders.containsKey(provider._1)) {
+                  @form(action = routes.ProfileController.unlinkProvider(userProviders.get(provider._1))) {
+                      @CSRF.formField
+                      <button class="btn btn-danger" type="submit">Unlink</button>
+                  }
+                } else {
+                  <a class="btn btn-block btn-social btn-@provider._1" href="@routes.OAuthClientController.authorize(provider._1, null)">
+                  <span class="fa fa-@provider._1"></span> Link @provider._2 account
+                  </a>
+                }
+              </div>
+          </div>
+      </div>
+    }
 </div>
 
 <h4 class="text-center"><a href="/logout">Logout</a></h4>

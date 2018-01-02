@@ -45,7 +45,8 @@ public class OAuthClientController extends Controller {
 		flash("state", context.getState());
 		return redirect(context.prepareAuthorizeUrl());
 	}
-
+	
+	@config.AuthorizationServerSecure(optional = true)
 	public CompletionStage<Result> callback(String providerKey, Optional<String> next, Optional<String> code, Optional<String> error, Optional<String> state) {
 		OAuthProvider provider = manager.getProvider(providerKey);
 		if(provider == null) {
@@ -62,6 +63,8 @@ public class OAuthClientController extends Controller {
 			flash("error", "Request failed (states don't match), please enable cookies and try again");
 			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(next.orElse(null))));
 		}
+		Optional<User> authenticatedUser = request().attrs().getOptional(config.AuthorizationServerSecure.USER);
+		play.Logger.info("authenticatedUser.isPresent():{}", authenticatedUser.isPresent());
 
 		OAuthContext context = new OAuthContext(provider, ws);
 		context.setState(state.get());
@@ -86,8 +89,12 @@ public class OAuthClientController extends Controller {
 					} else if(link.getUserId() != null) {
 						user = userRepository.findById(link.getUserId());
 					}
-					if(user == null) { // need to register
-						return redirect(routes.RegisterController.step2(next.orElse(null), link.getId()));
+					if(user == null) { // need to register or link
+		        if(authenticatedUser.isPresent()){ // already authenticated, link it
+							return redirect(routes.ProfileController.linkProvider(link.getId()));
+		        } else { // not authenticated, register
+							return redirect(routes.RegisterController.step2(next.orElse(null), link.getId()));
+						}
 					} else { // we have a valid user here!
 //						flash("info", "Login successful");
 //						flash("info", String.format("Received: %s", dto));

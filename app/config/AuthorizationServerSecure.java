@@ -15,4 +15,5 @@ import java.lang.annotation.Target;
 public @interface AuthorizationServerSecure {
     TypedKey<User> USER = TypedKey.create("user_a");
     boolean requireAdmin() default false;
+    boolean optional() default false;
 }

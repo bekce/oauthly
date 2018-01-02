@@ -22,8 +22,8 @@ public class AuthorizationServerAuthAction extends play.mvc.Action<Authorization
     @Override
     public CompletionStage<Result> call(Http.Context ctx) {
         Http.Cookie ltat = ctx.request().cookie("ltat");
-        boolean valid = false;
-        if(ltat != null){
+        boolean valid = configuration.optional();
+        if(ltat != null) {
             User user = jwtUtils.validateCookie(ltat.value());
             if(user != null) {
                 if(!configuration.requireAdmin() || user.isAdmin()){
