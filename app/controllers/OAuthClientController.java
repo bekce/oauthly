@@ -2,11 +2,12 @@ package controllers;
 
 import config.AuthorizationServerManager;
 import config.JwtUtils;
+import config.Utils;
 import dtos.OAuthContext;
 import dtos.OAuthProvider;
-import config.Utils;
 import models.ProviderLink;
 import models.User;
+import org.apache.commons.codec.binary.Base64;
 import play.libs.concurrent.HttpExecutionContext;
 import play.libs.ws.WSClient;
 import play.mvc.Controller;
@@ -15,6 +16,7 @@ import repositories.ProviderLinkRepository;
 import repositories.UserRepository;
 
 import javax.inject.Inject;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -40,35 +42,38 @@ public class OAuthClientController extends Controller {
 			return notFound("N/A");
 		}
 		OAuthContext context = new OAuthContext(provider, ws);
-		context.setState(Utils.newId());
-		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, Optional.ofNullable(next), Optional.empty(), Optional.empty(), Optional.empty()).absoluteURL(request()));
-		flash("state", context.getState());
+		String state = Base64.encodeBase64String(String.format("%s,%s", Utils.newId(), next == null ? "" : next).getBytes(StandardCharsets.UTF_8));
+		context.setState(state);
+		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, Optional.empty(), Optional.empty(), Optional.empty()).absoluteURL(request()));
+		flash("state", state);
 		return redirect(context.prepareAuthorizeUrl());
 	}
 	
 	@config.AuthorizationServerSecure(optional = true)
-	public CompletionStage<Result> callback(String providerKey, Optional<String> next, Optional<String> code, Optional<String> error, Optional<String> state) {
+	public CompletionStage<Result> callback(String providerKey, Optional<String> code, Optional<String> error, Optional<String> state) {
 		OAuthProvider provider = manager.getProvider(providerKey);
 		if(provider == null) {
 			return CompletableFuture.completedFuture(notFound("N/A"));
 		}
+		if(!state.isPresent() || !state.get().equals(flash("state"))){
+			flash("error", "Request failed (states don't match), please enable cookies and try again");
+			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(null)));
+		}
+		String decodedState = new String(Base64.decodeBase64(state.get()), StandardCharsets.UTF_8);
+		String next = org.apache.commons.lang3.StringUtils.trimToNull(decodedState.split(",", -1)[1]);
 		if(error.isPresent()){
 			flash("error", provider.getDisplayName() + " returned "+error.get());
-			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(next.orElse(null))));
+			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(next)));
 		}
 		if(!code.isPresent()){
 			return CompletableFuture.completedFuture(badRequest("no code parameter"));
-		}
-		if(!state.isPresent() || !state.get().equals(flash("state"))){
-			flash("error", "Request failed (states don't match), please enable cookies and try again");
-			return CompletableFuture.completedFuture(redirect(routes.LoginController.get(next.orElse(null))));
 		}
 		Optional<User> authenticatedUser = request().attrs().getOptional(config.AuthorizationServerSecure.USER);
 		play.Logger.info("authenticatedUser.isPresent():{}", authenticatedUser.isPresent());
 
 		OAuthContext context = new OAuthContext(provider, ws);
 		context.setState(state.get());
-		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, next, Optional.empty(), Optional.empty(), Optional.empty()).absoluteURL(request()));
+		context.setRedirectUri(routes.OAuthClientController.callback(providerKey, Optional.empty(), Optional.empty(), Optional.empty()).absoluteURL(request()));
 		context.setCode(code.get());
 
 		return context.retrieveToken()
@@ -93,12 +98,12 @@ public class OAuthClientController extends Controller {
 		        if(authenticatedUser.isPresent()){ // already authenticated, link it
 							return redirect(routes.ProfileController.linkProvider(link.getId()));
 		        } else { // not authenticated, register
-							return redirect(routes.RegisterController.step2(next.orElse(null), link.getId()));
+							return redirect(routes.RegisterController.step2(next, link.getId()));
 						}
 					} else { // we have a valid user here!
 //						flash("info", "Login successful");
 //						flash("info", String.format("Received: %s", dto));
-						return jwtUtils.prepareCookieThenRedirect(user, next.orElse(null));
+						return jwtUtils.prepareCookieThenRedirect(user, next);
 					}
 				}, httpExecutionContext.current());
 	}

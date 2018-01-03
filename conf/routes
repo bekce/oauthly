@@ -43,4 +43,4 @@ POST    /discourse      controllers.DiscourseController.updateSettings
 GET     /discourse/sso  controllers.DiscourseController.sso(sso: String, sig: String)
 
 GET     /oauth/client/:providerKey/authorize  controllers.OAuthClientController.authorize(providerKey: String, next: String ?= null)
-GET     /oauth/client/:providerKey/callback   controllers.OAuthClientController.callback(providerKey: String, next: java.util.Optional[String], code: java.util.Optional[String], error: java.util.Optional[String], state: java.util.Optional[String])
+GET     /oauth/client/:providerKey/callback   controllers.OAuthClientController.callback(providerKey: String, code: java.util.Optional[String], error: java.util.Optional[String], state: java.util.Optional[String])
