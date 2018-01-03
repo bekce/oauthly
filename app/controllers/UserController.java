@@ -23,4 +23,6 @@ public class UserController extends Controller {
         List<User> list = StreamSupport.stream(userRepository.findAll().spliterator(), false).collect(Collectors.toList());
         return ok(views.html.users.render(list));
     }
+
+
 }

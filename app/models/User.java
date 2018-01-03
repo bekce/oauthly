@@ -30,6 +30,8 @@ public class User {
      */
     private long creationTime;
 
+    private boolean emailValidated;
+
     public void encryptThenSetPassword(String password_plaintext){
         String salt = BCrypt.gensalt(12);
         this.password = BCrypt.hashpw(password_plaintext, salt);
@@ -106,5 +108,13 @@ public class User {
 
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
+    }
+
+    public boolean isEmailValidated() {
+        return emailValidated;
+    }
+
+    public void setEmailValidated(boolean emailValidated) {
+        this.emailValidated = emailValidated;
     }
 }

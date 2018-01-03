@@ -96,6 +96,7 @@ public class ProfileController extends Controller {
             return badRequest("users don't match");
         }
         user.setEmail(tuple2._2);
+        user.setEmailValidated(true);
         userRepository.save(user);
         flash("success", "Success, your email address was changed to "+user.getEmail()+". Please use the new address to login from now on.");
         // refresh the cookie here
