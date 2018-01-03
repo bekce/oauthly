@@ -10,7 +10,7 @@
         <h3 class="panel-title">Discourse SSO Settings</h3>
     </div>
     <div class="panel-body">
-        @form(action = routes.DiscourseController.updateSettings, 'class -> "form-inline") {
+        @form(action = routes.DiscourseController.updateSettings) {
             @CSRF.formField
             <div class="checkbox">
                 <label>
@@ -20,7 +20,7 @@
             <div class="form-group">
                 <input type="text" name="redirectUri" value="@discourse.getRedirectUri" class="form-control" placeholder="http://DISCOURSE/session/sso_login" style="width: 300px">
             </div>
-            <button type="submit" class="btn btn-default">Save</button>
+            <button type="submit" class="btn btn-primary">Save</button>
             <div class="form-group">
                 <p class="form-control-static">Secret: @{discourse.getSecret()}</p>
             </div>

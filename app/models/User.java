@@ -37,7 +37,7 @@ public class User {
     }
 
     public boolean checkPassword(String password_plaintext){
-        if(this.password == null)
+        if(this.password == null || password_plaintext == null)
             return false;
         if(!this.password.startsWith("$2a$"))
             throw new IllegalArgumentException("Invalid hash provided for comparison");

@@ -8,4 +8,6 @@ public class ConstraintGroups {
     public interface Register1 {}
     public interface Register2 {}
     public interface Register3 {}
+    public interface ChangePassword {}
+    public interface SetPassword {}
 }

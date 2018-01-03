@@ -12,13 +12,12 @@
     <div class="panel-body">
         <a class="btn btn-default" href="@routes.ClientController.create" role="button">Create New</a>
         <table class="table table-striped">
-            <thead><tr><td>Client Id</td><td>Name</td><td></td></tr></thead>
+            <thead><tr><td>Client Id</td><td>Name</td></tr></thead>
             <tbody>
             @for(client <- clients) {
             <tr>
                 <td><a href="@{routes.ClientController.edit(client.getId)}">@client.getId</a></td>
                 <td>@client.getName</td>
-                <td><a class="btn btn-default" href="@{routes.ClientController.edit(client.getId)}" role="button">View/Edit</a></td>
             </tr>
             }
             </tbody>

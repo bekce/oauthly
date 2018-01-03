@@ -1,10 +1,7 @@
 package dtos;
 
 import config.*;
-import dtos.ConstraintGroups.Login;
-import dtos.ConstraintGroups.Register1;
-import dtos.ConstraintGroups.Register2;
-import dtos.ConstraintGroups.Register3;
+import dtos.ConstraintGroups.*;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import repositories.UserRepository;
@@ -30,10 +27,12 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     @Constraints.Required(groups = {Login.class, Register1.class, Register2.class})
     @Constraints.Email(groups = {Register1.class, Register2.class})
     private String email;
-    @Constraints.MaxLength(value = 32, groups = {Register1.class})
-    @Constraints.MinLength(value = 4, groups = {Register1.class})
-    @Constraints.Required(groups = {Login.class, Register1.class})
+    @Constraints.MaxLength(value = 32, groups = {Register1.class, ChangePassword.class, SetPassword.class})
+    @Constraints.MinLength(value = 4, groups = {Register1.class, ChangePassword.class, SetPassword.class})
+    @Constraints.Required(groups = {Login.class, Register1.class, ChangePassword.class, SetPassword.class})
     private String password;
+    @Constraints.Required(groups = {ChangePassword.class})
+    private String oldPassword;
 
     public String getUsername() {
         return username;
@@ -67,6 +66,14 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
         this.password = password;
     }
 
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -75,12 +82,13 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
         return Objects.equals(username, that.username) &&
                 Objects.equals(usernameNormalized, that.usernameNormalized) &&
                 Objects.equals(email, that.email) &&
-                Objects.equals(password, that.password);
+                Objects.equals(password, that.password) &&
+                Objects.equals(oldPassword, that.oldPassword);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, usernameNormalized, email, password);
+        return Objects.hash(username, usernameNormalized, email, password, oldPassword);
     }
 
     @Override
@@ -89,7 +97,6 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
                 "username='" + username + '\'' +
                 ", usernameNormalized='" + usernameNormalized + '\'' +
                 ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
                 '}';
     }
 

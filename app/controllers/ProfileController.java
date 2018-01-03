@@ -2,10 +2,11 @@ package controllers;
 
 import config.AuthorizationServerSecure;
 import config.JwtUtils;
-import config.Utils;
+import dtos.ConstraintGroups;
+import dtos.RegistrationDto;
 import models.ProviderLink;
 import models.User;
-import org.apache.commons.lang3.StringUtils;
+import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -31,35 +32,32 @@ public class ProfileController extends Controller {
     @AuthorizationServerSecure
     public Result get() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        return ok(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId())));
+        return ok(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId()), formFactory.form(RegistrationDto.class)));
     }
 
     @AuthorizationServerSecure
     public Result changePassword(){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
 
-        String oldPassword = request().body().asFormUrlEncoded().get("oldPassword")[0];
-        String newPassword = request().body().asFormUrlEncoded().get("newPassword")[0];
+        Form<RegistrationDto> form;
+        if(user.getPassword() == null){
+            form = formFactory.form(RegistrationDto.class, ConstraintGroups.SetPassword.class).bindFromRequest();
+        } else {
+            form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangePassword.class).bindFromRequest();
+            if(!user.checkPassword(form.value().get().getOldPassword())){
+                form = form.withError("oldPassword", "Current password is invalid");
+            }
+        }
+        if(form.hasErrors()) {
+            flash("warning", "Form has errors");
+            return badRequest(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId()), form));
+        }
 
-        if(StringUtils.isAnyBlank(oldPassword, newPassword)){
-            flash("error", "All fields are required");
-            return redirect(routes.ProfileController.get());
-        }
-        else if(!user.checkPassword(oldPassword)){
-            flash("error", "Current password is invalid");
-            return redirect(routes.ProfileController.get());
-        }
-        else if(Utils.newPasswordCheck(newPassword, newPassword) != null){
-            flash("error", Utils.newPasswordCheck(newPassword, newPassword));
-            return redirect(routes.ProfileController.get());
-        }
-        else {
-            user.encryptThenSetPassword(newPassword);
-            userRepository.save(user);
-            flash("success", "You have changed your password!");
-            // refresh the cookie here
-            return jwtUtils.prepareCookieThenRedirect(user, null);
-        }
+        user.encryptThenSetPassword(form.get().getPassword());
+        userRepository.save(user);
+        flash("success", "You have changed your password!");
+        // refresh the cookie here
+        return jwtUtils.prepareCookieThenRedirect(user, null);
     }
 
     @AuthorizationServerSecure
