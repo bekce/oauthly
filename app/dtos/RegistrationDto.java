@@ -24,8 +24,8 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     @Constraints.Required(groups = {Register1.class, Register2.class, Register3.class})
     private String username;
     private String usernameNormalized;
-    @Constraints.Required(groups = {Login.class, Register1.class, Register2.class})
-    @Constraints.Email(groups = {Register1.class, Register2.class})
+    @Constraints.Required(groups = {Login.class, Register1.class, Register2.class, ChangeEmail.class})
+    @Constraints.Email(groups = {Register1.class, Register2.class, ChangeEmail.class})
     private String email;
     @Constraints.MaxLength(value = 32, groups = {Register1.class, ChangePassword.class, SetPassword.class})
     @Constraints.MinLength(value = 4, groups = {Register1.class, ChangePassword.class, SetPassword.class})

@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-public class RecaptchaAction extends play.mvc.Action.Simple {
+public class RecaptchaAction extends play.mvc.Action<RecaptchaProtected> {
 
     private final RecaptchaUtil recaptchaUtil;
     private final HttpExecutionContext httpExecutionContext;
@@ -43,7 +43,9 @@ public class RecaptchaAction extends play.mvc.Action.Simple {
             } else {
                 Logger.info("Recaptcha didn't pass");
                 ctx.flash().put("error", "Your request did not succeed - captcha required");
-                return CompletableFuture.completedFuture(redirect(ctx._requestHeader().asJava().path()));
+                return CompletableFuture.completedFuture(redirect(
+                        configuration.fallback().isEmpty() ? ctx._requestHeader().asJava().path() : configuration.fallback()
+                ));
             }
         }, httpExecutionContext.current());
     }

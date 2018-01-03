@@ -157,6 +157,53 @@ public class JwtUtils {
         }
     }
 
+    public String prepareEmailChangeConfirmationCode(User user, String newEmail) {
+        int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
+        final long iat = System.currentTimeMillis() / 1000L; // issued at claim
+        final long exp = iat + expireResetCode; // expires claim
+        final JWTSigner signer = new JWTSigner(jwtSecret);
+
+        final HashMap<String, Object> claims = new HashMap<>();
+        claims.put("vt", 7); //type=email_change_confirm_code
+        claims.put("exp", exp);
+        claims.put("user", user.getId());
+        claims.put("hash", hash);
+        claims.put("new_email", newEmail);
+        return signer.sign(claims);
+    }
+
+
+    public Tuple2<User, String> validateEmailChangeConfirmationCode(String code){
+        if(code == null)
+            return null;
+        try {
+            final JWTVerifier verifier = new JWTVerifier(jwtSecret);
+            final Map<String,Object> claims = verifier.verify(code);
+            // first check version
+            int type = (int) claims.get("vt");
+            if(type != 7){
+                return null;
+            }
+            // check expiry date
+            int exp = (int) claims.get("exp");
+            if(exp < (System.currentTimeMillis() / 1000L))
+                return null;
+            // check user
+            User user = userRepository.findById((String) claims.get("user"));
+            if(user == null) return null;
+            // check hash
+            int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
+            if((Integer) claims.get("hash") != hash) return null;
+            String newEmail = (String) claims.get("new_email");
+            return Tuple2.apply(user, newEmail);
+        } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
+            return null;
+        } catch (Exception e) {
+            Logger.error(e.getMessage(), e);
+            return null;
+        }
+    }
+
     public Result prepareCookieThenRedirect(User user, String next){
         Http.Cookie ltat = prepareCookie(user);
         if(next != null && next.matches("^/.*$"))

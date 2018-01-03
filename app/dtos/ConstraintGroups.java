@@ -10,4 +10,5 @@ public class ConstraintGroups {
     public interface Register3 {}
     public interface ChangePassword {}
     public interface SetPassword {}
+    public interface ChangeEmail {}
 }

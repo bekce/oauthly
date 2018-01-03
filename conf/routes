@@ -24,6 +24,8 @@ POST    /reset-password/confirm   controllers.ResetPasswordController.step4(code
 
 GET     /profile                controllers.ProfileController.get
 POST    /profile/password       controllers.ProfileController.changePassword
+POST    /profile/email          controllers.ProfileController.changeEmail
+GET     /profile/email/confirm  controllers.ProfileController.changeEmailConfirm(code: String)
 GET     /profile/link           controllers.ProfileController.linkProvider(linkId: String)
 POST    /profile/unlink         controllers.ProfileController.unlinkProvider(linkId: String)
 
