@@ -1,5 +1,6 @@
 package config;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import dtos.*;
 import play.Logger;
@@ -31,8 +32,25 @@ public class AuthorizationServerManager {
                 Function<OAuthContext, CompletionStage<MeDto>> currentUserIdentifier;
                 switch (key) {
                     case "facebook":
-                        currentUserIdentifier = new GenericCurrentUserIdentifier();
+                        currentUserIdentifier = new CurrentUserIdentifierOverUserInfoUrl(wsResponse -> {
+                            JsonNode node = wsResponse.asJson();
+                            String id = node.get("id").asText();
+                            String name = node.get("name").textValue();
+                            String email = node.get("email") == null ? null : node.get("email").textValue();
+                            return new MeDto(id, name, email);
+                        });
                         tokenRetriever = new FacebookTokenRetriever();
+                        break;
+                    case "google":
+                        currentUserIdentifier = new CurrentUserIdentifierOverUserInfoUrl(wsResponse -> {
+                            JsonNode node = wsResponse.asJson();
+                            Logger.info(node.toString());
+                            String email = node.get("emailAddresses").get(0).get("value").textValue();
+                            String id = node.get("resourceName").asText();
+                            String name = node.get("names").get(0).get("displayName").textValue();
+                            return new MeDto(id, name, email);
+                        });
+                        tokenRetriever = new GoogleTokenRetriever();
                         break;
                     default:
                         throw new IllegalArgumentException("provider is not recognized");

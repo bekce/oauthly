@@ -1,5 +1,7 @@
-package dtos;
+package config;
 
+import dtos.OAuthContext;
+import dtos.Token;
 import play.libs.Json;
 
 import java.util.concurrent.CompletionException;
