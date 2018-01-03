@@ -13,6 +13,7 @@ import repositories.ClientRepository;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Objects;
 
 @AuthorizationServerSecure(requireAdmin = true)
 public class ClientController extends Controller {
@@ -28,34 +29,55 @@ public class ClientController extends Controller {
         return ok(views.html.clients.render(clients));
     }
 
-    public Result addUpdateClient() {
+    public Result create() {
+        return ok(views.html.client.render(new Client()));
+    }
+
+    public Result edit(String id) {
+        User user = request().attrs().get(AuthorizationServerSecure.USER);
+        Client client = clientRepository.findById(id);
+        if(client == null)
+            return badRequest("client not found");
+        if(!Objects.equals(client.getOwnerId(), user.getId()))
+            return badRequest("not allowed");
+        return ok(views.html.client.render(client));
+    }
+
+    public Result addUpdateClient(String id) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         try {
             Form<ClientDto> form = formFactory.form(ClientDto.class).bindFromRequest();
             ClientDto dto = form.get();
-            if(dto.id == null){
+            if(id == null || id.isEmpty()){
                 Client client = new Client();
                 client.setId(Utils.newId());
                 client.setSecret(Utils.newId());
                 client.setOwnerId(user.getId());
                 client.setName(dto.name);
                 client.setRedirectUri(dto.redirectUri);
+                client.setAllowedOrigin(dto.allowedOrigin);
                 clientRepository.save(client);
                 flash("info", "Create client successful");
             } else {
-                Client client = clientRepository.findById(dto.id);
+                Client client = clientRepository.findById(id);
                 if(!client.getOwnerId().equals(user.getId())){
                     throw new IllegalAccessException();
                 }
                 client.setName(dto.name);
                 client.setRedirectUri(dto.redirectUri);
+                client.setAllowedOrigin(dto.allowedOrigin);
                 clientRepository.save(client);
                 flash("info", "Update successful");
             }
+            return redirect(routes.ClientController.get());
         } catch (Exception e) {
             flash("error", e.getMessage());
+            if(id == null || id.isEmpty()) {
+                return redirect(routes.ClientController.create());
+            } else {
+                return redirect(routes.ClientController.edit(id));
+            }
         }
-        return redirect(routes.ClientController.get());
     }
 
 }

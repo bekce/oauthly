@@ -27,8 +27,10 @@ POST    /profile/password       controllers.ProfileController.changePassword
 GET     /profile/link           controllers.ProfileController.linkProvider(linkId: String)
 POST    /profile/unlink         controllers.ProfileController.unlinkProvider(linkId: String)
 
-GET     /client         controllers.ClientController.get
-POST    /client         controllers.ClientController.addUpdateClient
+GET     /client        controllers.ClientController.get
+GET     /client/new    controllers.ClientController.create
+GET     /client/:id    controllers.ClientController.edit(id: String)
+POST    /client        controllers.ClientController.addUpdateClient(id: String)
 
 GET     /user           controllers.UserController.get
 

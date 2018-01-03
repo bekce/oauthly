@@ -12,6 +12,7 @@ import play.mvc.*;
 import repositories.UserRepository;
 
 import javax.inject.Inject;
+import java.time.Duration;
 import java.util.Optional;
 
 public class LoginController extends Controller {
@@ -28,6 +29,7 @@ public class LoginController extends Controller {
         this.authorizationServerManager = authorizationServerManager;
     }
 
+    @config.AuthorizationServerSecure(optional = true)
     public Result get(String next) {
         Optional<User> user = request().attrs().getOptional(AuthorizationServerSecure.USER);
         if(user.isPresent()){ // already authenticated
@@ -57,7 +59,7 @@ public class LoginController extends Controller {
 
     public Result logout(){
         Http.Cookie ltat = Http.Cookie.builder("ltat", "")
-                .withPath("/").withHttpOnly(true).withMaxAge(0).build();
+                .withPath("/").withHttpOnly(true).withMaxAge(Duration.ZERO).build();
         Optional<String> referer = request().header("Referer");
         flash("info", "Logout successful");
         if(referer.isPresent()){

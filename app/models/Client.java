@@ -25,6 +25,10 @@ public class Client {
      * The id of the managing user of this client
      */
     private String ownerId;
+    /**
+     * Contains the allowed origin for using the JS authentication. Must match incoming Origin header 1-1 else the request will not be allowed.
+     */
+    private String allowedOrigin;
 
     public String getId() {
         return id;
@@ -80,5 +84,13 @@ public class Client {
 
     public void setOwnerId(String ownerId) {
         this.ownerId = ownerId;
+    }
+
+    public String getAllowedOrigin() {
+        return allowedOrigin;
+    }
+
+    public void setAllowedOrigin(String allowedOrigin) {
+        this.allowedOrigin = allowedOrigin;
     }
 }
