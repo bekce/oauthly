@@ -22,11 +22,10 @@ First account will be given admin access.
     1. For Facebook, go to <https://developers.facebook.com/apps/> and create yourself an app with redirect uri `http://localhost:9000/oauth/client/facebook/callback`, then put its client id and secret to `application.conf`. You may need some additional settings on your Facebook app. Consult their documentation. 
     2. For Google, go to <https://console.developers.google.com/apis/credentials> and create an OAuth Client ID with redirect url `http://localhost:9000/oauth/client/google/callback`, then put its client id and secret to `application.conf`. You will also need to enable Google People API. Consult their documentation. 
     3. For any other OAuth 2.0 Authorization Server, 
-        0. Fork this project
         1. Put relevant config block in `application.conf`.
         2. Set `tokenRetriever` and `currentUserIdentifier` in `AuthorizationServerManager` class. Only `id` is necessary for identifying users in remote system. If you map email addresses in remote system to OAuthly, the confirmation step will be bypassed resulting in a smoother sign-up process. 
         3. We use [bootstrap-social](https://lipis.github.io/bootstrap-social/) for provider login buttons, fork it if necessary.
-3. By now, you have authenticated yourself on OAuthly platform. Now you will configure your applications and services (OAuth 2.0 Clients) to connect to OAuthly (OAuth 2.0 Authorization Server). Go to <http://localhost:9000/client> to create one client, by setting its `name` and `redirect_uri`. 
+3. By now, you have authenticated yourself as an admin on OAuthly platform. Now you will configure your applications and services (OAuth 2.0 Clients) to connect to OAuthly (OAuth 2.0 Authorization Server). Go to <http://localhost:9000/client> to create one client, by setting its `name` and `redirect_uri`. 
 4. Set generated Client ID and Client Secret and following endpoint addresses on your OAuth 2.0 Client Application:
 
 - Authorize endpoint: http://localhost:9000/oauth/authorize (`state` parameter is mandatory)
