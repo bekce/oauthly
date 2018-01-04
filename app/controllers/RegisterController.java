@@ -6,6 +6,7 @@ import dtos.ConstraintGroups;
 import dtos.RegistrationDto;
 import models.ProviderLink;
 import models.User;
+import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Controller;
@@ -100,8 +101,10 @@ public class RegisterController extends Controller {
             if(state == 1)
                 user1.encryptThenSetPassword(dto.getPassword());
             String confirmationCode = jwtUtils.prepareEmailConfirmationCode(user1, state == 2 ? linkId : null);
+            String confirmationUrl = routes.RegisterController.step5(next, confirmationCode).absoluteURL(request());
+            Logger.info("Confirmation URL for account "+dto.getEmail()+": "+confirmationUrl);
             String content = emails.html.confirm.render(
-                    routes.RegisterController.step5(next, confirmationCode).absoluteURL(request()),
+                    confirmationUrl,
                     config.getString("brand.name")).toString();
             mailService.sendEmail(dto.getEmail(), "Confirm your account", content);
             flash("info", "Success, confirmation email sent to "+dto.getEmail()+".");
