@@ -28,11 +28,11 @@ First account will be given admin access.
 3. By now, you have authenticated yourself as an admin on OAuthly platform. Now you will configure your applications and services (OAuth 2.0 Clients) to connect to OAuthly (OAuth 2.0 Authorization Server). Go to <http://localhost:9000/client> to create one client, by setting its `name` and `redirect_uri`. 
 4. Set generated Client ID and Client Secret and following endpoint addresses on your OAuth 2.0 Client Application:
 
-- Authorize endpoint: http://localhost:9000/oauth/authorize (`state` parameter is mandatory)
+- Authorize endpoint: http://localhost:9000/oauth/authorize
 
     Example: `curl -v 'http://localhost:9000/oauth/authorize?client_id=vpNS2x3QTVSxjTuWUrY3&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Flogin'`
     
-- Token endpoint: http://localhost:9000/oauth/token (Uses POST with FORM parameters)
+- Token endpoint: http://localhost:9000/oauth/token (Use POST with FORM parameters)
 
     Example: `curl -v -X POST -d 'grant_type=authorization_code&code=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoIjoxMDI1MDQ5NzEzLCJyIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2xvZ2luIiwiZXhwIjoxNTE1MDg0OTM3LCJ2dCI6MywiZyI6IjExbU9tMHVVMEQwOHMxSXo5S3RMIn0.wtLx54iK1kEWhXAVU5gb6AnyPQnN1Qb2r4L-s20TADk&client_id=vpNS2x3QTVSxjTuWUrY3&client_secret=0JPSlNiGKRmcgqidu77s&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Flogin' 'http://localhost:9000/oauth/token'`
 
