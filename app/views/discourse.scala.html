@@ -1,8 +1,7 @@
-@()(discourse: models.DiscourseSetting)
+@()(user: models.User, discourse: models.DiscourseSetting)
 @import helper._
 
-@main("Discourse SSO Settings") {
-@adminNavigator("discourse")
+@mainWithNavigation("Discourse SSO Settings", "discourse", user) {
 @alert(flash())
 
 <div class="panel panel-default">
@@ -27,5 +26,5 @@
         }
     </div>
 </div>
-<h4 class="text-center"><a href="/logout">Logout</a></h4>
+
 }

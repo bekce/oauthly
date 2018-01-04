@@ -20,8 +20,9 @@ public class UserController extends Controller {
 
     @AuthorizationServerSecure(requireAdmin = true)
     public Result get() {
+        User user = request().attrs().get(AuthorizationServerSecure.USER);
         List<User> list = StreamSupport.stream(userRepository.findAll().spliterator(), false).collect(Collectors.toList());
-        return ok(views.html.users.render(list));
+        return ok(views.html.users.render(user, list));
     }
 
 

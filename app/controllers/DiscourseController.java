@@ -43,8 +43,9 @@ public class DiscourseController extends Controller {
 
     @AuthorizationServerSecure(requireAdmin = true)
     public Result get() {
+        User user = request().attrs().get(AuthorizationServerSecure.USER);
         DiscourseSetting setting = getSetting();
-        return ok(views.html.discourse.render(setting));
+        return ok(views.html.discourse.render(user, setting));
     }
 
 
@@ -106,7 +107,7 @@ public class DiscourseController extends Controller {
             return notFound();
         }
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        if(!user.isEmailValidated()) {
+        if(!user.isEmailVerified()) {
             return redirect(routes.ProfileController.changeEmailPage(ctx().request().uri()));
         }
 

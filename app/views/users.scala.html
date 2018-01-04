@@ -1,8 +1,7 @@
-@()(users: List[models.User])
+@()(user: models.User, users: List[models.User])
 @import helper._
 
-@main("User Management") {
-@adminNavigator("users")
+@mainWithNavigation("User Management", "users", user) {
 @alert(flash())
 
 <div class="panel panel-default">
@@ -13,19 +12,17 @@
         <table class="table table-striped">
             <thead><tr><td>id</td><td>username</td><td>email</td><td>creation_time</td></tr></thead>
             <tbody>
-            @for(user <- users) {
+            @for(user1 <- users) {
             <tr>
-                <td>@user.getId</td>
-                <td>@user.getUsername</td>
-                <td>@user.getEmail</td>
-                <td>@user.getCreationTime</td>
+                <td>@user1.getId</td>
+                <td>@user1.getUsername</td>
+                <td>@user1.getEmail</td>
+                <td>@user1.getCreationTime</td>
             </tr>
             }
             </tbody>
         </table>
     </div>
 </div>
-
-<h4 class="text-center"><a href="/logout">Logout</a></h4>
 
 }

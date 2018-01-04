@@ -1,8 +1,7 @@
-@()(client: models.Client)
+@()(user: models.User, client: models.Client)
 @import helper._
 
-@main("Add/Update Client") {
-@adminNavigator("clients")
+@mainWithNavigation("Add/Update Client", "clients", user) {
 @alert(flash())
 
 <div class="panel panel-default">
@@ -54,7 +53,5 @@
 
     </div>
 </div>
-
-<h4 class="text-center"><a href="/logout">Logout</a></h4>
 
 }

@@ -1,8 +1,7 @@
-@()(clients: List[models.Client])
+@()(user: models.User, clients: List[models.Client])
 @import helper._
 
-@main("Client Management") {
-@adminNavigator("clients")
+@mainWithNavigation("Client Management", "clients", user) {
 @alert(flash())
 
 <div class="panel panel-default">
@@ -24,7 +23,5 @@
         </table>
     </div>
 </div>
-
-<h4 class="text-center"><a href="/logout">Logout</a></h4>
 
 }

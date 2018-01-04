@@ -110,7 +110,7 @@ public class RegisterController extends Controller {
             User user = new User();
             user.setId(Utils.newId());
             user.setEmail(link.getRemoteUserEmail());
-            user.setEmailValidated(true);
+            user.setEmailVerified(true);
             user.setUsername(dto.getUsername());
             user.setUsernameNormalized(dto.getUsernameNormalized());
             user.setCreationTime(System.currentTimeMillis());
@@ -159,7 +159,7 @@ public class RegisterController extends Controller {
         User user = new User();
         user.setId(Utils.newId());
         user.setEmail(dto.getEmail());
-        user.setEmailValidated(true);
+        user.setEmailVerified(true);
         user.setUsername(dto.getUsername());
         user.setUsernameNormalized(dto.getUsernameNormalized());
         user.setCreationTime(System.currentTimeMillis());

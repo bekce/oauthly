@@ -44,6 +44,11 @@ public class ProfileController extends Controller {
         return ok(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId()), formFactory.form(RegistrationDto.class), formFactory.form(RegistrationDto.class)));
     }
 
+    public Result changePasswordPage(){
+        User user = request().attrs().get(AuthorizationServerSecure.USER);
+        return ok(views.html.changePasswordPage.render(user, formFactory.form(RegistrationDto.class)));
+    }
+
     public Result changePassword(){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
 
@@ -58,7 +63,7 @@ public class ProfileController extends Controller {
         }
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
-            return badRequest(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId()), form, formFactory.form(RegistrationDto.class)));
+            return badRequest(views.html.changePasswordPage.render(user, form));
         }
 
         user.encryptThenSetPassword(form.get().getPassword());
@@ -70,7 +75,7 @@ public class ProfileController extends Controller {
 
     public Result changeEmailPage(String next){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        return ok(views.html.changeEmailPage.render(user.getEmail(), user.isEmailValidated(), formFactory.form(RegistrationDto.class), next));
+        return ok(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
     }
 
     @RecaptchaProtected(fallback = "/profile")
@@ -79,7 +84,7 @@ public class ProfileController extends Controller {
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangeEmail.class).bindFromRequest();
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
-            return badRequest(views.html.changeEmailPage.render(user.getEmail(), user.isEmailValidated(), formFactory.form(RegistrationDto.class), next));
+            return badRequest(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
         }
         String confirmationCode = jwtUtils.prepareEmailChangeConfirmationCode(user, form.get().getEmail());
         String content = emails.html.confirm.render(
@@ -87,7 +92,7 @@ public class ProfileController extends Controller {
                 config.getString("brand.name")).toString();
         mailService.sendEmail(form.get().getEmail(), "Confirm your new email address", content);
         flash("info", "A confirmation email has been sent to "+form.get().getEmail()+". The change will not be in effect until you click the confirmation link.");
-        if(user.isEmailValidated()){
+        if(user.isEmailVerified()){
             return redirect(routes.ProfileController.get());
         } else {
             return redirect(routes.ProfileController.changeEmailPage(next));
@@ -105,7 +110,7 @@ public class ProfileController extends Controller {
             return badRequest("users don't match");
         }
         user.setEmail(tuple2._2);
-        user.setEmailValidated(true);
+        user.setEmailVerified(true);
         userRepository.save(user);
         flash("success", "Success, your email address was changed to "+user.getEmail()+". Please use the new address to login from now on.");
         // refresh the cookie here

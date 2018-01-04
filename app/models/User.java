@@ -29,8 +29,11 @@ public class User {
      * User creation time in millis
      */
     private long creationTime;
-
-    private boolean emailValidated;
+    /**
+     * If the user's email address verified with confirmation link, value will be true.
+     * Value can only be false if this user was imported from another system.
+     */
+    private boolean emailVerified;
 
     public void encryptThenSetPassword(String password_plaintext){
         String salt = BCrypt.gensalt(12);
@@ -110,11 +113,11 @@ public class User {
         this.creationTime = creationTime;
     }
 
-    public boolean isEmailValidated() {
-        return emailValidated;
+    public boolean isEmailVerified() {
+        return emailVerified;
     }
 
-    public void setEmailValidated(boolean emailValidated) {
-        this.emailValidated = emailValidated;
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
     }
 }

@@ -26,11 +26,12 @@ public class ClientController extends Controller {
     public Result get() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         List<Client> clients = clientRepository.findByOwnerId(user.getId());
-        return ok(views.html.clients.render(clients));
+        return ok(views.html.clients.render(user, clients));
     }
 
     public Result create() {
-        return ok(views.html.client.render(new Client()));
+        User user = request().attrs().get(AuthorizationServerSecure.USER);
+        return ok(views.html.client.render(user, new Client()));
     }
 
     public Result edit(String id) {
@@ -40,7 +41,7 @@ public class ClientController extends Controller {
             return badRequest("client not found");
         if(!Objects.equals(client.getOwnerId(), user.getId()))
             return badRequest("not allowed");
-        return ok(views.html.client.render(client));
+        return ok(views.html.client.render(user, client));
     }
 
     public Result addUpdateClient(String id) {

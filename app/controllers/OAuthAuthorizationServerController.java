@@ -159,7 +159,7 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
         }
 
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        if(!user.isEmailValidated()) {
+        if(!user.isEmailVerified()) {
             return redirect(routes.ProfileController.changeEmailPage(ctx().request().uri()));
         }
 

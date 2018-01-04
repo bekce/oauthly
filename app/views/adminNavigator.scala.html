@@ -1,9 +1,0 @@
-@(active: String)
-
-<ul class="nav nav-pills">
-    <li role="presentation" @if(active == "profile"){ class="active" }><a href="@routes.ProfileController.get">Profile</a></li>
-    <li role="presentation" @if(active == "clients"){ class="active" }><a href="@routes.ClientController.get">Clients</a></li>
-    <li role="presentation" @if(active == "users"){ class="active" }><a href="@routes.UserController.get">Users</a></li>
-    <li role="presentation" @if(active == "discourse"){ class="active" }><a href="@routes.DiscourseController.get">Discourse SSO</a></li>
-</ul>
-<br>

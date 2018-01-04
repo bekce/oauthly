@@ -23,6 +23,7 @@ GET     /reset-password/confirm   controllers.ResetPasswordController.step3(code
 POST    /reset-password/confirm   controllers.ResetPasswordController.step4(code: String, next: String ?= null)
 
 GET     /profile                controllers.ProfileController.get
+GET     /profile/password       controllers.ProfileController.changePasswordPage
 POST    /profile/password       controllers.ProfileController.changePassword
 GET     /profile/email          controllers.ProfileController.changeEmailPage(next: String ?= null)
 POST    /profile/email          controllers.ProfileController.changeEmail(next: String ?= null)
