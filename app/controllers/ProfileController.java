@@ -68,24 +68,33 @@ public class ProfileController extends Controller {
         return jwtUtils.prepareCookieThenRedirect(user, null);
     }
 
+    public Result changeEmailPage(String next){
+        User user = request().attrs().get(AuthorizationServerSecure.USER);
+        return ok(views.html.changeEmailPage.render(user.getEmail(), user.isEmailValidated(), formFactory.form(RegistrationDto.class), next));
+    }
+
     @RecaptchaProtected(fallback = "/profile")
-    public Result changeEmail(){
+    public Result changeEmail(String next){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangeEmail.class).bindFromRequest();
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
-            return badRequest(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId()), formFactory.form(RegistrationDto.class), form));
+            return badRequest(views.html.changeEmailPage.render(user.getEmail(), user.isEmailValidated(), formFactory.form(RegistrationDto.class), next));
         }
         String confirmationCode = jwtUtils.prepareEmailChangeConfirmationCode(user, form.get().getEmail());
         String content = emails.html.confirm.render(
-                routes.ProfileController.changeEmailConfirm(confirmationCode).absoluteURL(request()),
+                routes.ProfileController.changeEmailConfirm(confirmationCode, next).absoluteURL(request()),
                 config.getString("brand.name")).toString();
         mailService.sendEmail(form.get().getEmail(), "Confirm your new email address", content);
         flash("info", "A confirmation email has been sent to "+form.get().getEmail()+". The change will not be in effect until you click the confirmation link.");
-        return redirect(routes.ProfileController.get());
+        if(user.isEmailValidated()){
+            return redirect(routes.ProfileController.get());
+        } else {
+            return redirect(routes.ProfileController.changeEmailPage(next));
+        }
     }
 
-    public Result changeEmailConfirm(String code){
+    public Result changeEmailConfirm(String code, String next){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Tuple2<User, String> tuple2 = jwtUtils.validateEmailChangeConfirmationCode(code);
         if(tuple2 == null){
@@ -100,7 +109,7 @@ public class ProfileController extends Controller {
         userRepository.save(user);
         flash("success", "Success, your email address was changed to "+user.getEmail()+". Please use the new address to login from now on.");
         // refresh the cookie here
-        return jwtUtils.prepareCookieThenRedirect(user, null);
+        return jwtUtils.prepareCookieThenRedirect(user, next);
     }
 
     public Result linkProvider(String linkId) {

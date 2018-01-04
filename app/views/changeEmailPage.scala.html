@@ -1,0 +1,6 @@
+@()(oldEmail: String, verified: Boolean, changeEmailForm: Form[dtos.RegistrationDto], next: String)
+
+@main("Change Email") {
+    @alert(flash())
+    @changeEmail(oldEmail, verified, changeEmailForm, next)
+}

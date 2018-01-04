@@ -106,6 +106,10 @@ public class DiscourseController extends Controller {
             return notFound();
         }
         User user = request().attrs().get(AuthorizationServerSecure.USER);
+        if(!user.isEmailValidated()) {
+            return redirect(routes.ProfileController.changeEmailPage(ctx().request().uri()));
+        }
+
         try {
             Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
             SecretKeySpec secret_key = new SecretKeySpec(setting.getSecret().getBytes("UTF-8"), "HmacSHA256");

@@ -24,8 +24,9 @@ POST    /reset-password/confirm   controllers.ResetPasswordController.step4(code
 
 GET     /profile                controllers.ProfileController.get
 POST    /profile/password       controllers.ProfileController.changePassword
-POST    /profile/email          controllers.ProfileController.changeEmail
-GET     /profile/email/confirm  controllers.ProfileController.changeEmailConfirm(code: String)
+GET     /profile/email          controllers.ProfileController.changeEmailPage(next: String ?= null)
+POST    /profile/email          controllers.ProfileController.changeEmail(next: String ?= null)
+GET     /profile/email/confirm  controllers.ProfileController.changeEmailConfirm(code: String, next: String ?= null)
 GET     /profile/link           controllers.ProfileController.linkProvider(linkId: String)
 POST    /profile/unlink         controllers.ProfileController.unlinkProvider(linkId: String)
 
@@ -48,3 +49,5 @@ GET     /discourse/sso  controllers.DiscourseController.sso(sso: String, sig: St
 
 GET     /oauth/client/:providerKey/authorize  controllers.OAuthClientController.authorize(providerKey: String, next: String ?= null)
 GET     /oauth/client/:providerKey/callback   controllers.OAuthClientController.callback(providerKey: String, code: java.util.Optional[String], error: java.util.Optional[String], state: java.util.Optional[String])
+
+GET     /api/me         controllers.MeController.get

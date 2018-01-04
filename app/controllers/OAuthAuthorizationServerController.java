@@ -159,6 +159,9 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
         }
 
         User user = request().attrs().get(AuthorizationServerSecure.USER);
+        if(!user.isEmailValidated()) {
+            return redirect(routes.ProfileController.changeEmailPage(ctx().request().uri()));
+        }
 
         Grant grant = grantRepository.findByClientAndUser(client_id, user.getId());
         if(grant != null){
