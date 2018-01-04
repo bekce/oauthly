@@ -9,6 +9,7 @@ import dtos.ConstraintGroups;
 import dtos.RegistrationDto;
 import models.ProviderLink;
 import models.User;
+import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.data.validation.ValidationError;
@@ -92,8 +93,10 @@ public class ProfileController extends Controller {
             return badRequest(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
         }
         String confirmationCode = jwtUtils.prepareEmailChangeConfirmationCode(user, form.get().getEmail());
+        String confirmationUrl = routes.ProfileController.changeEmailConfirm(confirmationCode, next).absoluteURL(request());
+        Logger.info("Confirmation URL for account "+user.getEmail()+": "+confirmationUrl);
         String content = emails.html.confirm.render(
-                routes.ProfileController.changeEmailConfirm(confirmationCode, next).absoluteURL(request()),
+                confirmationUrl,
                 config.getString("brand.name")).toString();
         mailService.sendEmail(form.get().getEmail(), "Confirm your new email address", content);
         flash("info", "A confirmation email has been sent to "+form.get().getEmail()+". The change will not be in effect until you click the confirmation link.");
