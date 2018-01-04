@@ -11,6 +11,7 @@ import models.ProviderLink;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import repositories.ProviderLinkRepository;
@@ -82,6 +83,10 @@ public class ProfileController extends Controller {
     public Result changeEmail(String next){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangeEmail.class).bindFromRequest();
+        ValidationError validateUniqueEmail = form.value().get().validateUniqueEmail(userRepository, user.getId());
+        if(validateUniqueEmail != null){
+            form = form.withError(validateUniqueEmail);
+        }
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
             return badRequest(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));

@@ -21,6 +21,6 @@ public class ValidateUniqueEmailValidator implements Constraints.PlayConstraintV
 
     @Override
     public boolean isValid(ValidatableUniqueEmail<?> value, ConstraintValidatorContext context) {
-        return reportValidationStatus(value.validateUniqueEmail(this.userRepository), context);
+        return reportValidationStatus(value.validateUniqueEmail(this.userRepository, null), context);
     }
 }

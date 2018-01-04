@@ -2,6 +2,7 @@ package dtos;
 
 import config.*;
 import dtos.ConstraintGroups.*;
+import models.User;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import repositories.UserRepository;
@@ -117,7 +118,7 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
 
 
     @Override
-    public ValidationError validateUniqueEmail(UserRepository userRepository) {
+    public ValidationError validateUniqueEmail(UserRepository userRepository, String currentUserId) {
         // advanced email validation with commons-validator
 //        if(!EmailValidator.getInstance().isValid(dto.getEmail())){
 //            form = form.withError("email", "Invalid.userForm.email");
@@ -125,7 +126,8 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
 
         email = Utils.normalizeEmail(email);
         if(email == null) return null;
-        if (userRepository.findByEmail(email) != null) {
+        User byEmail = userRepository.findByEmail(email);
+        if (byEmail != null && !byEmail.getId().equals(currentUserId)) {
             return new ValidationError("email", "Email is already registered");
         }
         return null;
