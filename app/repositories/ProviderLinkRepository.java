@@ -3,6 +3,8 @@ package repositories;
 import models.ProviderLink;
 import org.jongo.MongoCollection;
 import uk.co.panaxiom.playjongo.PlayJongo;
+
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -26,6 +28,10 @@ public class ProviderLinkRepository {
 
     public ProviderLink findByProvider(String providerKey, String remoteUserId) {
         return collection.findOne("{providerKey:#, remoteUserId:#}", providerKey, remoteUserId).as(ProviderLink.class);
+    }
+
+    public List<ProviderLink> findByUserId(String userId){
+      return StreamSupport.stream(collection.find("{userId:#}", userId).as(ProviderLink.class).spliterator(), false).collect(Collectors.toList());
     }
 
     public java.util.Map<String, String> findMapByUserId(String userId){

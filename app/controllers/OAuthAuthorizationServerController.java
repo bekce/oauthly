@@ -19,6 +19,7 @@ import scala.Tuple2;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -122,8 +123,11 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
                     grant.setUserId(user.getId());
                     grant.setClientId(client_id);
                     if(scope != null){
-                        grant.setScopes(Arrays.asList(scope.split(" ")));
+                        grant.setScopes(new HashSet<>(Arrays.asList(scope.split(" "))));
                     }
+                    grantRepository.save(grant);
+                } else if (scope != null) {
+                    grant.getScopes().addAll(Arrays.asList(scope.split(" ")));
                     grantRepository.save(grant);
                 }
                 Token token = jwtUtils.prepareToken(client_id, client_secret, grant.getId(), grant.getScopes());

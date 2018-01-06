@@ -2,8 +2,8 @@ package models;
 
 import org.jongo.marshall.jackson.oid.MongoId;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Models a grant made by user to client
@@ -14,7 +14,7 @@ public class Grant {
     private String id;
     private String userId;
     private String clientId;
-    private List<String> scopes = new ArrayList<>();
+    private Set<String> scopes = new HashSet<>();
 
     public String getId() {
         return id;
@@ -40,11 +40,11 @@ public class Grant {
         this.clientId = clientId;
     }
 
-    public List<String> getScopes() {
+    public Set<String> getScopes() {
         return scopes;
     }
 
-    public void setScopes(List<String> scopes) {
+    public void setScopes(Set<String> scopes) {
         this.scopes = scopes;
     }
 }

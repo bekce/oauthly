@@ -21,10 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import play.Logger;
 import scala.Tuple2;
@@ -343,7 +340,7 @@ public class JwtUtils {
      *
      * @return generated token
      */
-    public Token prepareToken(String client_id, String client_secret, String grant_id, List<String> scopes) {
+    public Token prepareToken(String client_id, String client_secret, String grant_id, Collection<String> scopes) {
         int hash = Objects.hash(client_id, client_secret);
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
         final long exp = iat + expireAccessToken; // expires claim. In this case the token expires in 60 seconds

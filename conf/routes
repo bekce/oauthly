@@ -41,8 +41,8 @@ GET     /user           controllers.UserController.get
 GET     /logout         controllers.LoginController.logout
 
 POST    /oauth/token        controllers.OAuthAuthorizationServerController.token
-GET     /oauth/authorize    controllers.OAuthAuthorizationServerController.authorize(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "read", state: String ?= null)
-POST    /oauth/authorize    controllers.OAuthAuthorizationServerController.authorizeDo(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "read", state: String ?= null)
+GET     /oauth/authorize    controllers.OAuthAuthorizationServerController.authorize(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "profile", state: String ?= null)
+POST    /oauth/authorize    controllers.OAuthAuthorizationServerController.authorizeDo(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "profile", state: String ?= null)
 
 GET     /discourse      controllers.DiscourseController.get
 POST    /discourse      controllers.DiscourseController.updateSettings

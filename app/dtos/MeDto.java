@@ -1,14 +1,20 @@
 package dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import scala.Tuple2;
+
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * Created by Selim Eren Bekçe on 16.08.2017.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MeDto {
     private String id;
     private String name;
     private String email;
+    private Map<String, Tuple2<String, Token>> socialLinks;
 
     public MeDto() {
     }
@@ -43,6 +49,14 @@ public class MeDto {
         this.email = email;
     }
 
+    public Map<String, Tuple2<String, Token>> getSocialLinks() {
+        return socialLinks;
+    }
+
+    public void setSocialLinks(Map<String, Tuple2<String, Token>> socialLinks) {
+        this.socialLinks = socialLinks;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -50,12 +64,13 @@ public class MeDto {
         MeDto meDto = (MeDto) o;
         return Objects.equals(id, meDto.id) &&
                 Objects.equals(name, meDto.name) &&
-                Objects.equals(email, meDto.email);
+                Objects.equals(email, meDto.email) &&
+                Objects.equals(socialLinks, meDto.socialLinks);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, email);
+        return Objects.hash(id, name, email, socialLinks);
     }
 
     @Override
