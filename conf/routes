@@ -52,3 +52,5 @@ GET     /oauth/client/:providerKey/authorize  controllers.OAuthClientController.
 GET     /oauth/client/:providerKey/callback   controllers.OAuthClientController.callback(providerKey: String, code: java.util.Optional[String], error: java.util.Optional[String], state: java.util.Optional[String])
 
 GET     /api/me         controllers.MeController.get
++ nocsrf
+POST    /api/user       controllers.UserController.apiCreate
