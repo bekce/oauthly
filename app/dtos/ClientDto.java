@@ -10,4 +10,5 @@ public class ClientDto {
     @Constraints.Required
     public String redirectUri;
     public String allowedOrigin;
+    public boolean trusted;
 }

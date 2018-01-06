@@ -57,6 +57,7 @@ public class ClientController extends Controller {
                 client.setName(dto.name);
                 client.setRedirectUri(dto.redirectUri);
                 client.setAllowedOrigin(dto.allowedOrigin);
+                client.setTrusted(dto.trusted);
                 clientRepository.save(client);
                 flash("info", "Create client successful");
             } else {
@@ -67,6 +68,7 @@ public class ClientController extends Controller {
                 client.setName(dto.name);
                 client.setRedirectUri(dto.redirectUri);
                 client.setAllowedOrigin(dto.allowedOrigin);
+                client.setTrusted(dto.trusted);
                 clientRepository.save(client);
                 flash("info", "Update successful");
             }

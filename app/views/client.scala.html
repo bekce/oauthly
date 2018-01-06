@@ -43,6 +43,16 @@
                 <input name="allowedOrigin" type="text" class="form-control" value="@client.getAllowedOrigin">
             </div>
         </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                    <label data-toggle="tooltip" data-placement="top" title="Trusted apps are automatically granted of ANY scope they request, without usual 'Authorize application' consent from the user and they are able to use Resource Owner Password Grant for getting tokens. So only use it for the applications you develop/control. ">
+                        <input type="checkbox" value="true" name="trusted" @if(client.isTrusted){checked}>
+                        Trusted
+                    </label>
+                </div>
+            </div>
+        </div>
         <input type="hidden" value="@client.getId" name="id"/>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
