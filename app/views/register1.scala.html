@@ -25,15 +25,15 @@
         @if(state == 1){
             <h2 class="form-heading">Register with email</h2>
             <div class="form-group">
-                <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
+                <input name="email" type="text" class="form-control input-lg" placeholder="Email address" autofocus/>
                 @for(error <- form("email").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="form-group">
-                <input name="username" type="text" class="form-control" placeholder="Username"/>
+                <input name="username" type="text" class="form-control input-lg" placeholder="Username"/>
                 @for(error <- form("username").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="form-group">
-                <input name="password" type="password" class="form-control" placeholder="Pick a password"/>
+                <input name="password" type="password" class="form-control input-lg" placeholder="Pick a password" data-toggle="password"/>
                 @for(error <- form("password").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="g-recaptcha" data-sitekey="6LfpYy0UAAAAALI0zTdsq9AzUE1Mi2KeCy-bpoEx"></div>
@@ -42,11 +42,11 @@
             <h2 class="form-heading">Complete Registration</h2>
             You have successfully connected with your @providerName account. Please enter an email address to complete your registration with us, the address will be used for communicating with you. We will also need to validate your e-mail address with a confirmation link.
             <div class="form-group">
-                <input name="email" type="text" class="form-control" placeholder="Email address" autofocus/>
+                <input name="email" type="text" class="form-control input-lg" placeholder="Email address" autofocus/>
                 @for(error <- form("email").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="form-group">
-                <input name="username" type="text" class="form-control" placeholder="Username"/>
+                <input name="username" type="text" class="form-control input-lg" placeholder="Username"/>
                 @for(error <- form("username").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
         }
@@ -57,7 +57,7 @@
                 <p class="form-control-static">@email</p>
             </div>
             <div class="form-group">
-                <input name="username" type="text" class="form-control" placeholder="Username"/>
+                <input name="username" type="text" class="form-control input-lg" placeholder="Username"/>
                 @for(error <- form("username").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
         }

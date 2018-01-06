@@ -7,10 +7,10 @@
         @CSRF.formField
         <h2 class="form-heading">Please Log In</h2>
         <div class="form-group">
-            <input name="email" type="text" class="form-control" placeholder="Username or Email" autofocus/>
+            <input name="email" type="text" class="form-control input-lg" placeholder="Username or Email" autofocus/>
         </div>
         <div class="form-group">
-            <input name="password" type="password" class="form-control" placeholder="Password"/>
+            <input name="password" type="password" class="form-control input-lg" placeholder="Password"/>
         </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
         <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">Register new account</a></h4>
