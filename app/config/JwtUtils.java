@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
+import java.time.Duration;
 import java.util.*;
 
 import play.Logger;
@@ -31,24 +32,24 @@ import static play.mvc.Results.redirect;
 @Singleton
 public class JwtUtils {
 
-    private final int expireCookie;
-    private final int expireResetCode;
+    private final String jwtSecret;
+    private final Duration expireCookie;
+    private final Duration expireResetCode;
+    private final Duration expireAccessToken;
+    private final Duration expireRefreshToken;
+    private final Duration expireAuthorizationCode;
     private final UserRepository userRepository;
     private final ClientRepository clientRepository;
     private final GrantRepository grantRepository;
-    private final String jwtSecret;
-    private final int expireAccessToken;
-    private final int expireRefreshToken;
-    private final int expireAuthorizationCode;
 
     @Inject
     public JwtUtils(Config config, UserRepository userRepository, ClientRepository clientRepository, GrantRepository grantRepository) {
         jwtSecret = config.getString("jwt.secret");
-        expireCookie = config.getInt("jwt.expire.cookie");
-        expireResetCode = config.getInt("jwt.expire.resetCode");
-        expireAccessToken = config.getInt("jwt.expire.accessToken");
-        expireRefreshToken = config.getInt("jwt.expire.refreshToken");
-        expireAuthorizationCode = config.getInt("jwt.expire.authorizationCode");
+        expireCookie = config.getDuration("jwt.expire.cookie");
+        expireResetCode = config.getDuration("jwt.expire.resetCode");
+        expireAccessToken = config.getDuration("jwt.expire.accessToken");
+        expireRefreshToken = config.getDuration("jwt.expire.refreshToken");
+        expireAuthorizationCode = config.getDuration("jwt.expire.authorizationCode");
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
         this.grantRepository = grantRepository;
@@ -57,7 +58,7 @@ public class JwtUtils {
     public String prepareResetCode(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword(), user.getLastUpdateTime());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
-        final long exp = iat + expireResetCode; // expires claim
+        final long exp = iat + expireResetCode.getSeconds(); // expires claim
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
@@ -107,7 +108,7 @@ public class JwtUtils {
 
     public String prepareEmailConfirmationCode(User user, String linkId) {
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
-        final long exp = iat + expireResetCode; // expires claim
+        final long exp = iat + expireResetCode.getSeconds(); // expires claim
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
@@ -157,7 +158,7 @@ public class JwtUtils {
     public String prepareEmailChangeConfirmationCode(User user, String newEmail) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
-        final long exp = iat + expireResetCode; // expires claim
+        final long exp = iat + expireResetCode.getSeconds(); // expires claim
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
@@ -216,7 +217,7 @@ public class JwtUtils {
     public String prepareCookieValue(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
-        final long exp = iat + expireCookie; // expires claim
+        final long exp = iat + expireCookie.getSeconds(); // expires claim
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
@@ -268,7 +269,7 @@ public class JwtUtils {
     public String prepareAuthorizationCode(String client_id, String client_secret, String grant_id, String redirect_uri) {
         int hash = Objects.hash(client_id, client_secret);
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
-        final long exp = iat + expireAuthorizationCode;
+        final long exp = iat + expireAuthorizationCode.getSeconds();
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
@@ -343,7 +344,7 @@ public class JwtUtils {
     public Token prepareToken(String client_id, String client_secret, String grant_id, Collection<String> scopes) {
         int hash = Objects.hash(client_id, client_secret);
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
-        final long exp = iat + expireAccessToken; // expires claim. In this case the token expires in 60 seconds
+        final long exp = iat + expireAccessToken.getSeconds(); // expires claim. In this case the token expires in 60 seconds
         final JWTSigner signer = new JWTSigner(jwtSecret);
 
         final HashMap<String, Object> claims = new HashMap<>();
@@ -354,7 +355,7 @@ public class JwtUtils {
         final String token_a = signer.sign(claims);
 
         final HashMap<String, Object> claims_r = new HashMap<>();
-        final long exp_r = iat + expireRefreshToken; // refresh token expire time: 1 week
+        final long exp_r = iat + expireRefreshToken.getSeconds(); // refresh token expire time: 1 week
         claims_r.put("vt", 2); //version=1 & type=refresh_token
         claims_r.put("exp", exp_r);
         claims_r.put("h", hash);
@@ -362,7 +363,7 @@ public class JwtUtils {
         final String token_r = signer.sign(claims_r);
 
         /* The last parameter (scope) is entirely optional. You can use it to implement scoping requirements. If you would like so, put it to claims map to verify it. */
-        return new Token(token_a, token_r, "bearer", expireAccessToken, scopes == null ? "" : String.join(" ", scopes));
+        return new Token(token_a, token_r, "bearer", expireAccessToken.getSeconds(), scopes == null ? "" : String.join(" ", scopes));
     }
 
     /**

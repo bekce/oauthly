@@ -65,7 +65,7 @@ public class ResetPasswordController extends Controller {
         String content = resetPassword.render(
                 confirmationUrl,
                 user.getEmail(),
-                config.getInt("jwt.expire.resetCode") / 3600,
+                (int) config.getDuration("jwt.expire.resetCode").toHours(),
                 config.getString("brand.name")).toString();
         Logger.info("Confirmation URL: "+confirmationUrl);
         mailService.sendEmail(user.getEmail(), "Reset your password", content);
