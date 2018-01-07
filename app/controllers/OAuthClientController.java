@@ -101,7 +101,7 @@ public class OAuthClientController extends Controller {
 							return redirect(routes.RegisterController.step2(next, link.getId()));
 						}
 					} else { // we have a valid user here!
-						if(!user.getId().equals(authenticatedUser.map(User::getId).orElse(null))) {
+						if(authenticatedUser.isPresent() && !user.getId().equals(authenticatedUser.get().getId())) {
 							// the linked account is connected to another account, we cannot allow this
 							flash("warning", "Warning: The "+providerKey+" account you tried to link is already linked to another account with email address "+user.getEmail()+". To proceed, you need to unlink it first");
 							return redirect(routes.ProfileController.get());

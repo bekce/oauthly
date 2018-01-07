@@ -181,7 +181,7 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
             }
             if(scopeOK){
                 String code = jwtUtils.prepareAuthorizationCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri);
-                String uri = String.format("%s?code=%s", redirect_uri, code);
+                String uri = String.format("%s%scode=%s", redirect_uri, redirect_uri.contains("?") ? "&" : "?", code);
                 if(state != null){
                     uri += "&state="+state;
                 }
@@ -222,7 +222,7 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
         grantRepository.save(grant);
 
         String code = jwtUtils.prepareAuthorizationCode(client.getId(), client.getSecret(), grant.getId(), redirect_uri);
-        String uri = String.format("%s?code=%s", redirect_uri, code);
+        String uri = String.format("%s%scode=%s", redirect_uri, redirect_uri.contains("?") ? "&" : "?", code);
         if(state != null){
             uri += "&state="+state;
         }
