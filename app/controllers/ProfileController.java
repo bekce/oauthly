@@ -82,7 +82,7 @@ public class ProfileController extends Controller {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         if(user.getPassword() == null){
             flash("warning", "To change your email address, please first set a password first.");
-            redirect(routes.ProfileController.changePasswordPage());
+            return redirect(routes.ProfileController.changePasswordPage());
         }
         return ok(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
     }
