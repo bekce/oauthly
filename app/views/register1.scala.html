@@ -1,7 +1,7 @@
-@(state: Int, providerName: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String)()
+@(state: Int, providerName: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String, tosText: Html)()
 
 @main("Register") {
-    @*@if(state == 1){*@
+    @* @if(state == 1){*@
         @*<div class="form-signin">*@
             @*<h2 class="form-heading">Register with Provider</h2>*@
             @*It is easier to register with a social provider*@
@@ -25,11 +25,11 @@
         @if(state == 1){
             <h2 class="form-heading">Register with email</h2>
             <div class="form-group">
-                <input name="email" type="text" class="form-control input-lg" placeholder="Email address" autofocus/>
+                <input name="email" type="email" class="form-control input-lg" placeholder="Email address" value="@form.rawData.get("email")" autofocus/>
                 @for(error <- form("email").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="form-group">
-                <input name="username" type="text" class="form-control input-lg" placeholder="Username"/>
+                <input name="username" type="text" class="form-control input-lg" placeholder="Username" value="@form.rawData.get("username")"/>
                 @for(error <- form("username").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="form-group">
@@ -42,11 +42,11 @@
             <h2 class="form-heading">Complete Registration</h2>
             You have successfully connected with your @providerName account. Please enter an email address to complete your registration with us, the address will be used for communicating with you. We will also need to validate your e-mail address with a confirmation link.
             <div class="form-group">
-                <input name="email" type="text" class="form-control input-lg" placeholder="Email address" autofocus/>
+                <input name="email" type="email" class="form-control input-lg" placeholder="Email address" value="@form.rawData.get("email")" autofocus/>
                 @for(error <- form("email").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
             <div class="form-group">
-                <input name="username" type="text" class="form-control input-lg" placeholder="Username"/>
+                <input name="username" type="text" class="form-control input-lg" placeholder="Username" value="@form.rawData.get("username")"/>
                 @for(error <- form("username").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
         }
@@ -57,11 +57,33 @@
                 <p class="form-control-static">@email</p>
             </div>
             <div class="form-group">
-                <input name="username" type="text" class="form-control input-lg" placeholder="Username"/>
+                <input name="username" type="text" class="form-control input-lg" placeholder="Username" value="@form.rawData.get("username")" autofocus/>
                 @for(error <- form("username").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
         }
+        <div class="form-group input-lg">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="acceptTos" value="true" /> Accept <a data-toggle="modal" data-target="#tosModal">Terms of Service</a>
+                    @for(error <- form("acceptTos").errors) {<p class="text-warning">@error.format(messages())</p>}
+                </label>
+            </div>
+        </div>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Continue</button>
         <h4 class="text-center"><a href="@routes.LoginController.get(next)">Back to login</a></h4>
     }
+
+<div class="modal fade" tabindex="-1" role="dialog" id="tosModal" aria-labelledby="tosModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="tosModalLabel">Terms of Service</h4>
+            </div>
+            <div class="modal-body">
+                @tosText
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 }

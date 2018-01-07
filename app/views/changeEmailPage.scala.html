@@ -1,4 +1,4 @@
-@()(user: models.User, changeEmailForm: Form[dtos.RegistrationDto], next: String)
+@()(user: models.User, changeEmailForm: play.data.Form[dtos.RegistrationDto], next: String)
 @import helper._
 @title = @{if(user.isEmailVerified) "Change Email" else "Verify Email"}
 @mainWithNavigation(title, "changeEmail", user) {

@@ -34,6 +34,8 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     private String password;
     @Constraints.Required(groups = {ChangePassword.class, ChangeEmail.class})
     private String oldPassword;
+    @Constraints.Required(groups = {Register1.class, Register2.class, Register3.class})
+    private Boolean acceptTos;
 
     public String getUsername() {
         return username;
@@ -73,6 +75,14 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
 
     public void setOldPassword(String oldPassword) {
         this.oldPassword = oldPassword;
+    }
+
+    public Boolean getAcceptTos() {
+        return acceptTos;
+    }
+
+    public void setAcceptTos(Boolean acceptTos) {
+        this.acceptTos = acceptTos;
     }
 
     @Override
