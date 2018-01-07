@@ -109,7 +109,7 @@ public class ProfileController extends Controller {
                 confirmationUrl,
                 config.getString("brand.name")).toString();
         mailService.sendEmail(form.get().getEmail(), "Confirm your new email address", content);
-        flash("info", "A confirmation email has been sent to "+form.get().getEmail()+". The change will not be in effect until you click the confirmation link.");
+        flash("info", "A confirmation email has been sent to "+form.get().getEmail()+". The change will be applied after clicking the confirmation link and authenticating yourself. Therefore, please login with your old credentials, if required.");
         if(user.isEmailVerified()){
             return redirect(routes.ProfileController.get());
         } else {
