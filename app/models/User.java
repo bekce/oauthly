@@ -34,6 +34,11 @@ public class User {
      * Value can only be false if this user was imported from another system.
      */
     private boolean emailVerified;
+    /**
+     * If the user is disabled, this field will contain the reason, else it will be null.
+     * Disabled users are not able to login.
+     */
+    private String disabledReason;
 
     public void encryptThenSetPassword(String password_plaintext){
         String salt = BCrypt.gensalt(12);
@@ -119,5 +124,17 @@ public class User {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public boolean isDisabled(){
+        return disabledReason != null;
+    }
+
+    public String getDisabledReason() {
+        return disabledReason;
+    }
+
+    public void setDisabledReason(String disabledReason) {
+        this.disabledReason = disabledReason;
     }
 }

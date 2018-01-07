@@ -7,8 +7,11 @@ import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import static play.mvc.Controller.flash;
 
 public class AuthorizationServerAuthAction extends play.mvc.Action<AuthorizationServerSecure> {
 
@@ -26,6 +29,12 @@ public class AuthorizationServerAuthAction extends play.mvc.Action<Authorization
         if(ltat != null) {
             User user = jwtUtils.validateCookie(ltat.value());
             if(user != null) {
+                if (user.isDisabled()) {
+                    flash("error", "Your account was disabled.");
+                    Http.Cookie ltatRemove = Http.Cookie.builder("ltat", "")
+                            .withPath("/").withHttpOnly(true).withMaxAge(Duration.ZERO).build();
+                    return CompletableFuture.completedFuture(redirect(routes.LoginController.get(null)).withCookies(ltatRemove));
+                }
                 if(!configuration.requireAdmin() || user.isAdmin()){
                     ctx = ctx.withRequest(ctx.request().addAttr(AuthorizationServerSecure.USER, user));
                     valid = true;

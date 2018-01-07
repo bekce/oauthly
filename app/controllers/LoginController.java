@@ -52,6 +52,10 @@ public class LoginController extends Controller {
         }
         User user = userRepository.findByUsernameOrEmail(form.get().getEmail());
         if(user != null && user.checkPassword(form.get().getPassword())){
+            if(user.isDisabled()){
+                flash("error", "Your account was disabled.");
+                return redirect(routes.LoginController.get(next));
+            }
             flash("info", "Login successful");
             eventRepository.login(request(), user, form.get().getEmail());
             return jwtUtils.prepareCookieThenRedirect(user, next);

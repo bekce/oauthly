@@ -210,11 +210,11 @@ public class JwtUtils {
             return redirect(routes.ProfileController.get()).withCookies(ltat);
     }
 
-    public Http.Cookie prepareCookie(User user){
+    private Http.Cookie prepareCookie(User user){
         return Http.Cookie.builder("ltat", prepareCookieValue(user)).withPath("/").withHttpOnly(true).withMaxAge(expireCookie).build();
     }
 
-    public String prepareCookieValue(User user) {
+    private String prepareCookieValue(User user) {
         int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
         final long iat = System.currentTimeMillis() / 1000L; // issued at claim
         final long exp = iat + expireCookie.getSeconds(); // expires claim

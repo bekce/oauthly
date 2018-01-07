@@ -52,6 +52,7 @@ public class UserController extends Controller {
         boolean emailVerified = json.path("user").path("emailVerified").asBoolean(false);
         long creationTime = json.path("user").path("creationTime").asLong(System.currentTimeMillis());
         long lastUpdateTime = json.path("user").path("lastUpdateTime").asLong(System.currentTimeMillis());
+        String disabledReason = json.path("user").path("disabledReason").asText(null);
         User byId = userRepository.findById(id);
         if(!update && byId != null) {
             return badRequest("duplicate id");
@@ -88,6 +89,7 @@ public class UserController extends Controller {
         user1.setCreationTime(creationTime);
         user1.setLastUpdateTime(lastUpdateTime);
         user1.setAdmin(false);
+        user1.setDisabledReason(disabledReason);
         if(password != null) user1.encryptThenSetPassword(password);
         else user1.setPassword(null);
         userRepository.save(user1);

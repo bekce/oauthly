@@ -106,6 +106,10 @@ public class OAuthClientController extends Controller {
 							flash("warning", "Warning: The "+providerKey+" account you tried to link is already linked to another account with email address "+user.getEmail()+". To proceed, you need to unlink it first");
 							return redirect(routes.ProfileController.get());
 						}
+						if(user.isDisabled()){
+							flash("error", "Your account was disabled.");
+							return redirect(routes.LoginController.get(next));
+						}
 						return jwtUtils.prepareCookieThenRedirect(user, next);
 					}
 				}, httpExecutionContext.current());
