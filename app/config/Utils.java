@@ -9,22 +9,12 @@ import java.util.Locale;
 public class Utils {
     public static String normalizeUsername(String username){
         if(username == null) return null;
-        return username.replaceAll("[-\\\\.]","_").toLowerCase(Locale.ENGLISH);
+        return username.replaceAll("[-.\\s]","_").toLowerCase(Locale.ENGLISH);
     }
 
     public static String normalizeEmail(String email){
         if(email == null) return null;
         return email.toLowerCase(Locale.ENGLISH);
-    }
-
-    public static String newPasswordCheck(String newPassword, String newPassword2){
-        if (newPassword.length() < 4 || newPassword.length() > 32) {
-            return "Please use between 4 and 32";
-        }
-        else if (!newPassword.equals(newPassword2)) {
-            return "These passwords don't match";
-        }
-        return null;
     }
 
     private static final String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";

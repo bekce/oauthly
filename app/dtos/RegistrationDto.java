@@ -19,7 +19,7 @@ import java.util.Objects;
 public class RegistrationDto implements Constraints.Validatable<List<ValidationError>>,
         ValidatableUniqueUsername<ValidationError>,
         ValidatableUniqueEmail<ValidationError> {
-    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores", groups = {Register1.class, Register2.class, Register3.class})
+    @Constraints.Pattern(value = "^[A-Za-z0-9]+(?:[\\._-][A-Za-z0-9]+)*$", message = "Username can contain alphanumerics, dots, hyphens and underscores", groups = {Register1.class, Register2.class, Register3.class})
     @Constraints.MaxLength(value = 20, groups = {Register1.class, Register2.class, Register3.class})
     @Constraints.MinLength(value = 3, groups = {Register1.class, Register2.class, Register3.class})
     @Constraints.Required(groups = {Register1.class, Register2.class, Register3.class})
