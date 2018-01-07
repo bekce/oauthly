@@ -41,4 +41,7 @@ public class Utils {
         return randomString(20);
 //        return RandomStringUtils.randomAlphanumeric(20);
     }
+    public static String newSecret() {
+        return randomString(32);
+    }
 }

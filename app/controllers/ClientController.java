@@ -52,7 +52,7 @@ public class ClientController extends Controller {
             if(id == null || id.isEmpty()){
                 Client client = new Client();
                 client.setId(Utils.newId());
-                client.setSecret(Utils.newId());
+                client.setSecret(Utils.newSecret());
                 client.setOwnerId(user.getId());
                 client.setName(dto.name);
                 client.setRedirectUri(dto.redirectUri);

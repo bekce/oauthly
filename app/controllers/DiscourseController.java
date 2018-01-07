@@ -58,7 +58,7 @@ public class DiscourseController extends Controller {
         Logger.info(form.get().toString());
 
         if(form.get().isEnabled() && StringUtils.isBlank(setting.getSecret())){
-            setting.setSecret(Utils.newId());
+            setting.setSecret(Utils.newSecret());
         }
         if(!form.get().isEnabled()){
             setting.setRedirectUri(null);
