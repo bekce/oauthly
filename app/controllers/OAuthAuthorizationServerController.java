@@ -168,6 +168,21 @@ public class OAuthAuthorizationServerController extends play.mvc.Controller {
         }
 
         Grant grant = grantRepository.findByClientAndUser(client_id, user.getId());
+
+        if(client.isTrusted()) {
+            if(grant == null){
+                grant = new Grant();
+                grant.setId(Utils.newId());
+                grant.setUserId(user.getId());
+                grant.setClientId(client_id);
+            }
+            if(scope != null){
+                List<String> scopes = Arrays.asList(scope.split(" "));
+                grant.getScopes().addAll(scopes);
+            }
+            grantRepository.save(grant);
+        }
+
         if(grant != null){
             boolean scopeOK = true;
             if(scope != null){
