@@ -11,6 +11,7 @@ import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
+import repositories.EventRepository;
 import repositories.ProviderLinkRepository;
 import repositories.UserRepository;
 import scala.Tuple2;
@@ -34,6 +35,8 @@ public class RegisterController extends Controller {
     private Config config;
     @Inject
     private AuthorizationServerManager authorizationServerManager;
+    @Inject
+    private EventRepository eventRepository;
 
     public Result step1(String next) {
         return ok(views.html.register1.render(1, null, null, null, formFactory.form(RegistrationDto.class), next));
@@ -120,8 +123,10 @@ public class RegisterController extends Controller {
             if(userRepository.count() == 0)
                 user.setAdmin(true);
             userRepository.save(user);
+            eventRepository.register(request(), user);
             link.setUserId(user.getId());
             providerLinkRepository.save(link);
+            eventRepository.providerLink(request(), user, link);
 
             flash("info", "Registration successful");
             return jwtUtils.prepareCookieThenRedirect(user, next);
@@ -172,10 +177,12 @@ public class RegisterController extends Controller {
         if(userRepository.count() == 0)
             user.setAdmin(true);
         userRepository.save(user);
+        eventRepository.register(request(), user);
 
         if(link != null){
             link.setUserId(user.getId());
             providerLinkRepository.save(link);
+            eventRepository.providerLink(request(), user, link);
         }
 
         flash("info", "Registration successful");

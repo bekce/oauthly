@@ -6,11 +6,13 @@ import config.MailgunService;
 import config.RecaptchaProtected;
 import emails.html.resetPassword;
 import models.User;
+import play.Logger;
 import play.data.Form;
 import play.data.FormFactory;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Result;
+import repositories.EventRepository;
 import repositories.UserRepository;
 
 import javax.inject.Inject;
@@ -27,6 +29,8 @@ public class ResetPasswordController extends Controller {
     private MailgunService mailService;
     @Inject
     private Config config;
+    @Inject
+    private EventRepository eventRepository;
 
     public static class Step1Dto {
         @Constraints.Required
@@ -57,13 +61,15 @@ public class ResetPasswordController extends Controller {
             return redirect(routes.ResetPasswordController.step1(next));
         }
         String resetCode = jwtUtils.prepareResetCode(user);
+        String confirmationUrl = routes.ResetPasswordController.step3(resetCode, next).absoluteURL(request());
         String content = resetPassword.render(
-                routes.ResetPasswordController.step3(resetCode, next).absoluteURL(request()),
+                confirmationUrl,
                 user.getEmail(),
                 config.getInt("jwt.expire.resetCode") / 3600,
                 config.getString("brand.name")).toString();
-        System.out.println(content);
+        Logger.info("Confirmation URL: "+confirmationUrl);
         mailService.sendEmail(user.getEmail(), "Reset your password", content);
+        eventRepository.resetPasswordSend(request(), user);
         flash("info", "Your password reset link was just sent to your email address. Please check your inbox and click on the provided link to continue.");
         return redirect(routes.LoginController.get(next));
     }
@@ -89,6 +95,7 @@ public class ResetPasswordController extends Controller {
         }
         user.encryptThenSetPassword(form.get().password);
         userRepository.save(user);
+        eventRepository.resetPasswordComplete(request(), user);
         flash("success", "Your password was reset! Please login to continue");
         return redirect(routes.LoginController.get(next));
     }

@@ -9,6 +9,7 @@ import models.User;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import repositories.EventRepository;
 import repositories.UserRepository;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ import java.util.stream.StreamSupport;
 public class UserController extends Controller {
     @Inject
     private UserRepository userRepository;
+    @Inject
+    private EventRepository eventRepository;
 
     @AuthorizationServerSecure(requireAdmin = true)
     public Result get() {
@@ -88,6 +91,7 @@ public class UserController extends Controller {
         if(password != null) user1.encryptThenSetPassword(password);
         else user1.setPassword(null);
         userRepository.save(user1);
+        eventRepository.addUpdateUserViaApi(request(), byId, user1);
         return ok("done");
     }
 

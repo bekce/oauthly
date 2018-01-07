@@ -15,6 +15,7 @@ import play.data.FormFactory;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
+import repositories.EventRepository;
 import repositories.ProviderLinkRepository;
 import repositories.UserRepository;
 import scala.Tuple2;
@@ -40,6 +41,8 @@ public class ProfileController extends Controller {
     private MailgunService mailService;
     @Inject
     private Config config;
+    @Inject
+    private EventRepository eventRepository;
 
     public Result get() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
@@ -67,9 +70,9 @@ public class ProfileController extends Controller {
             flash("warning", "Form has errors");
             return badRequest(views.html.changePasswordPage.render(user, form));
         }
-
         user.encryptThenSetPassword(form.get().getPassword());
         userRepository.save(user);
+        eventRepository.changePassword(request(), user);
         flash("success", "Success, your password was changed.");
         // refresh the cookie here
         return jwtUtils.prepareCookieThenRedirect(user, null);
@@ -117,9 +120,12 @@ public class ProfileController extends Controller {
         if(!user.getId().equals(tuple2._1.getId())){
             return badRequest("users don't match");
         }
+        String oldEmail = user.getEmail();
         user.setEmail(tuple2._2);
         user.setEmailVerified(true);
+        user.setLastUpdateTime(System.currentTimeMillis());
         userRepository.save(user);
+        eventRepository.changeEmail(request(), user, oldEmail);
         flash("success", "Success, your email address was changed to "+user.getEmail()+". Please use the new address to login from now on.");
         // refresh the cookie here
         return jwtUtils.prepareCookieThenRedirect(user, next);
@@ -137,6 +143,7 @@ public class ProfileController extends Controller {
         }
         link.setUserId(user.getId());
         providerLinkRepository.save(link);
+        eventRepository.providerLink(request(), user, link);
         flash("info", "You have successfully linked your "+link.getProviderKey()+" with us. You can now login with it");
         return redirect(routes.ProfileController.get());
     }
@@ -151,6 +158,7 @@ public class ProfileController extends Controller {
             flash("warning", "Please set a password to unlink");
             return redirect(routes.ProfileController.get());
         }
+        eventRepository.providerUnlink(request(), user, link);
         providerLinkRepository.delete(linkId);
         flash("info", "Account unlinked");
         return redirect(routes.ProfileController.get());
