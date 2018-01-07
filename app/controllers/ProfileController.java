@@ -80,20 +80,27 @@ public class ProfileController extends Controller {
 
     public Result changeEmailPage(String next){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
+        if(user.getPassword() == null){
+            flash("warning", "To change your email address, please first set a password first.");
+            redirect(routes.ProfileController.changePasswordPage());
+        }
         return ok(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
     }
 
-    @RecaptchaProtected(fallback = "/profile")
+    @RecaptchaProtected
     public Result changeEmail(String next){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangeEmail.class).bindFromRequest();
+        if(!user.checkPassword(form.value().get().getOldPassword())){
+            form = form.withError("oldPassword", "Current password is invalid");
+        }
         ValidationError validateUniqueEmail = form.value().get().validateUniqueEmail(userRepository, user.getId());
         if(validateUniqueEmail != null){
             form = form.withError(validateUniqueEmail);
         }
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
-            return badRequest(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
+            return badRequest(views.html.changeEmailPage.render(user, form, next));
         }
         String confirmationCode = jwtUtils.prepareEmailChangeConfirmationCode(user, form.get().getEmail());
         String confirmationUrl = routes.ProfileController.changeEmailConfirm(confirmationCode, next).absoluteURL(request());

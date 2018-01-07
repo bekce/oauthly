@@ -32,7 +32,7 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     @Constraints.MinLength(value = 4, groups = {Register1.class, ChangePassword.class, SetPassword.class})
     @Constraints.Required(groups = {Login.class, Register1.class, ChangePassword.class, SetPassword.class})
     private String password;
-    @Constraints.Required(groups = {ChangePassword.class})
+    @Constraints.Required(groups = {ChangePassword.class, ChangeEmail.class})
     private String oldPassword;
 
     public String getUsername() {
