@@ -1,7 +1,7 @@
 package repositories;
 
 import models.Event;
-import models.Event.EventType;
+import models.EventType;
 import models.ProviderLink;
 import models.User;
 import org.jongo.MongoCollection;

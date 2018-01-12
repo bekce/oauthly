@@ -7,12 +7,6 @@ import org.jongo.marshall.jackson.oid.MongoId;
  */
 public class Event {
 
-    public enum EventType {
-        LOGIN, BAD_LOGIN, REGISTER, LOGOUT, PROVIDER_LINK, PROVIDER_UNLINK, CHANGE_PASSWORD, CHANGE_EMAIL, ADD_UPDATE_USER_API, RESET_PASSWORD_SEND, RESET_PASSWORD_COMPLETE
-    }
-//    public enum ObjectType {
-//        USER, PROVIDER_LINK, SETTING, CLIENT
-//    }
     @MongoId
     private String id;
     private long timestamp = System.currentTimeMillis();

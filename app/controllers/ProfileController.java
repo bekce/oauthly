@@ -5,6 +5,7 @@ import config.AuthorizationServerSecure;
 import config.JwtUtils;
 import config.MailgunService;
 import config.RecaptchaProtected;
+import config.AuthorizationServerManager;
 import dtos.ConstraintGroups;
 import dtos.RegistrationDto;
 import models.ProviderLink;
@@ -35,7 +36,7 @@ public class ProfileController extends Controller {
     @Inject
     private ProviderLinkRepository providerLinkRepository;
     @Inject
-    private config.AuthorizationServerManager authorizationServerManager;
+    private AuthorizationServerManager authorizationServerManager;
     @Inject
     //TODO change this to use generic MailService
     private MailgunService mailService;
