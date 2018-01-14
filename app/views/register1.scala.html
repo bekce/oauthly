@@ -1,4 +1,5 @@
-@(state: Int, providerName: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String, tosText: Html)()
+@this(cfg: com.typesafe.config.Config)
+@(state: Int, providerName: String, email: String, link: String, form: play.data.Form[dtos.RegistrationDto], next: String, tosText: Html)
 
 @main("Register") {
     @* @if(state == 1){*@
@@ -14,6 +15,7 @@
         @*</div>*@
         @*<hr>*@
     @*}*@
+
     @helper.form(action = routes.RegisterController.post1(next, link), 'class -> "form-signin") {
         @if(form.hasGlobalErrors) {
             <p class="error">
@@ -36,7 +38,7 @@
                 <input name="password" type="password" class="form-control input-lg" placeholder="Pick a password" data-toggle="password"/>
                 @for(error <- form("password").errors) {<p class="text-warning">@error.format(messages())</p>}
             </div>
-            <div class="g-recaptcha" data-sitekey="6LfpYy0UAAAAALI0zTdsq9AzUE1Mi2KeCy-bpoEx"></div>
+            <div class="g-recaptcha" data-sitekey="@cfg.getString("recaptcha.siteKey")"></div>
         }
         @if(state == 2){
             <h2 class="form-heading">Complete Registration</h2>

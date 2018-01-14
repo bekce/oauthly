@@ -38,9 +38,11 @@ public class RegisterController extends Controller {
     private AuthorizationServerManager authorizationServerManager;
     @Inject
     private EventRepository eventRepository;
+    @Inject
+    private views.html.register1 template;
 
     public Result step1(String next) {
-        return ok(views.html.register1.render(1, null, null, null, formFactory.form(RegistrationDto.class), next, Html.apply(config.getString("tos.text"))));
+        return ok(template.render(1, null, null, null, formFactory.form(RegistrationDto.class), next, Html.apply(config.getString("tos.text"))));
     }
 
     public Result step2(String next, String linkId) {
@@ -52,7 +54,7 @@ public class RegisterController extends Controller {
                 return redirect(routes.LoginController.get(next));
             }
             int state = remoteUserEmail != null ? 3 : 2;
-            return ok(views.html.register1.render(state, authorizationServerManager.getProvider(link.getProviderKey()).getDisplayName(), remoteUserEmail, linkId, formFactory.form(RegistrationDto.class), next, Html.apply(config.getString("tos.text"))));
+            return ok(template.render(state, authorizationServerManager.getProvider(link.getProviderKey()).getDisplayName(), remoteUserEmail, linkId, formFactory.form(RegistrationDto.class), next, Html.apply(config.getString("tos.text"))));
         } else {
             flash("error", "Invalid authentication, please try again");
             return redirect(routes.RegisterController.step1(next));
@@ -95,7 +97,7 @@ public class RegisterController extends Controller {
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, validationGroupClass).bindFromRequest();
         if(form.hasErrors()){
             flash("warning", "Form has errors");
-            return badRequest(views.html.register1.render(state, providerName, link != null ? link.getRemoteUserEmail() : null, linkId, form, next, Html.apply(config.getString("tos.text"))));
+            return badRequest(template.render(state, providerName, link != null ? link.getRemoteUserEmail() : null, linkId, form, next, Html.apply(config.getString("tos.text"))));
         }
         RegistrationDto dto = form.get();
         if(state == 1 || state == 2){

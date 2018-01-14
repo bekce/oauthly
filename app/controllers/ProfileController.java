@@ -44,6 +44,10 @@ public class ProfileController extends Controller {
     private Config config;
     @Inject
     private EventRepository eventRepository;
+    @Inject
+    private views.html.changePasswordPage changePasswordTemplate;
+    @Inject
+    private views.html.changeEmailPage changeEmailTemplate;
 
     public Result get() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
@@ -52,9 +56,10 @@ public class ProfileController extends Controller {
 
     public Result changePasswordPage(){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        return ok(views.html.changePasswordPage.render(user, formFactory.form(RegistrationDto.class)));
+        return ok(changePasswordTemplate.render(user, formFactory.form(RegistrationDto.class)));
     }
 
+    @RecaptchaProtected
     public Result changePassword(){
         User user = request().attrs().get(AuthorizationServerSecure.USER);
 
@@ -69,7 +74,7 @@ public class ProfileController extends Controller {
         }
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
-            return badRequest(views.html.changePasswordPage.render(user, form));
+            return badRequest(changePasswordTemplate.render(user, form));
         }
         user.encryptThenSetPassword(form.get().getPassword());
         userRepository.save(user);
@@ -85,7 +90,7 @@ public class ProfileController extends Controller {
             flash("warning", "To change your email address, please first set a password first.");
             return redirect(routes.ProfileController.changePasswordPage());
         }
-        return ok(views.html.changeEmailPage.render(user, formFactory.form(RegistrationDto.class), next));
+        return ok(changeEmailTemplate.render(user, formFactory.form(RegistrationDto.class), next));
     }
 
     @RecaptchaProtected
@@ -101,7 +106,7 @@ public class ProfileController extends Controller {
         }
         if(form.hasErrors()) {
             flash("warning", "Form has errors");
-            return badRequest(views.html.changeEmailPage.render(user, form, next));
+            return badRequest(changeEmailTemplate.render(user, form, next));
         }
         String confirmationCode = jwtUtils.prepareEmailChangeConfirmationCode(user, form.get().getEmail());
         String confirmationUrl = routes.ProfileController.changeEmailConfirm(confirmationCode, next).absoluteURL(request());

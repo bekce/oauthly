@@ -31,6 +31,8 @@ public class ResetPasswordController extends Controller {
     private Config config;
     @Inject
     private EventRepository eventRepository;
+    @Inject
+    private views.html.resetPassword1 template;
 
     public static class Step1Dto {
         @Constraints.Required
@@ -45,14 +47,14 @@ public class ResetPasswordController extends Controller {
     }
 
     public Result step1(String next){
-        return ok(views.html.resetPassword1.render(next, formFactory.form(Step1Dto.class)));
+        return ok(template.render(next, formFactory.form(Step1Dto.class)));
     }
 
     @RecaptchaProtected
     public Result step2(String next){
         Form<Step1Dto> form = formFactory.form(Step1Dto.class).bindFromRequest();
         if(form.hasErrors()){
-            return badRequest(views.html.resetPassword1.render(next, form));
+            return badRequest(template.render(next, form));
         }
         Step1Dto dto = form.get();
         User user = userRepository.findByUsernameOrEmail(dto.login);
