@@ -11,7 +11,7 @@ There are a lot of authorization server examples on many platforms, such as Spri
 but none works as a full-fledged authorization server. This one does, for free. The functionality is comparable to
 auth0, will be better in the future (with your PRs, of course).
 
-## Instructions
+## Instructions for local mode
 
 0. Have a running mongodb instance and `sbt` installed.
 1. `sbt run`
@@ -39,6 +39,59 @@ First account will be given admin access.
 - User info endpoint: http://localhost:9000/api/me (Use `Authorization: Bearer token` header)
 
     Example: `curl -v -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJoIjoxMDI1MDQ5NzEzLCJleHAiOjE1MTUwODUxNTYsImdyYW50IjoiMTFtT20wdVUwRDA4czFJejlLdEwiLCJ2dCI6MX0.sl4F-ik9Tstw38JxOSfHYUCi1cN4NxYmqgNCoA0hIbA" http://localhost:9000/api/me`
+    
+## Instructions for production mode
+
+Please first follow the instructions for local mode AND run it on your local machine before attempting this. If you don't have that much time, AT LEAST read them once.
+
+0. OAuthly must run on a seperate domain. If your domain is `example.com`, running on `oauthly.example.com` is recommended.
+1. `sbt stage` in root folder to prepare distribution. 
+2. Move `target/universal/stage/oauthly-1.0-SNAPSHOT.zip` to your server and extract it to some place.
+3. Create account on <http://mailgun.com> and get a (free) API key for a valid domain of yours. It is absolutely essential to have email support but we don't support SMTP for now (PR welcome).
+4. Create account on <https://www.google.com/recaptcha/admin> and get `recaptcha.siteKey` and `recaptcha.secret`. 
+5. (Optional) If you want to allow Login with Facebook and/or Google, get your keys as specified above.
+6. Prepare `conf/prod.conf` file from following template. Put random values for `jwt.secret` and `play.http.secret.key`. 
+
+```
+include "application.conf"
+
+http.port=9000
+play.filters.enabled=[
+  play.filters.csrf.CSRFFilter,
+  play.filters.headers.SecurityHeadersFilter,
+  play.filters.hosts.AllowedHostsFilter,
+]
+play.filters.hosts.allowed = ["oauthly.example.com"]
+playjongo.uri="mongodb://127.0.0.1:27017/oauthly"
+play.http.secret.key=
+jwt.secret=
+recaptcha.enabled=true
+recaptcha.siteKey=
+recaptcha.secret=
+mail.mailgun.key=key-123
+mail.mailgun.domain=example.com
+mail.mailgun.from="OAuthly <noreply@example.com>"
+brand.name="My Brand"
+tos.text="""
+Terms of Service content
+"""
+
+oauth.providers=[
+  {
+    key=facebook
+    displayName=Facebook
+    clientId=
+    clientSecret=
+    tokenUrl="https://graph.facebook.com/v2.11/oauth/access_token"
+    authorizeUrl="https://www.facebook.com/v2.11/dialog/oauth"
+    scopes="public_profile email"
+    userInfoUrl="https://graph.facebook.com/me?fields=id,name,email"
+  }
+]
+```
+
+7. `bin/oauthly -Dconfig.resource=prod.conf` to start the server. 
+8. TLS is a must! You can follow <https://www.playframework.com/documentation/2.6.x/ConfiguringHttps> for configuring it but I recommend setting up TLS on a reverse proxy like nginx. 
 
 ## Features
 
