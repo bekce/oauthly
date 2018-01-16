@@ -5,11 +5,30 @@
 
 OAuth 2.0 Compliant Authorization and Resource Server in Java with Play Framework. Suitable for being the Authorization Server for your software platform, with SSO and social provider login support.
 
-**Important Note** This project was started as a Spring Boot project (on branch `spring-boot`) then I have recently fully converted it to Play Framework. The reason for this change is the superior features of Play Framework, and a little bit of curiousity on my side.
-
 There are a lot of authorization server examples on many platforms, such as Spring Boot, Play Framework, etc,
 but none works as a full-fledged authorization server. This one does, for free. The functionality is comparable to
 auth0, will be better in the future (with your PRs, of course).
+
+This project was started as a Spring Boot project (on branch `spring-boot`) then I have recently fully converted it to Play Framework. The reason for this change is the superior features of Play Framework, and a little bit of curiousity on my side.
+
+## Features
+
+- Uses Play Framework (Java) 2.6.x 
+- Fully supported OAuth2 grant types: client credentials, authorization code, resource owner password, refresh token
+- Login, register, profile, user management, client management and authorize client views with Bootstrap
+- Supports logging in with social providers and advanced account linking features
+- Supports sending email confirmation links
+- Utilizes JWT for tokens, authorization codes and cookies
+- Completely stateless server side logic
+- Logged-in users are remembered with long-term safe cookies
+- Multiple client id and secret pairs are supported, managed by a view
+- Customizable expiry times for generated tokens (see `application.conf` file)
+- Google reCAPTCHA support on endpoints (with `@RecaptchaProtected` annotation)
+- OAuth2 scopes support
+- MongoDB backend
+- Mailgun API integration for sending emails
+- Uses bcrypt for user passwords, [twirl](https://playframework.com/documentation/2.6.x/JavaTemplates) for templating
+- [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045) support, see [this](#discourse-sso)
 
 ## Instructions for local mode
 
@@ -21,10 +40,7 @@ First account will be given admin access.
 3. You can also enable login with Facebook, Google or any other OAuth 2.0 Authorization Server.
     1. For Facebook, go to <https://developers.facebook.com/apps/> and create yourself an app with redirect uri `http://localhost:9000/oauth/client/facebook/callback`, then put its client id and secret to `application.conf`. You may need some additional settings on your Facebook app. Consult their documentation. 
     2. For Google, go to <https://console.developers.google.com/apis/credentials> and create an OAuth Client ID with redirect url `http://localhost:9000/oauth/client/google/callback`, then put its client id and secret to `application.conf`. You will also need to enable Google People API. Consult their documentation. 
-    3. For any other OAuth 2.0 Authorization Server, 
-        1. Put relevant config block in `application.conf`.
-        2. Set `tokenRetriever` and `currentUserIdentifier` in `AuthorizationServerManager` class. Only `id` is necessary for identifying users in remote system. If you map email addresses in remote system to OAuthly, the confirmation step will be bypassed resulting in a smoother sign-up process. 
-        3. We use [bootstrap-social](https://lipis.github.io/bootstrap-social/) for provider login buttons, fork it if necessary.
+    3. For any other OAuth 2.0 Authorization Server, see [this](#custom-oauth2-provider)
 3. By now, you have authenticated yourself as an admin on OAuthly platform. Now you will configure your applications and services (OAuth 2.0 Clients) to connect to OAuthly (OAuth 2.0 Authorization Server). Go to <http://localhost:9000/client> to create one client, by setting its `name` and `redirect_uri`. 
 4. Set generated Client ID and Client Secret and following endpoint addresses on your OAuth 2.0 Client Application:
 
@@ -93,41 +109,16 @@ oauth.providers=[
 7. `bin/oauthly -Dconfig.resource=prod.conf` to start the server. 
 8. TLS is a must! You can follow <https://www.playframework.com/documentation/2.6.x/ConfiguringHttps> for configuring it but I recommend setting up TLS on a reverse proxy like nginx. 
 
-## Features
+## Custom OAuth2 Provider
 
-- Uses Play Framework (Java) 2.6.x 
-- Fully supported OAuth2 grant types: client credentials, authorization code, resource owner password, refresh token
-- Login, register, profile, user management, client management and authorize client views with Bootstrap
-- Supports logging in with social providers and advanced account linking features
-- Supports sending email confirmation links
-- Utilizes JWT for tokens, authorization codes and cookies
-- Completely stateless server side logic
-- Logged-in users are remembered with long-term safe cookies
-- Multiple client id and secret pairs are supported, managed by a view
-- Customizable expiry times for generated tokens (see `application.conf` file)
-- Google reCAPTCHA support on endpoints (with `@RecaptchaProtected` annotation)
-- OAuth2 scopes support
-- MongoDB backend
-- Mailgun API integration for sending emails
-- Uses bcrypt for user passwords, [twirl](https://playframework.com/documentation/2.6.x/JavaTemplates) for templating
-- [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045) support
+Currently we implement Facebook and Google OAuth2 clients. Every vendor may implement the token and user info retrieval part differently. Follow below steps for a new OAuth2 client implementation.
 
-## Screenshots (needs update)
+1. Put relevant config block in `application.conf`.
+2. Set `tokenRetriever` and `currentUserIdentifier` in `AuthorizationServerManager` class. Only `id` is necessary for identifying users in remote system. If you map email addresses in remote system to OAuthly, the confirmation step will be bypassed resulting in a smoother sign-up process. 
+3. We use [bootstrap-social](https://lipis.github.io/bootstrap-social/) for provider login buttons, fork it if necessary.
 
-![login](http://i.imgur.com/WpLsqYY.png)
-![register](http://i.imgur.com/dCoEENL.png)
-![reset-password](http://i.imgur.com/XeSO0vB.png)
-![profile](http://i.imgur.com/oRrz6Iz.png)
-![authorize](https://i.imgur.com/5FMlHCz.png)
+## Discourse SSO
 
-## TODO (PRs are welcome!)
-- Enable/disable user account function on user management view
-- Possible production example with let's encrypt certificates, docker container and nginx
-- Event logging
-- Scope CRUD screen
-- More social provider support
-
-## Discourse SSO Instructions
 OAuthly fully supports [Discourse SSO](https://meta.discourse.org/t/official-single-sign-on-for-discourse/13045)
 integration. In this configuration, the single source of users becomes oauthly. When Login button is clicked on Discourse,
 user is redirected to oauthly login page. If the user has already authenticated with oauthly with a long term token,
@@ -145,3 +136,18 @@ your system.
     5. Users -> 'logout redirect' -> `http://OAUTHLY_SERVER/logout`
 5. Done, you may test the integration. Remember that the admin account must have the same email address on both
 systems, or you'll get locked out.
+
+## Screenshots (needs update)
+
+![login](http://i.imgur.com/WpLsqYY.png)
+![register](http://i.imgur.com/dCoEENL.png)
+![reset-password](http://i.imgur.com/XeSO0vB.png)
+![profile](http://i.imgur.com/oRrz6Iz.png)
+![authorize](https://i.imgur.com/5FMlHCz.png)
+
+## TODO (PRs are welcome!)
+- Enable/disable user account function on user management view
+- Possible production example with let's encrypt certificates, docker container and nginx
+- Scope CRUD screen
+- Permissions model
+- More social provider support (github, etc)
