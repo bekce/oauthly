@@ -14,6 +14,7 @@ import repositories.UserRepository;
 
 import javax.inject.Inject;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 public class LoginController extends Controller {
@@ -50,19 +51,30 @@ public class LoginController extends Controller {
             flash("warning", "Please fill in the form");
             return redirect(routes.LoginController.get(next));
         }
-        User user = userRepository.findByUsernameOrEmail(form.get().getEmail());
-        if(user != null && user.checkPassword(form.get().getPassword())){
-            if(user.isDisabled()){
-                flash("error", "Your account was disabled.");
-                return redirect(routes.LoginController.get(next));
+        List<User> list = userRepository.findByUsernameOrEmailMulti(form.get().getEmail());
+        User validUser = null;
+        boolean disabled = false;
+        for (User user : list) {
+            if(user != null && user.checkPassword(form.get().getPassword())) {
+                if (user.isDisabled()) {
+                    disabled = true;
+                    continue;
+                }
+                validUser = user;
+                break;
             }
-            flash("info", "Login successful");
-            eventRepository.login(request(), user, form.get().getEmail());
-            return jwtUtils.prepareCookieThenRedirect(user, next);
-        } else {
-            flash("error", "Invalid login");
-            eventRepository.badLogin(request(), user != null ? user.getId() : null, form.get().getEmail());
+        }
+        if (disabled) {
+            flash("error", "Your account was disabled.");
             return redirect(routes.LoginController.get(next));
+        } else if (validUser == null) {
+            flash("error", "Invalid login");
+            eventRepository.badLogin(request(), null, form.get().getEmail());
+            return redirect(routes.LoginController.get(next));
+        } else {
+            flash("info", "Login successful");
+            eventRepository.login(request(), validUser, form.get().getEmail());
+            return jwtUtils.prepareCookieThenRedirect(validUser, next);
         }
     }
 

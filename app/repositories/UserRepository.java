@@ -7,6 +7,9 @@ import uk.co.panaxiom.playjongo.PlayJongo;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Singleton
 public class UserRepository {
@@ -41,6 +44,21 @@ public class UserRepository {
             user = findByEmail(Utils.normalizeEmail(login));
         }
         return user;
+    }
+
+    public List<User> findByUsernameOrEmailMulti(String login) {
+        String normalizedUsername = Utils.normalizeUsername(login);
+        String email = Utils.normalizeEmail(login);
+        List<User> list = new ArrayList<>();
+        Iterator<User> iterator = collection.find("{usernameNormalized:#}", normalizedUsername).as(User.class).iterator();
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        iterator = collection.find("{email:#}", email).as(User.class).iterator();
+        while (iterator.hasNext()) {
+            list.add(iterator.next());
+        }
+        return list;
     }
 
     public Iterable<User> findAll(){
