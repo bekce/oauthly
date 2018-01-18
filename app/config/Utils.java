@@ -9,7 +9,7 @@ import java.util.Locale;
 public class Utils {
     public static String normalizeUsername(String username){
         if(username == null) return null;
-        return username.replaceAll("[-.\\s]","_").toLowerCase(Locale.ENGLISH);
+        return username.replaceAll("[^A-Za-z0-9]","_").toLowerCase(Locale.ENGLISH);
     }
 
     public static String normalizeEmail(String email){
