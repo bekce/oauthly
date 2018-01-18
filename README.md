@@ -84,6 +84,7 @@ jwt.secret=
 recaptcha.enabled=true
 recaptcha.siteKey=
 recaptcha.secret=
+use.secure.session.cookie=true
 mail.mailgun.key=key-123
 mail.mailgun.domain=example.com
 mail.mailgun.from="OAuthly <noreply@example.com>"

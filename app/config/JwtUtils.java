@@ -38,6 +38,7 @@ public class JwtUtils {
     private final Duration expireAccessToken;
     private final Duration expireRefreshToken;
     private final Duration expireAuthorizationCode;
+    private final boolean useSecureSessionCookie;
     private final UserRepository userRepository;
     private final ClientRepository clientRepository;
     private final GrantRepository grantRepository;
@@ -50,6 +51,7 @@ public class JwtUtils {
         expireAccessToken = config.getDuration("jwt.expire.accessToken");
         expireRefreshToken = config.getDuration("jwt.expire.refreshToken");
         expireAuthorizationCode = config.getDuration("jwt.expire.authorizationCode");
+        useSecureSessionCookie = config.getBoolean("use.secure.session.cookie");
         this.userRepository = userRepository;
         this.clientRepository = clientRepository;
         this.grantRepository = grantRepository;
@@ -211,7 +213,7 @@ public class JwtUtils {
     }
 
     private Http.Cookie prepareCookie(User user){
-        return Http.Cookie.builder("ltat", prepareCookieValue(user)).withPath("/").withHttpOnly(true).withMaxAge(expireCookie).build();
+        return Http.Cookie.builder("ltat", prepareCookieValue(user)).withPath("/").withHttpOnly(true).withMaxAge(expireCookie).withSecure(useSecureSessionCookie).build();
     }
 
     private String prepareCookieValue(User user) {

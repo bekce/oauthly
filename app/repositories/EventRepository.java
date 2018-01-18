@@ -43,7 +43,7 @@ public class EventRepository {
         fillAndSave(new Event(user.getId(), null, user, EventType.REGISTER), request);
     }
     public void logout(Request request, User user) {
-        fillAndSave(new Event(user.getId(), null, null, EventType.LOGOUT), request);
+        fillAndSave(new Event(user == null ? null : user.getId(), null, null, EventType.LOGOUT), request);
     }
     public void resetPasswordSend(Request request, User user) {
         fillAndSave(new Event(user.getId(), null, null, EventType.RESET_PASSWORD_SEND), request);
