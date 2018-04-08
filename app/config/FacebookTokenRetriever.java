@@ -19,10 +19,10 @@ public class FacebookTokenRetriever implements Function<OAuthContext, Completion
                 .addQueryParameter("grant_type", "authorization_code")
                 .get()
                 .handleAsync((res, e) -> {
-                    if(e != null) {
+                    if (e != null) {
                         play.Logger.error("retrieveToken: exception", e);
                         throw new CompletionException(e);
-                    } else if(res.getStatus() != 200) {
+                    } else if (res.getStatus() != 200) {
                         String message = String.format("retrieveToken: status=%s, body=%s", res.getStatus(), res.getBody());
                         play.Logger.error(message);
                         throw new CompletionException(new IllegalStateException(message));

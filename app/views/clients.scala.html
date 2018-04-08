@@ -1,27 +1,30 @@
 @()(user: models.User, clients: List[models.Client])
-@import helper._
+
 
 @mainWithNavigation("Client Management", "clients", user) {
-@alert(flash())
+    @alert(flash())
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">Client Management</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Client Management</h3>
+        </div>
+        <div class="panel-body">
+            <a class="btn btn-default" href="@routes.ClientController.create" role="button">Create New</a>
+            <table class="table table-striped">
+                <thead><tr><td>Client Id</td><td>Name</td></tr></thead>
+                <tbody>
+                @for(client <- clients) {
+                    <tr>
+                        <td><a href="@{
+                            routes.ClientController.edit(client.getId)
+                        }">@client.getId</a>
+                        </td>
+                        <td>@client.getName</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="panel-body">
-        <a class="btn btn-default" href="@routes.ClientController.create" role="button">Create New</a>
-        <table class="table table-striped">
-            <thead><tr><td>Client Id</td><td>Name</td></tr></thead>
-            <tbody>
-            @for(client <- clients) {
-            <tr>
-                <td><a href="@{routes.ClientController.edit(client.getId)}">@client.getId</a></td>
-                <td>@client.getName</td>
-            </tr>
-            }
-            </tbody>
-        </table>
-    </div>
-</div>
 
 }

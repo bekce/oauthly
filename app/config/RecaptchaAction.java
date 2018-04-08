@@ -28,16 +28,18 @@ public class RecaptchaAction extends play.mvc.Action<RecaptchaProtected> {
             recaptchaResponse = ctx.request().body().asFormUrlEncoded().get("g-recaptcha-response")[0];
             Logger.debug("Found g-recaptcha-response by FormUrlEncoded");
             ctx.request().body().asFormUrlEncoded().remove("g-recaptcha-response");
-        } catch (Exception ignored){}
-        if(recaptchaResponse == null) {
+        } catch (Exception ignored) {
+        }
+        if (recaptchaResponse == null) {
             try {
                 recaptchaResponse = ctx.request().body().asMultipartFormData().asFormUrlEncoded().get("g-recaptcha-response")[0];
                 Logger.debug("Found g-recaptcha-response by MultipartFormData");
                 ctx.request().body().asMultipartFormData().asFormUrlEncoded().remove("g-recaptcha-response");
-            } catch (Exception ignored){}
+            } catch (Exception ignored) {
+            }
         }
         return recaptchaUtil.check(clientIp, recaptchaResponse).thenComposeAsync(passed -> {
-            if(passed) {
+            if (passed) {
                 Logger.debug("Recaptcha passes");
                 return delegate.call(ctx);
             } else {

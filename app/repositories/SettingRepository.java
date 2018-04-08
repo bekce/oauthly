@@ -22,7 +22,7 @@ public class SettingRepository {
 //        return setting != null ? (T) setting.getValue() : null;
     }
 
-    public void save(Setting u){
+    public void save(Setting u) {
         u.setId(u.getClass().getSimpleName());
         collection.save(u);
 //        Setting setting = collection.findOne("{_id:#}", u.getClass().getSimpleName()).as(Setting.class);

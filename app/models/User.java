@@ -10,11 +10,11 @@ import org.mindrot.jbcrypt.BCrypt;
 public class User {
     @MongoId
     private String id;
-//    @Indexed
+    //    @Indexed
     private String username;
-//    @Indexed
+    //    @Indexed
     private String usernameNormalized;
-//    @Indexed
+    //    @Indexed
     private String email;
     private String password;
     /**
@@ -40,16 +40,16 @@ public class User {
      */
     private String disabledReason;
 
-    public void encryptThenSetPassword(String password_plaintext){
+    public void encryptThenSetPassword(String password_plaintext) {
         String salt = BCrypt.gensalt(12);
         this.password = BCrypt.hashpw(password_plaintext, salt);
         this.lastUpdateTime = System.currentTimeMillis();
     }
 
-    public boolean checkPassword(String password_plaintext){
-        if(this.password == null || password_plaintext == null)
+    public boolean checkPassword(String password_plaintext) {
+        if (this.password == null || password_plaintext == null)
             return false;
-        if(!this.password.startsWith("$2a$"))
+        if (!this.password.startsWith("$2a$"))
             throw new IllegalArgumentException("Invalid hash provided for comparison");
         return BCrypt.checkpw(password_plaintext, password);
     }
@@ -126,7 +126,7 @@ public class User {
         this.emailVerified = emailVerified;
     }
 
-    public boolean isDisabled(){
+    public boolean isDisabled() {
         return disabledReason != null;
     }
 

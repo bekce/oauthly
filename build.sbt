@@ -22,12 +22,12 @@ libraryDependencies ++= Seq(
 // play.sbt.routes.RoutesKeys.routesImport += "com.sebworks.binders._"
 
 libraryDependencies ++= Seq(
-//  "commons-io" % "commons-io" % "2.6",
-  "org.mindrot"%"jbcrypt"%"0.4",
-//  "commons-validator"%"commons-validator"%"1.4.1",
-  "com.auth0"%"java-jwt"%"2.2.0",
-//  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
-//  "com.palominolabs.http"%"url-builder"%"1.1.1"
+  //  "commons-io" % "commons-io" % "2.6",
+  "org.mindrot" % "jbcrypt" % "0.4",
+  //  "commons-validator"%"commons-validator"%"1.4.1",
+  "com.auth0" % "java-jwt" % "2.2.0",
+  //  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
+  //  "com.palominolabs.http"%"url-builder"%"1.1.1",
   "com.typesafe.play" %% "play-mailer" % "6.0.1",
   "com.typesafe.play" %% "play-mailer-guice" % "6.0.1"
 )

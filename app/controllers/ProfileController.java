@@ -1,11 +1,7 @@
 package controllers;
 
 import com.typesafe.config.Config;
-import config.AuthorizationServerSecure;
-import config.JwtUtils;
-import config.MailService;
-import config.RecaptchaProtected;
-import config.AuthorizationServerManager;
+import config.*;
 import dtos.ConstraintGroups;
 import dtos.RegistrationDto;
 import models.ProviderLink;
@@ -53,25 +49,25 @@ public class ProfileController extends Controller {
         return ok(views.html.profile.render(user, authorizationServerManager.getProviders(), providerLinkRepository.findMapByUserId(user.getId()), formFactory.form(RegistrationDto.class), formFactory.form(RegistrationDto.class)));
     }
 
-    public Result changePasswordPage(){
+    public Result changePasswordPage() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         return ok(changePasswordTemplate.render(user, formFactory.form(RegistrationDto.class)));
     }
 
     @RecaptchaProtected
-    public Result changePassword(){
+    public Result changePassword() {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
 
         Form<RegistrationDto> form;
-        if(user.getPassword() == null){
+        if (user.getPassword() == null) {
             form = formFactory.form(RegistrationDto.class, ConstraintGroups.SetPassword.class).bindFromRequest();
         } else {
             form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangePassword.class).bindFromRequest();
-            if(!user.checkPassword(form.value().get().getOldPassword())){
+            if (!user.checkPassword(form.value().get().getOldPassword())) {
                 form = form.withError("oldPassword", "Current password is invalid");
             }
         }
-        if(form.hasErrors()) {
+        if (form.hasErrors()) {
             flash("warning", "Form has errors");
             return badRequest(changePasswordTemplate.render(user, form));
         }
@@ -83,9 +79,9 @@ public class ProfileController extends Controller {
         return jwtUtils.prepareCookieThenRedirect(user, null);
     }
 
-    public Result changeEmailPage(String next){
+    public Result changeEmailPage(String next) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        if(user.getPassword() == null){
+        if (user.getPassword() == null) {
             flash("warning", "To change your email address, please first set a password first.");
             return redirect(routes.ProfileController.changePasswordPage());
         }
@@ -93,43 +89,43 @@ public class ProfileController extends Controller {
     }
 
     @RecaptchaProtected
-    public Result changeEmail(String next){
+    public Result changeEmail(String next) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.ChangeEmail.class).bindFromRequest();
-        if(!user.checkPassword(form.value().get().getOldPassword())){
+        if (!user.checkPassword(form.value().get().getOldPassword())) {
             form = form.withError("oldPassword", "Current password is invalid");
         }
         ValidationError validateUniqueEmail = form.value().get().validateUniqueEmail(userRepository, user.getId());
-        if(validateUniqueEmail != null){
+        if (validateUniqueEmail != null) {
             form = form.withError(validateUniqueEmail);
         }
-        if(form.hasErrors()) {
+        if (form.hasErrors()) {
             flash("warning", "Form has errors");
             return badRequest(changeEmailTemplate.render(user, form, next));
         }
         String confirmationCode = jwtUtils.prepareEmailChangeConfirmationCode(user, form.get().getEmail());
         String confirmationUrl = routes.ProfileController.changeEmailConfirm(confirmationCode, next).absoluteURL(request());
-        Logger.info("Confirmation URL for account "+user.getEmail()+": "+confirmationUrl);
+        Logger.info("Confirmation URL for account " + user.getEmail() + ": " + confirmationUrl);
         String content = emails.html.confirm.render(
                 confirmationUrl,
                 config.getString("brand.name")).toString();
         mailService.sendEmail(form.get().getEmail(), "Confirm your new email address", content);
-        flash("info", "A confirmation email has been sent to "+form.get().getEmail()+". The change will be applied after clicking the confirmation link and authenticating yourself. Therefore, please login with your old credentials, if required.");
-        if(user.isEmailVerified()){
+        flash("info", "A confirmation email has been sent to " + form.get().getEmail() + ". The change will be applied after clicking the confirmation link and authenticating yourself. Therefore, please login with your old credentials, if required.");
+        if (user.isEmailVerified()) {
             return redirect(routes.ProfileController.get());
         } else {
             return redirect(routes.ProfileController.changeEmailPage(next));
         }
     }
 
-    public Result changeEmailConfirm(String code, String next){
+    public Result changeEmailConfirm(String code, String next) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Tuple2<User, String> tuple2 = jwtUtils.validateEmailChangeConfirmationCode(code);
-        if(tuple2 == null){
+        if (tuple2 == null) {
             flash("error", "Email change confirm code was invalid, please try again");
             return redirect(routes.ProfileController.get());
         }
-        if(!user.getId().equals(tuple2._1.getId())){
+        if (!user.getId().equals(tuple2._1.getId())) {
             return badRequest("users don't match");
         }
         String oldEmail = user.getEmail();
@@ -138,7 +134,7 @@ public class ProfileController extends Controller {
         user.setLastUpdateTime(System.currentTimeMillis());
         userRepository.save(user);
         eventRepository.changeEmail(request(), user, oldEmail);
-        flash("success", "Success, your email address was changed to "+user.getEmail()+". Please use the new address to login from now on.");
+        flash("success", "Success, your email address was changed to " + user.getEmail() + ". Please use the new address to login from now on.");
         // refresh the cookie here
         return jwtUtils.prepareCookieThenRedirect(user, next);
     }
@@ -146,27 +142,27 @@ public class ProfileController extends Controller {
     public Result linkProvider(String linkId) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         ProviderLink link = providerLinkRepository.findById(linkId);
-        if(link == null){
+        if (link == null) {
             return badRequest("bad parameter");
         }
-        if(link.getUserId() != null){
+        if (link.getUserId() != null) {
             flash("error", "Account is already linked");
             return redirect(routes.ProfileController.get());
         }
         link.setUserId(user.getId());
         providerLinkRepository.save(link);
         eventRepository.providerLink(request(), user, link);
-        flash("info", "You have successfully linked your "+link.getProviderKey()+" with us. You can now login with it");
+        flash("info", "You have successfully linked your " + link.getProviderKey() + " with us. You can now login with it");
         return redirect(routes.ProfileController.get());
     }
 
-    public Result unlinkProvider(String linkId){
+    public Result unlinkProvider(String linkId) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         ProviderLink link = providerLinkRepository.findById(linkId);
-        if(link == null || !Objects.equals(link.getUserId(), user.getId())){
+        if (link == null || !Objects.equals(link.getUserId(), user.getId())) {
             return badRequest("bad parameter");
         }
-        if(user.getPassword() == null){
+        if (user.getPassword() == null) {
             flash("warning", "Please set a password to unlink");
             return redirect(routes.ProfileController.get());
         }

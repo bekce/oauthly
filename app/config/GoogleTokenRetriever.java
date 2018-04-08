@@ -22,10 +22,10 @@ public class GoogleTokenRetriever implements Function<OAuthContext, CompletionSt
                             URLEncoder.encode(context.getProvider().getClientId(), "utf-8"),
                             URLEncoder.encode(context.getProvider().getClientSecret(), "utf-8")))
                     .handleAsync((res, e) -> {
-                        if(e != null) {
+                        if (e != null) {
                             play.Logger.error("retrieveToken: exception", e);
                             throw new CompletionException(e);
-                        } else if(res.getStatus() != 200) {
+                        } else if (res.getStatus() != 200) {
                             String message = String.format("retrieveToken: status=%s, body=%s", res.getStatus(), res.getBody());
                             play.Logger.error(message);
                             throw new CompletionException(new IllegalStateException(message));

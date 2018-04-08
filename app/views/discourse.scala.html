@@ -2,18 +2,18 @@
 @import helper._
 
 @mainWithNavigation("Discourse SSO Settings", "discourse", user) {
-@alert(flash())
+    @alert(flash())
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">Discourse SSO Settings</h3>
-    </div>
-    <div class="panel-body">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Discourse SSO Settings</h3>
+        </div>
+        <div class="panel-body">
         @form(action = routes.DiscourseController.updateSettings) {
             @CSRF.formField
             <div class="checkbox">
                 <label>
-                    <input type="checkbox" name="enabled" @if(discourse.isEnabled){checked}> Enabled
+                    <input type="checkbox" name="enabled" @if(discourse.isEnabled) {checked}> Enabled
                 </label>
             </div>
             <div class="form-group">
@@ -21,10 +21,12 @@
             </div>
             <button type="submit" class="btn btn-primary">Save</button>
             <div class="form-group">
-                <p class="form-control-static">Secret: @{discourse.getSecret()}</p>
+                <p class="form-control-static">Secret: @{
+                    discourse.getSecret()
+                }</p>
             </div>
         }
+        </div>
     </div>
-</div>
 
 }

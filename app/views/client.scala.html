@@ -2,66 +2,68 @@
 @import helper._
 
 @mainWithNavigation("Add/Update Client", "clients", user) {
-@alert(flash())
+    @alert(flash())
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">@{ if(client.getId == null) "Create New Client" else "View Client" }</h3>
-    </div>
-    <div class="panel-body">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">@{
+                if(client.getId == null) "Create New Client" else "View Client"
+            }</h3>
+        </div>
+        <div class="panel-body">
         @form(action = routes.ClientController.addUpdateClient(client.getId), 'class -> "form-horizontal") {
-        @CSRF.formField
-        @if(client.getId != null) {
+            @CSRF.formField
+            @if(client.getId != null) {
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Client Id</label>
+                    <div class="col-sm-10">
+                        <p class="form-control-static">@client.getId</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Client Secret</label>
+                    <div class="col-sm-10">
+                        <p class="form-control-static">@client.getSecret</p>
+                    </div>
+                </div>
+            }
             <div class="form-group">
-                <label class="col-sm-2 control-label">Client Id</label>
+                <label class="col-sm-2 control-label">Name</label>
                 <div class="col-sm-10">
-                    <p class="form-control-static">@client.getId</p>
+                    <input name="name" type="text" class="form-control" value="@client.getName">
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-2 control-label">Client Secret</label>
+                <label class="col-sm-2 control-label">Redirect Uri</label>
                 <div class="col-sm-10">
-                    <p class="form-control-static">@client.getSecret</p>
+                    <input name="redirectUri" type="text" class="form-control" value="@client.getRedirectUri">
                 </div>
             </div>
-        }
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Name</label>
-            <div class="col-sm-10">
-                <input name="name" type="text" class="form-control" value="@client.getName">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Redirect Uri</label>
-            <div class="col-sm-10">
-                <input name="redirectUri" type="text" class="form-control" value="@client.getRedirectUri">
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Allowed Origin</label>
-            <div class="col-sm-10">
-                <input name="allowedOrigin" type="text" class="form-control" value="@client.getAllowedOrigin">
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <div class="checkbox">
-                    <label data-toggle="tooltip" data-placement="top" title="Trusted apps are automatically granted of ANY scope they request, without usual 'Authorize application' consent from the user and they are able to use Resource Owner Password Grant for getting tokens. So only use it for the applications you develop/control. ">
-                        <input type="checkbox" value="true" name="trusted" @if(client.isTrusted){checked}>
-                        Trusted
-                    </label>
+            <div class="form-group">
+                <label class="col-sm-2 control-label">Allowed Origin</label>
+                <div class="col-sm-10">
+                    <input name="allowedOrigin" type="text" class="form-control" value="@client.getAllowedOrigin">
                 </div>
             </div>
-        </div>
-        <input type="hidden" value="@client.getId" name="id"/>
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <button class="btn btn-primary" type="submit">Save</button>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label data-toggle="tooltip" data-placement="top" title="Trusted apps are automatically granted of ANY scope they request, without usual 'Authorize application' consent from the user and they are able to use Resource Owner Password Grant for getting tokens. So only use it for the applications you develop/control. ">
+                            <input type="checkbox" value="true" name="trusted" @if(client.isTrusted) {checked}>
+                            Trusted
+                        </label>
+                    </div>
+                </div>
             </div>
-        </div>
+            <input type="hidden" value="@client.getId" name="id"/>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                </div>
+            </div>
         }
 
+        </div>
     </div>
-</div>
 
 }

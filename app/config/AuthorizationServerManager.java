@@ -2,7 +2,10 @@ package config;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
-import dtos.*;
+import dtos.MeDto;
+import dtos.OAuthContext;
+import dtos.OAuthProvider;
+import dtos.Token;
 import play.Logger;
 import scala.Tuple2;
 
@@ -22,7 +25,7 @@ public class AuthorizationServerManager {
     private List<Tuple2<String, String>> providerList;
 
     @Inject
-    public AuthorizationServerManager(Config config){
+    public AuthorizationServerManager(Config config) {
         this.providerMap = new LinkedHashMap<>();
         try {
             List<? extends Config> providers = config.getConfigList("oauth.providers");
@@ -77,7 +80,7 @@ public class AuthorizationServerManager {
         return providerMap.get(provider);
     }
 
-    public List<Tuple2<String, String>> getProviders(){
+    public List<Tuple2<String, String>> getProviders() {
         return providerList;
     }
 }

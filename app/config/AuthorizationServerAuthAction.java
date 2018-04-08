@@ -26,16 +26,16 @@ public class AuthorizationServerAuthAction extends play.mvc.Action<Authorization
     public CompletionStage<Result> call(Http.Context ctx) {
         Http.Cookie ltat = ctx.request().cookie("ltat");
         boolean valid = configuration.optional();
-        if(ltat != null) {
+        if (ltat != null) {
             User user = jwtUtils.validateCookie(ltat.value());
-            if(user != null) {
+            if (user != null) {
                 if (user.isDisabled()) {
                     flash("error", "Your account was disabled.");
                     Http.Cookie ltatRemove = Http.Cookie.builder("ltat", "")
                             .withPath("/").withHttpOnly(true).withMaxAge(Duration.ZERO).build();
                     return CompletableFuture.completedFuture(redirect(routes.LoginController.get(null)).withCookies(ltatRemove));
                 }
-                if(!configuration.requireAdmin() || user.isAdmin()){
+                if (!configuration.requireAdmin() || user.isAdmin()) {
                     ctx = ctx.withRequest(ctx.request().addAttr(AuthorizationServerSecure.USER, user));
                     valid = true;
                 } else {
@@ -45,7 +45,7 @@ public class AuthorizationServerAuthAction extends play.mvc.Action<Authorization
                 }
             }
         }
-        if(!valid) {
+        if (!valid) {
             return CompletableFuture.completedFuture(redirect(routes.LoginController.get(ctx.request().uri())));
         } else { // pass on
             return delegate.call(ctx);

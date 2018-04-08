@@ -119,7 +119,7 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
     @Override
     public ValidationError validateUniqueUsername(UserRepository userRepository) {
         usernameNormalized = Utils.normalizeUsername(username);
-        if(usernameNormalized == null) return null;
+        if (usernameNormalized == null) return null;
         if (userRepository.findByUsernameNormalized(usernameNormalized) != null) {
             return new ValidationError("username", "Username already exists");
         }
@@ -135,7 +135,7 @@ public class RegistrationDto implements Constraints.Validatable<List<ValidationE
 //        }
 
         email = Utils.normalizeEmail(email);
-        if(email == null) return null;
+        if (email == null) return null;
         User byEmail = userRepository.findByEmail(email);
         if (byEmail != null && !byEmail.getId().equals(currentUserId)) {
             return new ValidationError("email", "Email is already registered");

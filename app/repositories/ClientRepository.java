@@ -25,11 +25,11 @@ public class ClientRepository {
         return collection.findOne("{_id:#}", id).as(Client.class);
     }
 
-    public void save(Client u){
+    public void save(Client u) {
         collection.save(u);
     }
 
-    public List<Client> findByOwnerId(String ownerId){
+    public List<Client> findByOwnerId(String ownerId) {
         MongoCursor<Client> cursor = collection.find("{ownerId:#}", ownerId).as(Client.class);
         return StreamSupport.stream(cursor.spliterator(), false).collect(Collectors.toList());
     }

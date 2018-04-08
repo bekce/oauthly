@@ -1,9 +1,10 @@
-@(app_name:String, client_id:String, response_type:String, redirect_uri:String, scope:String, state:String)
+@(app_name: String, client_id: String, response_type: String, redirect_uri: String, scope: String, state: String)
 @import helper._
 
 @main("Authorize") {
     <h2 class="text-center">Authorize @app_name</h2>
-    <h4 class="text-center">@app_name would like to know your name and e-mail address. Your password will not be shared.</h4>
+    <h4 class="text-center">@app_name
+        would like to know your name and e-mail address. Your password will not be shared.</h4>
 
     @form(action = routes.OAuthAuthorizationServerController.authorizeDo(client_id, response_type, redirect_uri, scope, state), 'class -> "form-signin") {
         @alert(flash())

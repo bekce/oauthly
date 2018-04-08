@@ -1,13 +1,13 @@
 @(title: String, activeNavigator: String, user: models.User)(content: Html)
 
-@main(title) {
-    <div class="row">
-        <div class="col-sm-3">
+    @main(title) {
+        <div class="row">
+            <div class="col-sm-3">
             @navigator(activeNavigator, user)
-        </div>
-        <div class="col-sm-9">
+            </div>
+            <div class="col-sm-9">
             @content
+            </div>
         </div>
-    </div>
-    <h4 class="text-center"><a href="/logout">Logout</a></h4>
-}
+        <h4 class="text-center"><a href="/logout">Logout</a></h4>
+    }

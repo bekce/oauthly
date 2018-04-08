@@ -29,24 +29,24 @@ public class ResourceServerAuthAction extends play.mvc.Action<ResourceServerSecu
                 .orElseGet(() -> requestHeader.getQueryString("access_token"));
 
         Tuple2<Grant, TokenStatus> tuple = jwtUtils.getTokenStatus(token);
-        if(tuple._2 == TokenStatus.VALID_ACCESS) {
+        if (tuple._2 == TokenStatus.VALID_ACCESS) {
             Grant grant = tuple._1;
 
             boolean scopeOK = true;
             List<String> scopes = Arrays.asList(configuration.scope().split(" "));
             for (String s : scopes) {
-                if(!grant.getScopes().contains(s)){
+                if (!grant.getScopes().contains(s)) {
                     scopeOK = false;
                     break;
                 }
             }
-            if(scopeOK) {
+            if (scopeOK) {
                 ctx = ctx.withRequest(ctx.request().addAttr(ResourceServerSecure.GRANT, grant));
                 return delegate.call(ctx);
             } else {
                 return CompletableFuture.completedFuture(unauthorized(Json.newObject()
-                                .put("message", "insufficient scope")
-                                .put("scope", configuration.scope()))
+                        .put("message", "insufficient scope")
+                        .put("scope", configuration.scope()))
                 );
             }
         }

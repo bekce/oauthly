@@ -1,8 +1,8 @@
 package controllers;
 
 import config.AuthorizationServerSecure;
-import dtos.ClientDto;
 import config.Utils;
+import dtos.ClientDto;
 import models.Client;
 import models.User;
 import play.data.Form;
@@ -37,9 +37,9 @@ public class ClientController extends Controller {
     public Result edit(String id) {
         User user = request().attrs().get(AuthorizationServerSecure.USER);
         Client client = clientRepository.findById(id);
-        if(client == null)
+        if (client == null)
             return badRequest("client not found");
-        if(!Objects.equals(client.getOwnerId(), user.getId()))
+        if (!Objects.equals(client.getOwnerId(), user.getId()))
             return badRequest("not allowed");
         return ok(views.html.client.render(user, client));
     }
@@ -49,7 +49,7 @@ public class ClientController extends Controller {
         try {
             Form<ClientDto> form = formFactory.form(ClientDto.class).bindFromRequest();
             ClientDto dto = form.get();
-            if(id == null || id.isEmpty()){
+            if (id == null || id.isEmpty()) {
                 Client client = new Client();
                 client.setId(Utils.newId());
                 client.setSecret(Utils.newSecret());
@@ -62,7 +62,7 @@ public class ClientController extends Controller {
                 flash("info", "Create client successful");
             } else {
                 Client client = clientRepository.findById(id);
-                if(!client.getOwnerId().equals(user.getId())){
+                if (!client.getOwnerId().equals(user.getId())) {
                     throw new IllegalAccessException();
                 }
                 client.setName(dto.name);
@@ -75,7 +75,7 @@ public class ClientController extends Controller {
             return redirect(routes.ClientController.get());
         } catch (Exception e) {
             flash("error", e.getMessage());
-            if(id == null || id.isEmpty()) {
+            if (id == null || id.isEmpty()) {
                 return redirect(routes.ClientController.create());
             } else {
                 return redirect(routes.ClientController.edit(id));
