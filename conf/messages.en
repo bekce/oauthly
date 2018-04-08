@@ -1,0 +1,7 @@
+login.login=Log In
+login.login.please=Please Log In
+login.username.placeholder=Username or email
+login.password=Password
+login.register=Register new account
+login.reset.password=Reset password
+login.continue.with.provider=Continue with {0}

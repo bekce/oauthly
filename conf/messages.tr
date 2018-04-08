@@ -1,0 +1,7 @@
+login.login=Giriş Yap
+login.login.please=Lütfen Giriş Yapınız
+login.username.placeholder=Kullanıcı adı veya e-posta
+login.password=Parola
+login.register=Yeni hesap oluştur
+login.reset.password=Parola yenile
+login.continue.with.provider={0} ile devam et
