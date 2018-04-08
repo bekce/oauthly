@@ -30,8 +30,7 @@ public class RegisterController extends Controller {
     @Inject
     private FormFactory formFactory;
     @Inject
-    //TODO change this to use generic MailService
-    private MailgunService mailService;
+    private MailService mailService;
     @Inject
     private Config config;
     @Inject

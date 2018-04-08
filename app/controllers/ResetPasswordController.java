@@ -2,7 +2,7 @@ package controllers;
 
 import com.typesafe.config.Config;
 import config.JwtUtils;
-import config.MailgunService;
+import config.MailService;
 import config.RecaptchaProtected;
 import emails.html.resetPassword;
 import models.User;
@@ -25,8 +25,8 @@ public class ResetPasswordController extends Controller {
     private FormFactory formFactory;
     @Inject
     private UserRepository userRepository;
-    @Inject //TODO change this to use generic MailService
-    private MailgunService mailService;
+    @Inject
+    private MailService mailService;
     @Inject
     private Config config;
     @Inject

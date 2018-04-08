@@ -63,7 +63,7 @@ Please first follow the instructions for local mode AND run it on your local mac
 0. OAuthly must run on a seperate domain. If your domain is `example.com`, running on `oauthly.example.com` is recommended.
 1. `sbt stage` in root folder to prepare distribution. 
 2. Move `target/universal/stage/oauthly-1.0-SNAPSHOT.zip` to your server and extract it to some place.
-3. Create account on <http://mailgun.com> and get a (free) API key for a valid domain of yours. It is absolutely essential to have email support but we don't support SMTP for now (PR welcome).
+3. Set your smtp configurations for `play.mailer` and set `mock=false` or create account on <http://mailgun.com> and get a (free) API key for a valid domain of yours.
 4. Create account on <https://www.google.com/recaptcha/admin> and get `recaptcha.siteKey` and `recaptcha.secret`. 
 5. (Optional) If you want to allow Login with Facebook and/or Google, get your keys as specified above.
 6. Prepare `conf/prod.conf` file from following template. Put random values for `jwt.secret` and `play.http.secret.key`. 
