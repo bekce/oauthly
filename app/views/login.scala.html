@@ -5,20 +5,20 @@
     @form(action = routes.LoginController.post(next), 'class -> "form-signin") {
         @alert(flash())
         @CSRF.formField
-        <h2 class="form-heading">Please Log In</h2>
+        <h2 class="form-heading">@Messages("login.login.please")</h2>
         <div class="form-group">
-            <input name="email" type="text" class="form-control input-lg" placeholder="Username or Email" autofocus/>
+            <input name="email" type="text" class="form-control input-lg" placeholder="@Messages("login.username.placeholder")" autofocus/>
         </div>
         <div class="form-group">
-            <input name="password" type="password" class="form-control input-lg" placeholder="Password"/>
+            <input name="password" type="password" class="form-control input-lg" placeholder="@Messages("login.password")"/>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
-        <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">Register new account</a></h4>
-        <h4 class="text-center"><a href="@routes.ResetPasswordController.step1(next)">Reset password</a></h4>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">@Messages("login.login")</button>
+        <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">@Messages("login.register")</a></h4>
+        <h4 class="text-center"><a href="@routes.ResetPasswordController.step1(next)">@Messages("login.reset.password")</a></h4>
         <hr>
         @for(provider <- providers){
             <a class="btn btn-block btn-social btn-@provider._1" href="@routes.OAuthClientController.authorize(provider._1, next)">
-            <span class="fa fa-@provider._1"></span> Continue with @provider._2
+            <span class="fa fa-@provider._1"></span> @Messages("login.continue.with.provider", provider._2)
             </a>
         }
     }
