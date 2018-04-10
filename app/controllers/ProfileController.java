@@ -3,7 +3,7 @@ package controllers;
 import com.typesafe.config.Config;
 import config.AuthorizationServerSecure;
 import config.JwtUtils;
-import config.MailgunService;
+import config.MailService;
 import config.RecaptchaProtected;
 import config.AuthorizationServerManager;
 import dtos.ConstraintGroups;
@@ -38,8 +38,7 @@ public class ProfileController extends Controller {
     @Inject
     private AuthorizationServerManager authorizationServerManager;
     @Inject
-    //TODO change this to use generic MailService
-    private MailgunService mailService;
+    private MailService mailService;
     @Inject
     private Config config;
     @Inject
