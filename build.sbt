@@ -28,6 +28,8 @@ libraryDependencies ++= Seq(
   "com.auth0"%"java-jwt"%"2.2.0",
 //  "uk.co.panaxiom" %% "play-jongo" % "2.0.0-jongo1.3",
 //  "com.palominolabs.http"%"url-builder"%"1.1.1"
+  "com.typesafe.play" %% "play-mailer" % "6.0.1",
+  "com.typesafe.play" %% "play-mailer-guice" % "6.0.1"
 )
 
 lazy val playJongo = RootProject(uri("https://github.com/bekce/play-jongo.git"))
