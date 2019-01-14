@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/bekce/oauthly.svg?branch=master)](https://travis-ci.org/bekce/oauthly)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/18e70942adcf440e8c85d3e186c0e916)](https://www.codacy.com/app/seb_4/oauthly)
 
+![chart](https://i.imgur.com/Gr5Ph3P.png)
+
 OAuth 2.0 Compliant Authorization and Resource Server in Java with Play Framework. Suitable for being the Authorization Server for your software platform, with SSO and social provider login support.
 
 There are a lot of authorization server examples on many platforms, such as Spring Boot, Play Framework, etc,
