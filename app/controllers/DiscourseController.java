@@ -37,7 +37,7 @@ public class DiscourseController extends Controller {
 
     private DiscourseSetting getSetting() {
         DiscourseSetting setting = settingRepository.findById(DiscourseSetting.class);
-        if(setting == null) setting = new DiscourseSetting();
+        if (setting == null) setting = new DiscourseSetting();
         return setting;
     }
 
@@ -57,10 +57,10 @@ public class DiscourseController extends Controller {
         setting.setEnabled(form.get().isEnabled());
         Logger.info(form.get().toString());
 
-        if(form.get().isEnabled() && StringUtils.isBlank(setting.getSecret())){
+        if (form.get().isEnabled() && StringUtils.isBlank(setting.getSecret())) {
             setting.setSecret(Utils.newSecret());
         }
-        if(!form.get().isEnabled()){
+        if (!form.get().isEnabled()) {
             setting.setRedirectUri(null);
             setting.setSecret(null);
         }
@@ -101,13 +101,13 @@ public class DiscourseController extends Controller {
 //    }
 
     @AuthorizationServerSecure
-    public Result sso(String sso, String sig){
+    public Result sso(String sso, String sig) {
         DiscourseSetting setting = getSetting();
-        if(!setting.isEnabled()){
+        if (!setting.isEnabled()) {
             return notFound();
         }
         User user = request().attrs().get(AuthorizationServerSecure.USER);
-        if(!user.isEmailVerified()) {
+        if (!user.isEmailVerified()) {
             return redirect(routes.ProfileController.changeEmailPage(ctx().request().uri()));
         }
 
@@ -116,7 +116,7 @@ public class DiscourseController extends Controller {
             SecretKeySpec secret_key = new SecretKeySpec(setting.getSecret().getBytes("UTF-8"), "HmacSHA256");
             sha256_HMAC.init(secret_key);
             String hexString = Hex.encodeHexString(sha256_HMAC.doFinal(sso.getBytes("UTF-8")));
-            if(!Objects.equals(hexString, sig)){
+            if (!Objects.equals(hexString, sig)) {
                 return badRequest(Json.newObject().put("message", "signature mismatch"));
             }
 
@@ -125,7 +125,7 @@ public class DiscourseController extends Controller {
             payload = Base64.encodeBase64String(payload.getBytes(StandardCharsets.UTF_8));
             String sig_new = Hex.encodeHexString(sha256_HMAC.doFinal(payload.getBytes("UTF-8")));
 
-            return redirect(setting.getRedirectUri()+"?sso="+URLEncoder.encode(payload, "utf-8")+"&sig="+sig_new);
+            return redirect(setting.getRedirectUri() + "?sso=" + URLEncoder.encode(payload, "utf-8") + "&sig=" + sig_new);
 
         } catch (Exception e) {
             Logger.error(e.getMessage(), e);

@@ -1,6 +1,14 @@
 @(implicit flash: play.mvc.Http.Flash)
 
-@if(flash.get("info")) {<div class="alert alert-info" role="alert">@flash.get("info")</div>}
-@if(flash.get("success")) {<div class="alert alert-success" role="alert">@flash.get("success")</div>}
-@if(flash.get("warning")) {<div class="alert alert-warning" role="alert">@flash.get("warning")</div>}
-@if(flash.get("error")) {<div class="alert alert-danger" role="alert">@flash.get("error")</div>}
+@if(flash.get("info")) {
+    <div class="alert alert-info" role="alert">@flash.get("info")</div>
+}
+@if(flash.get("success")) {
+    <div class="alert alert-success" role="alert">@flash.get("success")</div>
+}
+@if(flash.get("warning")) {
+    <div class="alert alert-warning" role="alert">@flash.get("warning")</div>
+}
+@if(flash.get("error")) {
+    <div class="alert alert-danger" role="alert">@flash.get("error")</div>
+}

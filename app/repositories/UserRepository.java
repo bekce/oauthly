@@ -25,16 +25,16 @@ public class UserRepository {
         return collection.findOne("{_id:#}", id).as(User.class);
     }
 
-    public void save(User u){
+    public void save(User u) {
         collection.save(u);
     }
 
     public User findByUsernameNormalized(String usernameNormalized) {
-        return collection.findOne("{usernameNormalized:#}",usernameNormalized).as(User.class);
+        return collection.findOne("{usernameNormalized:#}", usernameNormalized).as(User.class);
     }
 
     public User findByEmail(String email) {
-        return collection.findOne("{email:#}",email).as(User.class);
+        return collection.findOne("{email:#}", email).as(User.class);
     }
 
     public User findByUsernameOrEmail(String login) {
@@ -61,7 +61,7 @@ public class UserRepository {
         return list;
     }
 
-    public Iterable<User> findAll(){
+    public Iterable<User> findAll() {
         return collection.find().as(User.class);
     }
 

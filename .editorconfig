@@ -1,0 +1,23 @@
+# https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+
+# top-most EditorConfig file
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{js,java}]
+charset = utf-8
+indent_style = space
+curly_bracket_next_line = false
+indent_brace_style = K&R
+
+[*.java]
+indent_size = 4
+continuation_indent_size = 8
+
+[*.js]
+indent_size = 2
+continuation_indent_size = 2

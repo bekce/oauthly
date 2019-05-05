@@ -21,7 +21,7 @@ public class GrantRepository {
         return collection.findOne("{_id:#}", id).as(Grant.class);
     }
 
-    public void save(Grant u){
+    public void save(Grant u) {
         collection.save(u);
     }
 

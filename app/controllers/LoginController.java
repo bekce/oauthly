@@ -8,7 +8,9 @@ import dtos.RegistrationDto;
 import models.User;
 import play.data.Form;
 import play.data.FormFactory;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Result;
 import repositories.EventRepository;
 import repositories.UserRepository;
 
@@ -36,8 +38,8 @@ public class LoginController extends Controller {
     @AuthorizationServerSecure(optional = true)
     public Result get(String next) {
         Optional<User> user = request().attrs().getOptional(AuthorizationServerSecure.USER);
-        if(user.isPresent()){ // already authenticated
-            if(next != null && next.matches("^/.*$"))
+        if (user.isPresent()) { // already authenticated
+            if (next != null && next.matches("^/.*$"))
                 return redirect(next);
             else
                 return redirect(routes.ProfileController.get());
@@ -47,7 +49,7 @@ public class LoginController extends Controller {
 
     public Result post(String next) {
         Form<RegistrationDto> form = formFactory.form(RegistrationDto.class, ConstraintGroups.Login.class).bindFromRequest();
-        if(form.hasErrors()) {
+        if (form.hasErrors()) {
             flash("warning", "Please fill in the form");
             return redirect(routes.LoginController.get(next));
         }
@@ -55,7 +57,7 @@ public class LoginController extends Controller {
         User validUser = null;
         boolean disabled = false;
         for (User user : list) {
-            if(user != null && user.checkPassword(form.get().getPassword())) {
+            if (user != null && user.checkPassword(form.get().getPassword())) {
                 if (user.isDisabled()) {
                     disabled = true;
                     continue;
@@ -79,14 +81,14 @@ public class LoginController extends Controller {
     }
 
     @AuthorizationServerSecure(optional = true)
-    public Result logout(){
+    public Result logout() {
         Optional<User> user = request().attrs().getOptional(AuthorizationServerSecure.USER);
         Http.Cookie ltat = Http.Cookie.builder("ltat", "")
                 .withPath("/").withHttpOnly(true).withMaxAge(Duration.ZERO).build();
         Optional<String> referer = request().header("Referer");
         eventRepository.logout(request(), user.orElse(null));
         flash("info", "Logout successful");
-        if(referer.isPresent()){
+        if (referer.isPresent()) {
             return redirect(referer.get()).withCookies(ltat);
         } else {
             return redirect(routes.LoginController.get(null));

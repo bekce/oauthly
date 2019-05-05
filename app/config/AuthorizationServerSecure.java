@@ -14,6 +14,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthorizationServerSecure {
     TypedKey<User> USER = TypedKey.create("user_a");
+
     boolean requireAdmin() default false;
+
     boolean optional() default false;
 }

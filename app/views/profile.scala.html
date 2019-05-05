@@ -2,54 +2,62 @@
 @import helper._
 
 @mainWithNavigation("Profile", "profile", user) {
-@alert(flash())
-@if(!user.isEmailVerified) {<div class="alert alert-warning" role="alert">Please <a href="@routes.ProfileController.changeEmailPage(null)">verify</a> your email address</div>}
+    @alert(flash())
+    @if(!user.isEmailVerified) {
+        <div class="alert alert-warning" role="alert">Please <a href="@routes.ProfileController.changeEmailPage(null)">
+            verify</a> your email address</div>
+    }
 
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">Your Information</h3>
-    </div>
-    <div class="panel-body">
-        <form class="form-horizontal">
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Username</label>
-                <div class="col-sm-9">
-                    <p class="form-control-static">@user.getUsername</p>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Email</label>
-                <div class="col-sm-9">
-                    <p class="form-control-static">@user.getEmail &nbsp; <a class="btn btn-default" href="@routes.ProfileController.changeEmailPage(null)" role="button">Change</a></p>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Password</label>
-                <div class="col-sm-9">
-                    <p class="form-control-static"><a class="btn btn-default" href="@routes.ProfileController.changePasswordPage" role="button">Change</a></p>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-@for(provider <- providers) {
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3 class="panel-title">@{provider._2} Login</h3>
+            <h3 class="panel-title">Your Information</h3>
         </div>
         <div class="panel-body">
-            @if(userProviders.containsKey(provider._1)) {
-            @form(action = routes.ProfileController.unlinkProvider(userProviders.get(provider._1))) {
-            @CSRF.formField
-            <button class="btn btn-danger" type="submit">Unlink</button>
-            }
-            } else {
-            <a class="btn btn-block btn-social btn-@provider._1" href="@routes.OAuthClientController.authorize(provider._1, null)">
-                <span class="fa fa-@provider._1"></span> Link @provider._2 account
-            </a>
-            }
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Username</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-static">@user.getUsername</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Email</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-static">@user.getEmail &nbsp;
+                            <a class="btn btn-default" href="@routes.ProfileController.changeEmailPage(null)" role="button">
+                                Change</a></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Password</label>
+                    <div class="col-sm-9">
+                        <p class="form-control-static"><a class="btn btn-default" href="@routes.ProfileController.changePasswordPage" role="button">
+                            Change</a></p>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
-}
+    @for(provider <- providers) {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">@{
+                    provider._2
+                } Login</h3>
+            </div>
+            <div class="panel-body">
+            @if(userProviders.containsKey(provider._1)) {
+                @form(action = routes.ProfileController.unlinkProvider(userProviders.get(provider._1))) {
+                    @CSRF.formField
+                    <button class="btn btn-danger" type="submit">Unlink</button>
+                }
+            } else {
+                <a class="btn btn-block btn-social btn-@provider._1" href="@routes.OAuthClientController.authorize(provider._1, null)">
+                    <span class="fa fa-@provider._1"></span> Link @provider._2 account
+                </a>
+            }
+            </div>
+        </div>
+    }
 
 }

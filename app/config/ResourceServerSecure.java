@@ -17,6 +17,7 @@ public @interface ResourceServerSecure {
 
     /**
      * Whitespace separated list of scopes for this endpoint.
+     *
      * @return
      */
     String scope();

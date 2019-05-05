@@ -11,21 +11,23 @@ import dtos.TokenStatus;
 import models.Client;
 import models.Grant;
 import models.User;
+import play.Logger;
 import play.mvc.Http;
 import play.mvc.Result;
 import repositories.ClientRepository;
 import repositories.GrantRepository;
 import repositories.UserRepository;
+import scala.Tuple2;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.security.InvalidKeyException;
 import java.security.SignatureException;
 import java.time.Duration;
-import java.util.*;
-
-import play.Logger;
-import scala.Tuple2;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static play.mvc.Results.redirect;
 
@@ -72,31 +74,31 @@ public class JwtUtils {
         return signer.sign(claims);
     }
 
-    public User validateResetCode(String reset_code){
-        if(reset_code == null)
+    public User validateResetCode(String reset_code) {
+        if (reset_code == null)
             return null;
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(reset_code);
+            final Map<String, Object> claims = verifier.verify(reset_code);
             // first check version
             int type = (int) claims.get("vt");
-            if(type != 5){
+            if (type != 5) {
                 return null;
             }
             // check expiry date
             int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
+            if (exp < (System.currentTimeMillis() / 1000L))
                 return null;
             // check user
             String user_id = (String) claims.get("user");
             User user = userRepository.findById(user_id);
-            if(user == null){
+            if (user == null) {
                 return null;
             }
             // check hash value
             int receivedHash = (int) claims.get("hash");
             int correctHash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword(), user.getLastUpdateTime());
-            if(receivedHash != correctHash) {
+            if (receivedHash != correctHash) {
                 return null;
             }
             return user;
@@ -118,34 +120,34 @@ public class JwtUtils {
         claims.put("exp", exp);
         claims.put("email", user.getEmail());
         claims.put("username", user.getUsername());
-        if(user.getPassword() != null)
+        if (user.getPassword() != null)
             claims.put("password", user.getPassword());
-        if(linkId != null)
+        if (linkId != null)
             claims.put("linkId", linkId);
 
         return signer.sign(claims);
     }
 
-    public Tuple2<User, String> validateEmailConfirmationCode(String code){
-        if(code == null)
+    public Tuple2<User, String> validateEmailConfirmationCode(String code) {
+        if (code == null)
             return null;
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(code);
+            final Map<String, Object> claims = verifier.verify(code);
             // first check version
             int type = (int) claims.get("vt");
-            if(type != 6){
+            if (type != 6) {
                 return null;
             }
             // check expiry date
             int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
+            if (exp < (System.currentTimeMillis() / 1000L))
                 return null;
             // check user
             User user = new User();
             user.setEmail((String) claims.get("email"));
             user.setUsername((String) claims.get("username"));
-            if(claims.containsKey("password"))
+            if (claims.containsKey("password"))
                 user.setPassword((String) claims.get("password"));
             String linkId = claims.containsKey("linkId") ? (String) claims.get("linkId") : null;
             return Tuple2.apply(user, linkId);
@@ -173,27 +175,27 @@ public class JwtUtils {
     }
 
 
-    public Tuple2<User, String> validateEmailChangeConfirmationCode(String code){
-        if(code == null)
+    public Tuple2<User, String> validateEmailChangeConfirmationCode(String code) {
+        if (code == null)
             return null;
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(code);
+            final Map<String, Object> claims = verifier.verify(code);
             // first check version
             int type = (int) claims.get("vt");
-            if(type != 7){
+            if (type != 7) {
                 return null;
             }
             // check expiry date
             int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
+            if (exp < (System.currentTimeMillis() / 1000L))
                 return null;
             // check user
             User user = userRepository.findById((String) claims.get("user"));
-            if(user == null) return null;
+            if (user == null) return null;
             // check hash
             int hash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
-            if((Integer) claims.get("hash") != hash) return null;
+            if ((Integer) claims.get("hash") != hash) return null;
             String newEmail = (String) claims.get("new_email");
             return Tuple2.apply(user, newEmail);
         } catch (JWTVerifyException | SignatureException | InvalidKeyException | NullPointerException e) {
@@ -204,15 +206,15 @@ public class JwtUtils {
         }
     }
 
-    public Result prepareCookieThenRedirect(User user, String next){
+    public Result prepareCookieThenRedirect(User user, String next) {
         Http.Cookie ltat = prepareCookie(user);
-        if(next != null && next.matches("^/.*$"))
+        if (next != null && next.matches("^/.*$"))
             return redirect(next).withCookies(ltat);
         else
             return redirect(routes.ProfileController.get()).withCookies(ltat);
     }
 
-    private Http.Cookie prepareCookie(User user){
+    private Http.Cookie prepareCookie(User user) {
         return Http.Cookie.builder("ltat", prepareCookieValue(user)).withPath("/").withHttpOnly(true).withMaxAge(expireCookie).withSecure(useSecureSessionCookie).build();
     }
 
@@ -231,31 +233,31 @@ public class JwtUtils {
         return signer.sign(claims);
     }
 
-    public User validateCookie(String cookie_value){
-        if(cookie_value == null)
+    public User validateCookie(String cookie_value) {
+        if (cookie_value == null)
             return null;
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(cookie_value);
+            final Map<String, Object> claims = verifier.verify(cookie_value);
             // first check version
             int type = (int) claims.get("vt");
-            if(type != 4){
+            if (type != 4) {
                 return null;
             }
             // check expiry date
             int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
+            if (exp < (System.currentTimeMillis() / 1000L))
                 return null;
             // check user
             String user_id = (String) claims.get("user");
             User user = userRepository.findById(user_id);
-            if(user == null){
+            if (user == null) {
                 return null;
             }
             // check hash value
             int receivedHash = (int) claims.get("hash");
             int correctHash = Objects.hash(user.getUsername(), user.getEmail(), user.getPassword());
-            if(receivedHash != correctHash) {
+            if (receivedHash != correctHash) {
                 return null;
             }
             return user;
@@ -283,39 +285,39 @@ public class JwtUtils {
         return signer.sign(claims);
     }
 
-    public Grant validateAuthorizationCode(String code, String redirect_uri){
-        if(code == null || redirect_uri == null)
+    public Grant validateAuthorizationCode(String code, String redirect_uri) {
+        if (code == null || redirect_uri == null)
             return null;
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(code);
+            final Map<String, Object> claims = verifier.verify(code);
             // first check version
             int type = (int) claims.get("vt");
-            if(type != 3){
+            if (type != 3) {
                 return null;
             }
             // check expiry date
             int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
+            if (exp < (System.currentTimeMillis() / 1000L))
                 return null;
             // check grant
             String grant_id = (String) claims.get("g");
             Grant grant = grantRepository.findById(grant_id);
-            if(grant == null){
+            if (grant == null) {
                 return null;
             }
             // check hash value
             int receivedHash = (int) claims.get("h");
             Client client = clientRepository.findById(grant.getClientId());
-            if(client == null){
+            if (client == null) {
                 return null;
             }
             int correctHash = Objects.hash(client.getId(), client.getSecret());
-            if(receivedHash != correctHash) {
+            if (receivedHash != correctHash) {
                 return null;
             }
             // check redirect_uri
-            if(!Objects.equals(claims.get("r"), redirect_uri)){
+            if (!Objects.equals(claims.get("r"), redirect_uri)) {
                 return null;
             }
             return grant;
@@ -370,41 +372,42 @@ public class JwtUtils {
 
     /**
      * Validate given token and return its type
+     *
      * @see TokenStatus
      */
-    public Tuple2<Grant, TokenStatus> getTokenStatus(String access_token){
-        if(access_token == null)
+    public Tuple2<Grant, TokenStatus> getTokenStatus(String access_token) {
+        if (access_token == null)
             return new Tuple2<>(null, TokenStatus.INVALID);
         try {
             final JWTVerifier verifier = new JWTVerifier(jwtSecret);
-            final Map<String,Object> claims = verifier.verify(access_token);
+            final Map<String, Object> claims = verifier.verify(access_token);
             // first check version
             int type = (int) claims.get("vt");
-            if(type != 1 && type != 2){
+            if (type != 1 && type != 2) {
                 return new Tuple2<>(null, TokenStatus.INVALID);
             }
             // check expiry date
             int exp = (int) claims.get("exp");
-            if(exp < (System.currentTimeMillis() / 1000L))
+            if (exp < (System.currentTimeMillis() / 1000L))
                 return new Tuple2<>(null, TokenStatus.INVALID);
             // check grant
             String grant_id = (String) claims.get("grant");
             Grant grant = grantRepository.findById(grant_id);
-            if(grant == null){
+            if (grant == null) {
                 return new Tuple2<>(null, TokenStatus.INVALID);
             }
             Client client = clientRepository.findById(grant.getClientId());
-            if(client == null){
+            if (client == null) {
                 return new Tuple2<>(null, TokenStatus.INVALID); // how can this be?
             }
             // check hash value
             int receivedHash = (int) claims.get("h");
             int correctHash = Objects.hash(client.getId(), client.getSecret());
-            if(receivedHash != correctHash) {
+            if (receivedHash != correctHash) {
                 return new Tuple2<>(null, TokenStatus.INVALID);
             }
             // check token type & version
-            if(type == 1){
+            if (type == 1) {
                 return new Tuple2<>(grant, TokenStatus.VALID_ACCESS);
             } else {
                 return new Tuple2<>(grant, TokenStatus.VALID_REFRESH);

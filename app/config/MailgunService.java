@@ -13,9 +13,8 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by Selim Eren Bekçe on 6.09.2017.
- *
+ * <p>
  * TODO Use circuit breaker or akka for retries https://github.com/jhalterman/failsafe#circuit-breakers
- *
  */
 @Singleton
 public class MailgunService implements MailService {
@@ -45,9 +44,9 @@ public class MailgunService implements MailService {
                         new DataPart("subject", subject),
                         new DataPart("html", content))))
                 .handleAsync((response, throwable) -> {
-                    if(throwable != null) {
+                    if (throwable != null) {
                         log.error("sendEmail: Exception", throwable);
-                    } else if(response.getStatus() != 200) {
+                    } else if (response.getStatus() != 200) {
                         log.error("sendEmail: Non-200 response, status={}, body={}", response.getStatus(), response.getBody());
                     } else {
                         log.error("sendEmail: OK, status={}, body={}", response.getStatus(), response.getBody());

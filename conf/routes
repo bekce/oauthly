@@ -3,54 +3,54 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
+GET         /                                           controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /login          controllers.LoginController.get(next: String ?= null)
-POST    /login          controllers.LoginController.post(next: String ?= null)
+GET         /login                                      controllers.LoginController.get(next: String ?= null)
+POST        /login                                      controllers.LoginController.post(next: String ?= null)
 
-GET     /register           controllers.RegisterController.step1(next: String ?= null)
-GET     /register/provider  controllers.RegisterController.step2(next: String ?= null, link: String)
-POST    /register           controllers.RegisterController.post1(next: String ?= null, link: String ?= null)
-GET     /register/confirm   controllers.RegisterController.step5(next: String ?= null, code: String)
-GET     /register/await     controllers.RegisterController.await
+GET         /register                                   controllers.RegisterController.step1(next: String ?= null)
+GET         /register/provider                          controllers.RegisterController.step2(next: String ?= null, link: String)
+POST        /register                                   controllers.RegisterController.post1(next: String ?= null, link: String ?= null)
+GET         /register/confirm                           controllers.RegisterController.step5(next: String ?= null, code: String)
+GET         /register/await                             controllers.RegisterController.await
 
-GET     /reset-password           controllers.ResetPasswordController.step1(next: String ?= null)
-POST    /reset-password           controllers.ResetPasswordController.step2(next: String ?= null)
-GET     /reset-password/confirm   controllers.ResetPasswordController.step3(code: String, next: String ?= null)
-POST    /reset-password/confirm   controllers.ResetPasswordController.step4(code: String, next: String ?= null)
+GET         /reset-password                             controllers.ResetPasswordController.step1(next: String ?= null)
+POST        /reset-password                             controllers.ResetPasswordController.step2(next: String ?= null)
+GET         /reset-password/confirm                     controllers.ResetPasswordController.step3(code: String, next: String ?= null)
+POST        /reset-password/confirm                     controllers.ResetPasswordController.step4(code: String, next: String ?= null)
 
-GET     /profile                controllers.ProfileController.get
-GET     /profile/password       controllers.ProfileController.changePasswordPage
-POST    /profile/password       controllers.ProfileController.changePassword
-GET     /profile/email          controllers.ProfileController.changeEmailPage(next: String ?= null)
-POST    /profile/email          controllers.ProfileController.changeEmail(next: String ?= null)
-GET     /profile/email/confirm  controllers.ProfileController.changeEmailConfirm(code: String, next: String ?= null)
-GET     /profile/link           controllers.ProfileController.linkProvider(linkId: String)
-POST    /profile/unlink         controllers.ProfileController.unlinkProvider(linkId: String)
+GET         /profile                                    controllers.ProfileController.get
+GET         /profile/password                           controllers.ProfileController.changePasswordPage
+POST        /profile/password                           controllers.ProfileController.changePassword
+GET         /profile/email                              controllers.ProfileController.changeEmailPage(next: String ?= null)
+POST        /profile/email                              controllers.ProfileController.changeEmail(next: String ?= null)
+GET         /profile/email/confirm                      controllers.ProfileController.changeEmailConfirm(code: String, next: String ?= null)
+GET         /profile/link                               controllers.ProfileController.linkProvider(linkId: String)
+POST        /profile/unlink                             controllers.ProfileController.unlinkProvider(linkId: String)
 
-GET     /client        controllers.ClientController.get
-GET     /client/new    controllers.ClientController.create
-GET     /client/:id    controllers.ClientController.edit(id: String)
-POST    /client        controllers.ClientController.addUpdateClient(id: String)
+GET         /client                                     controllers.ClientController.get
+GET         /client/new                                 controllers.ClientController.create
+GET         /client/:id                                 controllers.ClientController.edit(id: String)
+POST        /client                                     controllers.ClientController.addUpdateClient(id: String)
 
-GET     /user           controllers.UserController.get
+GET         /user                                       controllers.UserController.get
 
-GET     /logout         controllers.LoginController.logout
+GET         /logout                                     controllers.LoginController.logout
 
-POST    /oauth/token        controllers.OAuthAuthorizationServerController.token
-GET     /oauth/authorize    controllers.OAuthAuthorizationServerController.authorize(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "profile", state: String ?= null)
-POST    /oauth/authorize    controllers.OAuthAuthorizationServerController.authorizeDo(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "profile", state: String ?= null)
+POST        /oauth/token                                controllers.OAuthAuthorizationServerController.token
+GET         /oauth/authorize                            controllers.OAuthAuthorizationServerController.authorize(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "profile", state: String ?= null)
+POST        /oauth/authorize                            controllers.OAuthAuthorizationServerController.authorizeDo(client_id: String, response_type: String, redirect_uri: String, scope: String ?= "profile", state: String ?= null)
 
-GET     /discourse      controllers.DiscourseController.get
-POST    /discourse      controllers.DiscourseController.updateSettings
-GET     /discourse/sso  controllers.DiscourseController.sso(sso: String, sig: String)
+GET         /discourse                                  controllers.DiscourseController.get
+POST        /discourse                                  controllers.DiscourseController.updateSettings
+GET         /discourse/sso                              controllers.DiscourseController.sso(sso: String, sig: String)
 
-GET     /oauth/client/:providerKey/authorize  controllers.OAuthClientController.authorize(providerKey: String, next: String ?= null)
-GET     /oauth/client/:providerKey/callback   controllers.OAuthClientController.callback(providerKey: String, code: java.util.Optional[String], error: java.util.Optional[String], state: java.util.Optional[String])
+GET         /oauth/client/:providerKey/authorize        controllers.OAuthClientController.authorize(providerKey: String, next: String ?= null)
+GET         /oauth/client/:providerKey/callback         controllers.OAuthClientController.callback(providerKey: String, code: java.util.Optional[String], error: java.util.Optional[String], state: java.util.Optional[String])
 
-GET     /api/me         controllers.MeController.get
+GET         /api/me                                     controllers.MeController.get
 + nocsrf
-POST    /api/user       controllers.UserController.apiCreate
+POST        /api/user                                   controllers.UserController.apiCreate

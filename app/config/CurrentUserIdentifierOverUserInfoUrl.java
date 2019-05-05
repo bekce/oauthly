@@ -19,7 +19,7 @@ public class CurrentUserIdentifierOverUserInfoUrl implements Function<OAuthConte
     public CompletionStage<MeDto> apply(OAuthContext context) {
         return context.getWs()
                 .url(context.getProvider().getUserInfoUrl())
-                .addHeader("Authorization", "Bearer "+ context.getToken().getAccessToken())
+                .addHeader("Authorization", "Bearer " + context.getToken().getAccessToken())
                 .get()
                 .thenApplyAsync(responseToUserFunction);
     }

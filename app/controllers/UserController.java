@@ -35,10 +35,10 @@ public class UserController extends Controller {
 
     @ResourceServerSecure(scope = "user:create")
     @BodyParser.Of(BodyParser.Json.class)
-    public Result apiCreate(){
+    public Result apiCreate() {
         Grant grant = request().attrs().get(ResourceServerSecure.GRANT);
         User user = userRepository.findById(grant.getUserId());
-        if(!user.isAdmin()) {
+        if (!user.isAdmin()) {
             return unauthorized("need admin");
         }
         JsonNode json = request().body().asJson();
@@ -54,31 +54,31 @@ public class UserController extends Controller {
         long lastUpdateTime = json.path("user").path("lastUpdateTime").asLong(System.currentTimeMillis());
         String disabledReason = json.path("user").path("disabledReason").asText(null);
         User byId = userRepository.findById(id);
-        if(!update && byId != null) {
+        if (!update && byId != null) {
             return badRequest("duplicate id");
         }
-        if(update && byId == null){
-            return badRequest("no user found with id "+id);
+        if (update && byId == null) {
+            return badRequest("no user found with id " + id);
         }
         User byEmail = userRepository.findByEmail(Utils.normalizeEmail(email));
-        if(!bypassEmailCheck && email != null && byEmail != null && !byEmail.getId().equals(id)){
+        if (!bypassEmailCheck && email != null && byEmail != null && !byEmail.getId().equals(id)) {
             return badRequest("duplicate email");
         }
         User byUsernameNormalized = userRepository.findByUsernameNormalized(Utils.normalizeUsername(username));
-        if(!bypassUsernameCheck && username != null && byUsernameNormalized != null && !byUsernameNormalized.getId().equals(id)){
+        if (!bypassUsernameCheck && username != null && byUsernameNormalized != null && !byUsernameNormalized.getId().equals(id)) {
             return badRequest("duplicate username");
         }
-        if(email == null && username == null) {
+        if (email == null && username == null) {
             return badRequest("either username or email is necessary");
         }
-        if(password == null && email == null){
+        if (password == null && email == null) {
             return badRequest("either email or password is necessary (come on!)");
         }
-        if(password != null && password.isEmpty()) {
+        if (password != null && password.isEmpty()) {
             return badRequest("password cannot be empty (seriously!)");
         }
         User user1 = update ? byId : new User();
-        if(user1.isAdmin()) {
+        if (user1.isAdmin()) {
             return badRequest("cannot update admins with this");
         }
         user1.setId(id);
@@ -90,7 +90,7 @@ public class UserController extends Controller {
         user1.setLastUpdateTime(lastUpdateTime);
         user1.setAdmin(false);
         user1.setDisabledReason(disabledReason);
-        if(password != null) user1.encryptThenSetPassword(password);
+        if (password != null) user1.encryptThenSetPassword(password);
         else user1.setPassword(null);
         userRepository.save(user1);
         eventRepository.addUpdateUserViaApi(request(), byId, user1);

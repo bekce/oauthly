@@ -1,5 +1,5 @@
 @(next: String, providers: List[(String, String)])()
-@import helper._
+    @import helper._
 
 @main("Login") {
     @form(action = routes.LoginController.post(next), 'class -> "form-signin") {
@@ -16,9 +16,10 @@
         <h4 class="text-center"><a href="@routes.RegisterController.step1(next)">@Messages("login.register")</a></h4>
         <h4 class="text-center"><a href="@routes.ResetPasswordController.step1(next)">@Messages("login.reset.password")</a></h4>
         <hr>
-        @for(provider <- providers){
+        @for(provider <- providers) {
             <a class="btn btn-block btn-social btn-@provider._1" href="@routes.OAuthClientController.authorize(provider._1, next)">
-            <span class="fa fa-@provider._1"></span> @Messages("login.continue.with.provider", provider._2)
+                <span class="fa fa-@provider._1"></span>
+                @Messages("login.continue.with.provider", provider._2)
             </a>
         }
     }
